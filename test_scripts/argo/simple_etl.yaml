@@ -1,0 +1,93 @@
+# Argo Workflow — Simple Weather ETL
+# ==================================
+# A basic 3-step sequential workflow that fetches weather data,
+# transforms it, and loads results.
+#
+# Expected eco-design profile:
+#   - No rules fired (simple sequential, no sensors, moderate schedule)
+#   - Baseline for Argo energy comparison
+
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  name: weather-etl
+  namespace: data-pipelines
+  labels:
+    app: pisces-samples
+    type: etl
+spec:
+  entrypoint: weather-pipeline
+  templates:
+    # --- Extract ---
+    - name: extract-weather
+      container:
+        image: python:3.11-slim
+        command: [python, -c]
+        args:
+          - |
+            import json, random
+            stations = ["KBOS", "KORD", "KCLT"]
+            data = [{"station": s, "temp": round(random.uniform(5,35),1),
+                      "humidity": random.randint(30,90)} for s in stations]
+            with open("/tmp/weather.json", "w") as f:
+                json.dump(data, f)
+            print(json.dumps(data))
+        resources:
+          requests:
+            cpu: "250m"
+            memory: "128Mi"
+          limits:
+            cpu: "500m"
+            memory: "256Mi"
+
+    # --- Transform ---
+    - name: transform-weather
+      container:
+        image: python:3.11-slim
+        command: [python, -c]
+        args:
+          - |
+            import json
+            with open("/tmp/weather.json") as f:
+                data = json.load(f)
+            result = [{"station": r["station"],
+                       "temp_f": round(r["temp"]*9/5+32,1),
+                       "humidity_pct": r["humidity"]} for r in data]
+            print(json.dumps(result))
+        resources:
+          requests:
+            cpu: "250m"
+            memory: "128Mi"
+          limits:
+            cpu: "500m"
+            memory: "256Mi"
+
+    # --- Load ---
+    - name: load-results
+      container:
+        image: python:3.11-slim
+        command: [python, -c]
+        args:
+          - |
+            import json, sys
+            # Simulate DB insert
+            data = json.loads(sys.stdin.read()) if not sys.stdin.isatty() else []
+            for r in data:
+                print(f"INSERT: {r['station']} temp={r['temp_f']}F")
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "64Mi"
+          limits:
+            cpu: "250m"
+            memory: "128Mi"
+
+    # --- Main pipeline (sequential) ---
+    - name: weather-pipeline
+      steps:
+        - - name: extract
+            template: extract-weather
+        - - name: transform
+            template: transform-weather
+        - - name: load
+            template: load-results

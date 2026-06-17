@@ -1,0 +1,96 @@
+# Kestra Flow — Simple Weather ETL
+# ==================================
+# A basic 3-task sequential flow for weather data processing.
+#
+# Expected eco-design profile:
+#   - No rules (simple sequential, daily schedule)
+#   - Baseline for Kestra energy comparison
+
+id: weather_etl
+namespace: data.pipelines
+description: "Simple ETL pipeline for weather observation data"
+labels:
+  app: pisces-samples
+  type: etl
+
+inputs:
+  - name: api_endpoint
+    type: STRING
+    defaults: "https://api.weather.gov/stations"
+
+tasks:
+  - id: extract_weather
+    type: io.kestra.plugin.scripts.python.Script
+    description: "Fetch raw weather observations from external API"
+    script: |
+      import json
+      import random
+
+      stations = [
+          {"id": "KBOS", "city": "Boston"},
+          {"id": "KORD", "city": "Chicago"},
+          {"id": "KCLT", "city": "Charlotte"},
+      ]
+
+      data = []
+      for station in stations:
+          data.append({
+              "station": station["id"],
+              "city": station["city"],
+              "temperature_c": round(random.uniform(5.0, 35.0), 1),
+              "humidity_pct": random.randint(30, 90),
+              "wind_speed_kmh": round(random.uniform(0.0, 50.0), 1),
+          })
+
+      print(json.dumps(data))
+
+  - id: transform_weather
+    type: io.kestra.plugin.scripts.python.Script
+    description: "Transform raw data with derived metrics"
+    inputs:
+      raw_json: "{{ outputs.extract_weather.vars }}"
+    script: |
+      import json
+
+      raw_data = json.loads("{{ inputs.raw_json }}")
+      transformed = []
+      for record in raw_data:
+          transformed.append({
+              "station_id": record["station"],
+              "city": record["city"],
+              "temp_f": round(record["temperature_c"] * 9 / 5 + 32, 1),
+              "wind_mph": round(record["wind_speed_kmh"] * 0.621, 1),
+              "humidity_pct": record["humidity_pct"],
+              "comfort_index": round(
+                  0.5 * record["temperature_c"]
+                  + 0.3 * (100 - record["humidity_pct"])
+                  - 0.2 * record["wind_speed_kmh"],
+                  1,
+              ),
+          })
+
+      print(json.dumps(transformed))
+
+  - id: load_to_warehouse
+    type: io.kestra.plugin.scripts.python.Script
+    description: "Load transformed data to warehouse"
+    inputs:
+      transformed_json: "{{ outputs.transform_weather.vars }}"
+    script: |
+      import json
+
+      data = json.loads("{{ inputs.transformed_json }}")
+      table = "weather_observations"
+
+      for row in data:
+          print(
+              f"INSERT INTO {table}: {row['station_id']} "
+              f"temp={row['temp_f']}F comfort={row['comfort_index']}"
+          )
+
+      print(f"Loaded {len(data)} records")
+
+triggers:
+  - id: daily_schedule
+    type: io.kestra.plugin.core.trigger.Schedule
+    cron: "0 6 * * *"    # Daily at 6 AM

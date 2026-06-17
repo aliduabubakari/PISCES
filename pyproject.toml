@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pisces"
+version = "0.1.0"
+description = "PISCES — Pipeline Intelligent Sustainability & Carbon Evaluation Suite. Energy/carbon tracking, runtime energy evaluation, and eco-design heuristics for LLM-generated workflow code (Airflow, Prefect, Dagster)."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+authors = [{ name = "Alidu Abubakari" }]
+dependencies = []
+
+[project.optional-dependencies]
+yaml = ["PyYAML>=6.0.1"]
+energy = ["codecarbon>=2.3.5"]
+llm = ["openai>=1.0.0"]
+dotenv = ["python-dotenv>=1.0.0"]
+cli = ["typer>=0.12.0", "rich>=13.7.1"]
+dev = ["pytest>=8.0.0", "ruff>=0.6.0"]
+
+[project.scripts]
+pisces-unified = "pisces.unified_evaluator:main"
+pisces-energy = "pisces.energy.runtime_runner_cli:main"
+pisces-compare = "pisces.dag_comparator:main"
+pisces = "pisces.cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"pisces" = ["knowledge_packs/*.json"]

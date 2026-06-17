@@ -1,0 +1,212 @@
+# Argo CronWorkflow — Multi-City Weather Processing with Fan-Out
+# ===============================================================
+# A recurring workflow that processes weather data for multiple cities
+# in parallel, then aggregates results. Highlights fan-out/fan-in
+# patterns and resource requests.
+#
+# Expected eco-design profile:
+#   - LARGE_FAN_OUT (6 parallel city-processing branches)
+#   - HIGH_FREQUENCY_HEAVY_COMPUTE (hourly schedule + heavy containers)
+#   - Resources with explicit CPU/memory requests
+
+apiVersion: argoproj.io/v1alpha1
+kind: CronWorkflow
+metadata:
+  name: multi-city-weather
+  namespace: data-pipelines
+  labels:
+    app: pisces-samples
+    type: batch
+spec:
+  schedule: "0 * * * *"       # Every hour
+  timezone: "America/New_York"
+  concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 300
+  workflowSpec:
+    entrypoint: city-weather-pipeline
+    templates:
+      # --- Fetch city list ---
+      - name: fetch-cities
+        container:
+          image: python:3.11-slim
+          command: [python, -c]
+          args:
+            - |
+              import json
+              cities = [
+                {"name": "Boston", "state": "MA", "lat": 42.36, "lon": -71.06},
+                {"name": "Chicago", "state": "IL", "lat": 41.88, "lon": -87.63},
+                {"name": "Charlotte", "state": "NC", "lat": 35.23, "lon": -80.84},
+                {"name": "Seattle", "state": "WA", "lat": 47.61, "lon": -122.33},
+                {"name": "Denver", "state": "CO", "lat": 39.74, "lon": -104.99},
+                {"name": "Miami", "state": "FL", "lat": 25.76, "lon": -80.19},
+              ]
+              print(json.dumps(cities))
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "64Mi"
+
+      # --- Process a single city (HEAVY COMPUTE) ---
+      - name: process-city
+        inputs:
+          parameters:
+            - name: city_name
+            - name: lat
+            - name: lon
+        container:
+          image: python:3.11-slim
+          command: [python, -c]
+          args:
+            - |
+              import json, random, hashlib, sys
+              city = "{{inputs.parameters.city_name}}"
+              lat = float("{{inputs.parameters.lat}}")
+              lon = float("{{inputs.parameters.lon}}")
+              
+              # Simulate heavy computation
+              results = {}
+              for i in range(1000):
+                  h = hashlib.sha256(f"{city}_{i}".encode()).hexdigest()
+              
+              weather = {
+                  "city": city,
+                  "lat": lat, "lon": lon,
+                  "temp_c": round(random.uniform(5, 35), 1),
+                  "humidity_pct": random.randint(30, 90),
+                  "wind_ms": round(random.uniform(0, 25), 1),
+                  "pressure_hpa": round(random.uniform(990, 1030), 1),
+              }
+              print(json.dumps(weather))
+          resources:
+            requests:
+              cpu: "1"           # 1 full CPU core — HEAVY
+              memory: "512Mi"
+            limits:
+              cpu: "2"
+              memory: "1Gi"
+        retryStrategy:
+          limit: 2
+        timeout: "5m"
+
+      # --- Validate a single city result ---
+      - name: validate-city
+        inputs:
+          parameters:
+            - name: weather_json
+        container:
+          image: python:3.11-slim
+          command: [python, -c]
+          args:
+            - |
+              import json, sys
+              data = json.loads("""{{inputs.parameters.weather_json}}""")
+              issues = []
+              if data["temp_c"] < -10 or data["temp_c"] > 45:
+                  issues.append("extreme_temp")
+              if data["wind_ms"] > 30:
+                  issues.append("high_wind")
+              result = {"city": data["city"], "valid": len(issues)==0, "issues": issues}
+              print(json.dumps(result))
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "64Mi"
+
+      # --- Aggregate all city results ---
+      - name: aggregate-results
+        inputs:
+          parameters:
+            - name: validations
+        container:
+          image: python:3.11-slim
+          command: [python, -c]
+          args:
+            - |
+              import json, statistics
+              validations = json.loads("""{{inputs.parameters.validations}}""")
+              total = len(validations)
+              valid = sum(1 for v in validations if v["valid"])
+              print(json.dumps({
+                  "total_cities": total,
+                  "valid_count": valid,
+                  "invalid_count": total - valid,
+                  "success_rate": round(valid/max(total,1)*100, 1),
+              }))
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "128Mi"
+
+      # --- Main DAG ---
+      - name: city-weather-pipeline
+        dag:
+          tasks:
+            - name: fetch
+              template: fetch-cities
+
+            - name: process-boston
+              template: process-city
+              arguments:
+                parameters:
+                  - {name: city_name, value: "Boston"}
+                  - {name: lat, value: "42.36"}
+                  - {name: lon, value: "-71.06"}
+              dependencies: [fetch]
+
+            - name: process-chicago
+              template: process-city
+              arguments:
+                parameters:
+                  - {name: city_name, value: "Chicago"}
+                  - {name: lat, value: "41.88"}
+                  - {name: lon, value: "-87.63"}
+              dependencies: [fetch]
+
+            - name: process-charlotte
+              template: process-city
+              arguments:
+                parameters:
+                  - {name: city_name, value: "Charlotte"}
+                  - {name: lat, value: "35.23"}
+                  - {name: lon, value: "-80.84"}
+              dependencies: [fetch]
+
+            - name: process-seattle
+              template: process-city
+              arguments:
+                parameters:
+                  - {name: city_name, value: "Seattle"}
+                  - {name: lat, value: "47.61"}
+                  - {name: lon, value: "-122.33"}
+              dependencies: [fetch]
+
+            - name: process-denver
+              template: process-city
+              arguments:
+                parameters:
+                  - {name: city_name, value: "Denver"}
+                  - {name: lat, value: "39.74"}
+                  - {name: lon, value: "-104.99"}
+              dependencies: [fetch]
+
+            - name: process-miami
+              template: process-city
+              arguments:
+                parameters:
+                  - {name: city_name, value: "Miami"}
+                  - {name: lat, value: "25.76"}
+                  - {name: lon, value: "-80.19"}
+              dependencies: [fetch]
+
+            - name: aggregate
+              template: aggregate-results
+              dependencies:
+                [
+                  process-boston,
+                  process-chicago,
+                  process-charlotte,
+                  process-seattle,
+                  process-denver,
+                  process-miami,
+                ]

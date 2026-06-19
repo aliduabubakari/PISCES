@@ -74,6 +74,32 @@ run-kestra: install
 		--energy-mode heuristic \
 		--stdout
 
+.PHONY: demo
+demo: install
+	@echo "→ Running release demo bundle …"
+	mkdir -p demo/output
+	$(PYTHON) -m pisces.diagnostics test_scripts/airflow/simple_etl.py \
+		--carbon-country-iso NOR \
+		--out demo/output/readiness.json
+	$(PISCES) test_scripts/airflow/simple_etl.py \
+		--enable-energy-eval \
+		--energy-mode sample \
+		--energy-sample-path demo/input/weather_observations.csv \
+		--energy-sample-map-file demo/input/sample_schema_map.json \
+		--estimate-scenario-file demo/input/scenario_daily.json \
+		--out-dir demo/output
+	$(PISCES) test_scripts/airflow/simple_etl.py \
+		--enable-energy-eval \
+		--energy-mode fuzz_fill \
+		--estimate-scenario-file demo/input/scenario_daily.json \
+		--out-dir demo/output
+	$(PISCES) test_scripts/argo/simple_etl.yaml \
+		--orchestrator argo \
+		--out-dir demo/output
+	$(PYTHON) -m pisces.dag_comparator demo/output/*.json \
+		--out demo/output/comparison.json
+	@echo "✓ Demo reports written to demo/output"
+
 # ────────────────────────────────────────────────────────────────
 # Test
 # ────────────────────────────────────────────────────────────────
@@ -123,6 +149,7 @@ help:
 	@echo "  make run-synthetic LLM synthetic data evaluation (needs .env)"
 	@echo "  make run-argo      Heuristic evaluation on Argo YAML workflow"
 	@echo "  make run-kestra    Heuristic evaluation on Kestra YAML workflow"
+	@echo "  make demo          Run release demo bundle"
 	@echo ""
 	@echo "TEST"
 	@echo "  make test          Run all tests"

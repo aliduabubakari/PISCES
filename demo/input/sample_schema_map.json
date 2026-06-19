@@ -1,0 +1,7 @@
+{
+  "stationIdentifier": "station_id",
+  "tempCelsius": "temperature_c",
+  "humidityPercent": "humidity_pct",
+  "windSpeedKmh": "wind_speed_kmh",
+  "observedAt": "timestamp"
+}

@@ -221,7 +221,7 @@ def _load_sidecar(code_file: Path, *, kind: str, explicit_path: Optional[Path], 
 
     if suffix in (".yaml", ".yml"):
         try:
-            import yaml  # type: ignore
+            __import__("yaml")
             meta["yaml_supported"] = True
         except Exception:
             meta["yaml_supported"] = False

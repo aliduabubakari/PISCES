@@ -1,0 +1,40 @@
+{
+  "energy": {
+    "data_source": "sample",
+    "evidence": {
+      "confidence": "medium",
+      "data_source": "sample",
+      "execution_adapter": "representative",
+      "measurement_kind": "sample_runtime",
+      "production_equivalent": false
+    },
+    "estimate": {
+      "assumptions": {
+        "repetitions_per_run": 1.0,
+        "runs_per_year": 365,
+        "scenario_name": "golden-demo",
+        "years": 1.0
+      },
+      "measurement_kind": "calibrated_estimate",
+      "status": "ok"
+    },
+    "mode_used": "sample",
+    "sample_summary": {
+      "mapping_enabled": true,
+      "mapped_column_count": 3,
+      "row_count": 3,
+      "schema_column_count": 3
+    }
+  },
+  "energy_evaluation": {
+    "enabled": true,
+    "mode_requested": "sample"
+  },
+  "report_schema_version": "1.1.0",
+  "tool": "pisces-unified",
+  "workflow": {
+    "name": "flow",
+    "orchestrator": "airflow",
+    "runtime_supported": true
+  }
+}

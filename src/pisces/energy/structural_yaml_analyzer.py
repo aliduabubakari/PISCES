@@ -21,19 +21,16 @@ Design goals:
 from __future__ import annotations
 
 import hashlib
-import json
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 try:
     import yaml  # type: ignore
     HAS_YAML = True
 except ImportError:
     HAS_YAML = False
-
-from ..base_evaluator import Orchestrator
 
 SCHEMA_VERSION = "1.0.0"
 YAML_ORCHESTRATORS = {"argo", "kestra"}
@@ -589,7 +586,6 @@ def parse_yaml_manifest(
         )
 
     text = file_path.read_text(encoding="utf-8", errors="ignore")
-    code_sha256 = hashlib.sha256(text.encode()).hexdigest()
 
     try:
         manifest = yaml.safe_load(text)

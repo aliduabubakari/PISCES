@@ -48,12 +48,20 @@ pisces-unified test_scripts/airflow/simple_etl.py \
   --enable-energy-eval \
   --energy-mode zero_fill
 
+# Evaluate with real sample input data and a yearly scenario estimate
+pisces-unified test_scripts/airflow/simple_etl.py \
+  --enable-energy-eval \
+  --energy-mode sample \
+  --energy-sample-path demo/input/weather_observations.csv \
+  --energy-sample-map-file demo/input/sample_schema_map.json \
+  --estimate-scenario-file demo/input/scenario_daily.json
+
 # Compare two workflows across orchestrators
 pisces-unified test_scripts/airflow/weather_pipeline.py \
-  --track-carbon --energy-mode zero_fill --out-dir ./reports
+  --track-carbon --enable-energy-eval --energy-mode zero_fill --out-dir ./reports
 
 pisces-unified test_scripts/dagster/multi_asset_job.py \
-  --track-carbon --energy-mode zero_fill --out-dir ./reports
+  --track-carbon --enable-energy-eval --energy-mode zero_fill --out-dir ./reports
 
 # Batch evaluate all Airflow scripts
 for script in test_scripts/airflow/*.py; do

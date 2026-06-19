@@ -37,6 +37,34 @@ class TrackerHandle:
     config: Dict[str, Any]
 
 
+def add_scaled_estimate(payload: Dict[str, Any], scale_factor: float) -> Dict[str, Any]:
+    """Return a copy of a CodeCarbon payload with explicit scaled estimates."""
+    out = dict(payload or {})
+    try:
+        factor = float(scale_factor)
+    except Exception:
+        factor = 1.0
+
+    out["scale_factor"] = factor
+    energy_kwh = out.get("energy_consumed_kwh")
+    emissions_kg = out.get("emissions_kgco2eq")
+    out["scaled_estimate"] = {
+        "scale_factor": factor,
+        "energy_consumed_kwh": (
+            float(energy_kwh) * factor
+            if isinstance(energy_kwh, (int, float))
+            else None
+        ),
+        "emissions_kgco2eq": (
+            float(emissions_kg) * factor
+            if isinstance(emissions_kg, (int, float))
+            else None
+        ),
+        "disclaimer": "Scaled values are estimates derived from raw local measurement, not separate measurements.",
+    }
+    return out
+
+
 def _disable_powermetrics_sudo() -> None:
     """
     Monkey-patch codecarbon's powermetrics module to avoid the sudo
@@ -146,7 +174,7 @@ def try_stop_tracker(handle: Optional[TrackerHandle]) -> Dict[str, Any]:
         return base
 
     try:
-        result = handle.impl.stop()
+        handle.impl.stop()
         duration_s = max(0.0, time.time() - float(handle.started_at))
 
         # CodeCarbon API differs across versions:

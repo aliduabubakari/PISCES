@@ -8,6 +8,7 @@ Supports guided mode for building evaluation commands step by step.
 
 Usage:
     pisces evaluate path/to/workflow.py --track-carbon
+    pisces diagnostics path/to/workflow.py
     pisces agent
 """
 
@@ -16,14 +17,17 @@ from __future__ import annotations
 import json
 import sys
 from pathlib import Path
-from typing import List, Optional
+from typing import List
 
 
 def _print_energy_mode_help() -> None:
     print("""
 Energy Evaluation Modes:
-  auto       Try zero_fill → sample → synthetic → heuristic (default)
+  auto       Try sample if provided, otherwise fuzz_fill → zero_fill → synthetic → heuristic
   zero_fill  AST-inferred trivial data (all zeros), no LLM needed
+  fuzz_fill  AST-inferred deterministic non-zero data, no LLM needed
+  scale_probe Run deterministic generated workloads at multiple row counts
+  operator_profile  Static tier-weighted representative workload
   sample     Use provided sample data for runtime measurement
   synthetic  Use LLM-generated synthetic data for runtime measurement
   heuristic  Static eco-design rules only (no runtime measurement)
@@ -93,6 +97,12 @@ def agent():
                 parts.extend(["--energy-execution-adapter", adapter])
         except (EOFError, KeyboardInterrupt):
             pass
+        try:
+            cache_mode = input("  Synthetic cache (use|refresh|off) [use]: ").strip()
+            if cache_mode:
+                parts.extend(["--synthetic-cache", cache_mode])
+        except (EOFError, KeyboardInterrupt):
+            pass
 
     try:
         stdout = _confirm("Print report to stdout? (otherwise saved to file)", default=False)
@@ -140,11 +150,44 @@ def main():
     eval_parser.add_argument("workflow", type=str, help="Path to workflow Python file")
     eval_parser.add_argument("--track-carbon", action="store_true")
     eval_parser.add_argument("--carbon-country-iso", type=str)
+    eval_parser.add_argument("--carbon-measure-power-secs", type=int, default=1)
     eval_parser.add_argument("--carbon-scale-factor", type=float, default=1.0)
+    eval_parser.add_argument("--estimate-scenario-file")
+    eval_parser.add_argument("--estimate-scenario-name")
+    eval_parser.add_argument("--estimate-runs-per-year", type=int)
+    eval_parser.add_argument("--estimate-years", type=float, default=1.0)
+    eval_parser.add_argument("--estimate-repetitions-per-run", type=float, default=1.0)
     eval_parser.add_argument("--enable-energy-eval", action="store_true")
-    eval_parser.add_argument("--energy-mode", default="auto")
+    eval_parser.add_argument(
+        "--energy-mode",
+        default="auto",
+        choices=["auto", "zero_fill", "fuzz_fill", "scale_probe", "operator_profile", "sample", "synthetic", "heuristic"],
+    )
+    eval_parser.add_argument("--energy-seed", type=int, default=1729)
+    eval_parser.add_argument("--energy-max-rows", type=int, default=500)
+    eval_parser.add_argument("--energy-max-tasks", type=int, default=25)
+    eval_parser.add_argument("--energy-timeout-s", type=int, default=120)
+    eval_parser.add_argument("--energy-execution-adapter", default="representative", choices=["representative", "native", "auto"])
+    eval_parser.add_argument("--energy-sample-path", action="append", default=[])
+    eval_parser.add_argument("--energy-sample-map", action="append", default=[], help="Sample schema mapping as SOURCE=TARGET")
+    eval_parser.add_argument("--energy-sample-map-file", help="JSON object mapping sample source columns to target columns")
+    eval_parser.add_argument("--llm-provider", default="openrouter")
+    eval_parser.add_argument("--llm-model", default="openai/gpt-oss-120b")
+    eval_parser.add_argument("--llm-api-key-env")
+    eval_parser.add_argument("--synthetic-cache", default="use", choices=["use", "refresh", "off"])
     eval_parser.add_argument("--out-dir", type=str)
     eval_parser.add_argument("--stdout", action="store_true")
+
+    diag_parser = sub.add_parser("diagnostics", help="Report environment readiness before evaluation")
+    diag_parser.add_argument("workflow", nargs="?", help="Optional workflow file to inspect")
+    diag_parser.add_argument("--orchestrator", default="auto", choices=["auto", "airflow", "prefect", "dagster", "argo", "kestra"])
+    diag_parser.add_argument("--llm-provider", default="openrouter")
+    diag_parser.add_argument("--llm-model", default="openai/gpt-oss-120b")
+    diag_parser.add_argument("--llm-api-key-env")
+    diag_parser.add_argument("--carbon-country-iso")
+    diag_parser.add_argument("--carbon-measure-power-secs", type=int, default=1)
+    diag_parser.add_argument("--skip-codecarbon-smoke", action="store_true")
+    diag_parser.add_argument("--out", type=str)
 
     # agent subcommand
     sub.add_parser("agent", help="Interactive guided command builder")
@@ -156,13 +199,55 @@ def main():
     elif args.command == "evaluate":
         from .unified_evaluator import UnifiedEnergyConfig, run_unified_energy_evaluation
 
+        sample_schema_map = {}
+        if args.energy_sample_map_file:
+            loaded_map = json.loads(Path(args.energy_sample_map_file).read_text(encoding="utf-8"))
+            if isinstance(loaded_map, dict):
+                sample_schema_map.update({str(k): str(v) for k, v in loaded_map.items()})
+        for item in args.energy_sample_map:
+            if "=" not in item:
+                raise SystemExit("--energy-sample-map must use SOURCE=TARGET")
+            source, target = item.split("=", 1)
+            sample_schema_map[source.strip()] = target.strip()
+        estimate_scenario_name = args.estimate_scenario_name
+        estimate_runs_per_year = args.estimate_runs_per_year
+        estimate_years = args.estimate_years
+        estimate_repetitions_per_run = args.estimate_repetitions_per_run
+        if args.estimate_scenario_file:
+            scenario = json.loads(Path(args.estimate_scenario_file).read_text(encoding="utf-8"))
+            if not isinstance(scenario, dict):
+                raise SystemExit("--estimate-scenario-file must contain a JSON object")
+            estimate_scenario_name = estimate_scenario_name or scenario.get("name") or scenario.get("scenario_name")
+            if estimate_runs_per_year is None and scenario.get("runs_per_year") is not None:
+                estimate_runs_per_year = int(scenario["runs_per_year"])
+            if scenario.get("years") is not None and args.estimate_years == 1.0:
+                estimate_years = float(scenario["years"])
+            if scenario.get("repetitions_per_run") is not None and args.estimate_repetitions_per_run == 1.0:
+                estimate_repetitions_per_run = float(scenario["repetitions_per_run"])
+
         config = UnifiedEnergyConfig(
             workflow_path=Path(args.workflow),
             track_carbon=args.track_carbon,
             carbon_country_iso=args.carbon_country_iso,
+            carbon_measure_power_secs=args.carbon_measure_power_secs,
             carbon_scale_factor=args.carbon_scale_factor,
+            estimate_scenario_name=estimate_scenario_name,
+            estimate_runs_per_year=estimate_runs_per_year,
+            estimate_years=estimate_years,
+            estimate_repetitions_per_run=estimate_repetitions_per_run,
             enable_energy_evaluation=args.enable_energy_eval,
             energy_mode=args.energy_mode,
+            energy_seed=args.energy_seed,
+            energy_max_rows=args.energy_max_rows,
+            energy_max_tasks=args.energy_max_tasks,
+            energy_timeout_s=args.energy_timeout_s,
+            energy_execution_adapter=args.energy_execution_adapter,
+            energy_sample_paths=[Path(p) for p in args.energy_sample_path],
+            energy_sample_schema_map=sample_schema_map,
+            llm_provider=args.llm_provider,
+            llm_model=args.llm_model,
+            llm_api_key_env=args.llm_api_key_env,
+            synthetic_cache_mode=args.synthetic_cache,
             out_dir=Path(args.out_dir) if args.out_dir else None,
             stdout=args.stdout,
         )
@@ -177,6 +262,27 @@ def main():
             out_path = out_dir / f"pisces_{wf.stem}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
             out_path.write_text(json.dumps(report, indent=2, default=str), encoding="utf-8")
             print(f"Report written to: {out_path}")
+    elif args.command == "diagnostics":
+        from .diagnostics import DiagnosticsConfig, collect_diagnostics
+
+        report = collect_diagnostics(
+            DiagnosticsConfig(
+                workflow_path=Path(args.workflow) if args.workflow else None,
+                orchestrator=args.orchestrator,
+                llm_provider=args.llm_provider,
+                llm_model=args.llm_model,
+                llm_api_key_env=args.llm_api_key_env,
+                carbon_country_iso=args.carbon_country_iso,
+                carbon_measure_power_secs=args.carbon_measure_power_secs,
+                validate_codecarbon=not args.skip_codecarbon_smoke,
+            )
+        )
+        rendered = json.dumps(report, indent=2, default=str)
+        if args.out:
+            out = Path(args.out)
+            out.parent.mkdir(parents=True, exist_ok=True)
+            out.write_text(rendered + "\n", encoding="utf-8")
+        print(rendered)
     else:
         parser.print_help()
 

@@ -24,11 +24,9 @@ Design goals:
 from __future__ import annotations
 
 import ast
-import hashlib
-import random
 import re
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set
 
 
 SCHEMA_VERSION = "1.0.0"
@@ -259,7 +257,6 @@ def _generate_zero_rows(
     - str    → "" (empty string)
     - bool   → False
     """
-    rng = random.Random(seed)
     rows: List[Dict[str, Any]] = []
     for _ in range(max(1, row_count)):
         row: Dict[str, Any] = {}
@@ -298,8 +295,8 @@ def _is_yaml_content(text: str) -> bool:
             return False
     # If it has YAML-like colon-separated top-level keys
     first_lines = stripped.split("\n")[:5]
-    yaml_like = sum(1 for l in first_lines if re.match(r"^\w[\w.]*:\s", l))
-    python_like = sum(1 for l in first_lines if l.strip().startswith(("import ", "from ", "def ", "class ")))
+    yaml_like = sum(1 for line in first_lines if re.match(r"^\w[\w.]*:\s", line))
+    python_like = sum(1 for line in first_lines if line.strip().startswith(("import ", "from ", "def ", "class ")))
     return yaml_like > python_like and yaml_like >= 1
 
 
@@ -507,7 +504,6 @@ def extract_expected_row_count(code_text: str) -> int:
     """
     hints = _extract_schema_hints(code_text)
     num_tasks = len(hints["task_ids"])
-    num_ops = len(hints["operator_types"])
 
     if num_tasks == 0:
         return 5

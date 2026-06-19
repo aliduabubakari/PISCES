@@ -1,0 +1,38 @@
+{
+  "energy": {
+    "attempts": [
+      {
+        "mode": "heuristic",
+        "reason": "heuristic_fallback",
+        "status": "success",
+        "tier": "static"
+      }
+    ],
+    "data_source": "none",
+    "evidence": {
+      "confidence": "low",
+      "data_source": "none",
+      "execution_adapter": "none",
+      "measurement_kind": "static",
+      "measurement_scope": "static_only",
+      "production_equivalent": false
+    },
+    "measurements": {
+      "estimate": null,
+      "import_build": null,
+      "runtime": null
+    },
+    "mode_used": "heuristic"
+  },
+  "energy_evaluation": {
+    "enabled": true,
+    "mode_requested": "heuristic"
+  },
+  "report_schema_version": "1.1.0",
+  "tool": "pisces-unified",
+  "workflow": {
+    "name": "plain_workflow",
+    "orchestrator": "unknown",
+    "runtime_supported": false
+  }
+}

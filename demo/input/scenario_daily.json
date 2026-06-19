@@ -1,0 +1,6 @@
+{
+  "name": "daily-production-demo",
+  "runs_per_year": 365,
+  "years": 1,
+  "repetitions_per_run": 1
+}

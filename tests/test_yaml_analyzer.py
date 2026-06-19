@@ -4,10 +4,7 @@ Tests for structural_yaml_analyzer.py — Argo Workflows and Kestra support.
 
 from __future__ import annotations
 
-import json
 from pathlib import Path
-
-import pytest
 
 from pisces.energy.structural_yaml_analyzer import (
     ArgoParser,
@@ -16,7 +13,6 @@ from pisces.energy.structural_yaml_analyzer import (
     YamlTask,
     analyze_yaml_workflow,
     detect_yaml_orchestrator,
-    parse_yaml_manifest,
     _estimate_runs_from_cron,
     _parse_memory_to_mb,
     _parse_duration_to_seconds,
@@ -278,7 +274,7 @@ def test_parse_duration_to_seconds():
 # ---------------------------------------------------------------------------
 
 def test_zero_fill_detects_yaml():
-    from pisces.energy.zero_fill import generate_zero_fill_dataset, _is_yaml_content
+    from pisces.energy.zero_fill import _is_yaml_content
     import yaml
     yaml_text = yaml.dump(ARGO_SIMPLE)
     assert _is_yaml_content(yaml_text) is True

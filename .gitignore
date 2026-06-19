@@ -32,5 +32,7 @@ Thumbs.db
 # PISCES output
 pisces_reports/
 orcheval_reports/
+diagnostics/
+demo/output/
 synthetic_recipes.json
 powermetrics_log.txt

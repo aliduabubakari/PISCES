@@ -27,7 +27,7 @@ from .design_rules import EcoDesignRuleEngine
 from .structural_energy_analyzer import StructuralEnergyAnalyzer
 
 
-SCHEMA_VERSION = "1.1.0"
+SCHEMA_VERSION = "1.2.0"
 RECIPE_SCHEMA_VERSION = "1"
 DEFAULT_SEED = 1729
 RUNTIME_SUPPORTED = {"airflow", "prefect", "dagster"}
@@ -81,7 +81,14 @@ class EnergyEvaluationRequest:
     llm_base_url: Optional[str] = None
     llm_timeout_s: int = 30
     synthetic_cache_mode: str = "use"
-    execution_adapter: str = "representative"
+    execution_adapter: str = "surrogate_benchmark"
+    measurement_minimum_duration_s: float = 0.0
+    measurement_minimum_repetitions: int = 1
+    measurement_maximum_repetitions: int = 1000
+    measurement_warmup_repetitions: int = 0
+    experiment_mode: bool = False
+    workload_contract: Optional[Path] = None
+    artifact_binding: Optional[Path] = None
     track_carbon: bool = False
     carbon_country_iso: Optional[str] = None
     carbon_measure_power_secs: int = 1
@@ -951,7 +958,18 @@ def _run_runtime_measurement(
         "mode": mode_name,
         "data_source": data_source,
         "workflow_file": str(request.file_path),
-        "execution_adapter": (request.execution_adapter or "representative"),
+        "execution_adapter": (request.execution_adapter or "surrogate_benchmark"),
+        "minimum_duration_s": float(request.measurement_minimum_duration_s),
+        "minimum_repetitions": int(request.measurement_minimum_repetitions),
+        "maximum_repetitions": int(request.measurement_maximum_repetitions),
+        "warmup_repetitions": int(request.measurement_warmup_repetitions),
+        "experiment_mode": bool(request.experiment_mode),
+        "workload_contract": (
+            str(request.workload_contract) if request.workload_contract else None
+        ),
+        "artifact_binding": (
+            str(request.artifact_binding) if request.artifact_binding else None
+        ),
         "max_rows": int(request.max_rows),
         "max_tasks": int(request.max_tasks),
         "seed": int(request.seed),
@@ -1022,7 +1040,7 @@ def _mode_to_tier(mode: Optional[str]) -> str:
     if key == "sample":
         return "sample_runtime"
     if key in {"zero_fill", "fuzz_fill", "scale_probe", "operator_profile", "synthetic"}:
-        return "representative_runtime"
+        return "surrogate_benchmark"
     return key or "unknown"
 
 
@@ -1062,11 +1080,13 @@ def _import_energy_profile(import_build_measurement: Optional[Dict[str, Any]]) -
 
 def _runtime_measurement_kind(mode_used: str, runtime_measurement: Dict[str, Any]) -> str:
     adapter_used = str(runtime_measurement.get("execution_adapter_used") or "").strip().lower()
+    if adapter_used in {"surrogate_benchmark", "representative"}:
+        return "surrogate_benchmark"
     if adapter_used == "native":
         return "native_runtime"
     if mode_used == "sample":
         return "sample_runtime"
-    return "representative_runtime"
+    return "surrogate_benchmark"
 
 
 def _build_evidence(
@@ -1082,21 +1102,26 @@ def _build_evidence(
     if isinstance(runtime_measurement, dict):
         measurement_kind = _runtime_measurement_kind(mode_used, runtime_measurement)
         confidence = {
-            "native_runtime": "high",
+            "native_runtime": "medium",
             "sample_runtime": "medium",
-            "representative_runtime": "low",
+            "surrogate_benchmark": "low",
         }.get(measurement_kind, "low")
+        if (
+            measurement_kind == "native_runtime"
+            and runtime_measurement.get("eligible_for_paired_equivalence_comparison")
+        ):
+            confidence = "high"
         adapter = str(
             runtime_measurement.get("execution_adapter_used")
             or runtime_measurement.get("execution_adapter_requested")
             or execution_adapter
-            or "representative"
+            or "surrogate_benchmark"
         )
         profile = _runtime_energy_profile(runtime_measurement)
-        measurement_scope = str(profile.get("measurement_scope") or "runtime_representative_workload")
-        if measurement_kind == "representative_runtime":
+        measurement_scope = str(profile.get("measurement_scope") or "bounded_execution_block")
+        if measurement_kind == "surrogate_benchmark":
             limitations.append(
-                "Runtime used a bounded representative workload; it is useful for comparison but is not production-equivalent."
+                "The surrogate benchmark is a PISCES diagnostic workload. It does not execute the workflow and is ineligible for route comparison."
             )
         if data_source == "zero_fill":
             limitations.append("Generated zero-fill data may miss branches and understate data-dependent work.")
@@ -1108,8 +1133,12 @@ def _build_evidence(
             limitations.append("Operator-profile mode scales a bounded synthetic workload using static operator-tier signals; it is still a surrogate.")
         if data_source == "synthetic":
             limitations.append("Synthetic data is generated from a minimized workflow spec and may not match production distributions.")
-        if not bool(profile.get("available", False)):
-            limitations.append("CodeCarbon did not produce hardware energy values; runtime counters are still reported.")
+        limitations.append(
+            "Wall-clock time, process CPU time, and peak resident memory are the primary operational measurements."
+        )
+        limitations.append(
+            "CodeCarbon output is secondary modeled-energy evidence unless a hardware power source is independently verified."
+        )
 
         return {
             "measurement_kind": measurement_kind,
@@ -1174,7 +1203,7 @@ def _uncertainty_fraction(measurement_kind: str) -> float:
     return {
         "native_runtime": 0.15,
         "sample_runtime": 0.30,
-        "representative_runtime": 0.60,
+        "surrogate_benchmark": 0.60,
     }.get(measurement_kind, 0.75)
 
 
@@ -1386,6 +1415,27 @@ def evaluate_energy(request: EnergyEvaluationRequest) -> EnergyEvaluationResult:
     signature_hash = _sha256_text(json.dumps(minimized_spec, sort_keys=True))
 
     modes = _resolve_modes(request.mode_selected)
+    if request.experiment_mode:
+        selected_mode = (request.mode_selected or "").strip().lower()
+        if selected_mode in {
+            "zero_fill",
+            "fuzz_fill",
+            "scale_probe",
+            "operator_profile",
+            "sample",
+            "synthetic",
+            "heuristic",
+        }:
+            modes = [selected_mode]
+        elif selected_mode == "auto":
+            errors.append(
+                {
+                    "mode": "auto",
+                    "error_type": "ExperimentConfigurationError",
+                    "message": "experiment_mode requires an explicit energy mode",
+                }
+            )
+            modes = []
 
     synthetic_cache_mode = (request.synthetic_cache_mode or "use").strip().lower()
     if synthetic_cache_mode not in {"use", "refresh", "off"}:
@@ -1405,7 +1455,7 @@ def evaluate_energy(request: EnergyEvaluationRequest) -> EnergyEvaluationResult:
         attempted.append(
             {
                 "mode": "import_build",
-                "status": "success" if isinstance(import_payload.get("measurement"), dict) else "failed",
+                "status": "success" if bool(import_payload.get("ok", False)) else "failed",
                 "reason": (
                     "ok"
                     if bool(import_payload.get("ok", False))
@@ -1501,6 +1551,14 @@ def evaluate_energy(request: EnergyEvaluationRequest) -> EnergyEvaluationResult:
                     "details": runtime.get("metadata") or {},
                 }
             )
+            if request.experiment_mode and isinstance(runtime.get("runtime_measurement"), dict):
+                # A failed experimental execution still belongs to the
+                # explicitly requested mode.  Retaining the default
+                # "heuristic" label here makes the report contradict both
+                # attempted_modes and data_source.
+                mode_used = mode
+                runtime_measurement = runtime["runtime_measurement"]
+                data_source = mode
             continue
 
         if mode == "scale_probe":
@@ -1592,6 +1650,14 @@ def evaluate_energy(request: EnergyEvaluationRequest) -> EnergyEvaluationResult:
                     "details": {"failed_runs": failed_runs},
                 }
             )
+            if request.experiment_mode and failed_runs:
+                mode_used = "scale_probe"
+                runtime_measurement = (
+                    runtime.get("runtime_measurement")
+                    if isinstance(runtime.get("runtime_measurement"), dict)
+                    else None
+                )
+                data_source = "scale_probe"
             continue
 
         if mode == "sample":
@@ -1682,6 +1748,10 @@ def evaluate_energy(request: EnergyEvaluationRequest) -> EnergyEvaluationResult:
                     "details": runtime.get("metadata") or {},
                 }
             )
+            if request.experiment_mode and isinstance(runtime.get("runtime_measurement"), dict):
+                mode_used = "sample"
+                runtime_measurement = runtime["runtime_measurement"]
+                data_source = "sample"
             continue
 
         if mode == "synthetic":
@@ -1801,6 +1871,10 @@ def evaluate_energy(request: EnergyEvaluationRequest) -> EnergyEvaluationResult:
                         "details": runtime.get("metadata") or {},
                     }
                 )
+                if request.experiment_mode and isinstance(runtime.get("runtime_measurement"), dict):
+                    mode_used = "synthetic"
+                    runtime_measurement = runtime["runtime_measurement"]
+                    data_source = "synthetic"
                 continue
 
             except LLMProviderError as e:
@@ -1881,7 +1955,19 @@ def evaluate_energy(request: EnergyEvaluationRequest) -> EnergyEvaluationResult:
         "seed": int(request.seed),
         "max_rows": int(request.max_rows),
         "max_tasks": int(request.max_tasks),
-        "execution_adapter_selected": (request.execution_adapter or "representative"),
+        "execution_adapter_selected": (request.execution_adapter or "surrogate_benchmark"),
+        "experiment_mode": bool(request.experiment_mode),
+        "measurement_window": {
+            "minimum_duration_s": float(request.measurement_minimum_duration_s),
+            "minimum_repetitions": int(request.measurement_minimum_repetitions),
+            "maximum_repetitions": int(request.measurement_maximum_repetitions),
+            "warmup_repetitions": int(
+                request.measurement_warmup_repetitions
+            ),
+        },
+        "workload_contract_requested": bool(
+            request.workload_contract or request.artifact_binding
+        ),
         "knowledge_pack": kp_resolution.to_dict(),
         "uncertainty": kp_resolution.uncertainty,
         "warnings": resolution_warnings(kp_resolution),
@@ -1891,7 +1977,7 @@ def evaluate_energy(request: EnergyEvaluationRequest) -> EnergyEvaluationResult:
     evidence = _build_evidence(
         mode_used=mode_used,
         data_source=data_source,
-        execution_adapter=(request.execution_adapter or "representative"),
+        execution_adapter=(request.execution_adapter or "surrogate_benchmark"),
         import_build_measurement=import_build_measurement,
         runtime_measurement=runtime_measurement,
     )

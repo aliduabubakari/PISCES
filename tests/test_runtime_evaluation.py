@@ -109,8 +109,8 @@ def test_privacy_no_raw_rows_persisted_for_sample_mode(tmp_path: Path) -> None:
     assert "sensitive123" not in blob
     assert res["privacy"]["raw_rows_persisted"] is False
     assert res["privacy"]["sample_provenance_mode"].startswith("file hashes")
-    assert res["evidence"]["measurement_kind"] == "sample_runtime"
-    assert res["evidence"]["confidence"] == "medium"
+    assert res["evidence"]["measurement_kind"] == "surrogate_benchmark"
+    assert res["evidence"]["confidence"] == "low"
     assert res["measurements"]["runtime"] == res["runtime_measurement"]
     sample_summary = res["attempted_modes"][0]["sample_summary"]
     assert sample_summary["schema_summary"]["column_count"] == 2
@@ -241,12 +241,19 @@ def test_synthetic_mode_runtime_for_supported_orchestrators(tmp_path: Path, monk
     assert res["mode_used"] == "synthetic"
     assert isinstance(res["runtime_measurement"], dict)
     assert res["runtime_measurement"].get("status") == "ok"
-    assert res["runtime_measurement"].get("execution_adapter_requested") == "representative"
-    assert res["runtime_measurement"].get("execution_adapter_used") in {"representative", "native"}
-    assert res["runtime_measurement"].get("energy_profile", {}).get("measurement_scope") == "runtime_representative_workload"
-    assert res["evidence"]["measurement_kind"] == "representative_runtime"
+    assert res["runtime_measurement"].get("execution_adapter_requested") == "surrogate_benchmark"
+    assert res["runtime_measurement"].get("execution_adapter_used") in {"surrogate_benchmark", "native"}
+    assert res["runtime_measurement"].get("energy_profile", {}).get("measurement_scope") == "bounded_execution_block"
+    assert res["evidence"]["measurement_kind"] == "surrogate_benchmark"
     assert res["evidence"]["data_source"] == "synthetic"
     assert res["synthetic_info"]["signature_hash"]
+    operational = res["runtime_measurement"]["operational_metrics"]
+    assert operational["evidence_role"] == "primary"
+    assert operational["wall_clock_s"] >= 0
+    assert operational["process_cpu_s"] >= 0
+    assert operational["peak_rss_mb"] is not None
+    assert res["runtime_measurement"]["modeled_energy"]["evidence_role"] == "secondary"
+    assert res["runtime_measurement"]["eligible_for_resource_comparison"] is False
 
 
 def test_synthetic_cache_key_includes_seed(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:

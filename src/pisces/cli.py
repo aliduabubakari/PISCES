@@ -92,7 +92,7 @@ def agent():
         except (EOFError, KeyboardInterrupt):
             pass
         try:
-            adapter = input("  Execution adapter (representative|native|auto) [representative]: ").strip()
+            adapter = input("  Execution adapter (surrogate_benchmark|native|auto) [surrogate_benchmark]: ").strip()
             if adapter:
                 parts.extend(["--energy-execution-adapter", adapter])
         except (EOFError, KeyboardInterrupt):
@@ -167,7 +167,22 @@ def main():
     eval_parser.add_argument("--energy-max-rows", type=int, default=500)
     eval_parser.add_argument("--energy-max-tasks", type=int, default=25)
     eval_parser.add_argument("--energy-timeout-s", type=int, default=120)
-    eval_parser.add_argument("--energy-execution-adapter", default="representative", choices=["representative", "native", "auto"])
+    eval_parser.add_argument(
+        "--energy-runtime-python",
+        help="Python interpreter for orchestrator-native execution",
+    )
+    eval_parser.add_argument(
+        "--energy-execution-adapter",
+        default="surrogate_benchmark",
+        choices=["surrogate_benchmark", "representative", "native", "auto"],
+    )
+    eval_parser.add_argument("--energy-minimum-duration-s", type=float, default=0.0)
+    eval_parser.add_argument("--energy-minimum-repetitions", type=int, default=1)
+    eval_parser.add_argument("--energy-maximum-repetitions", type=int, default=1000)
+    eval_parser.add_argument("--energy-warmup-repetitions", type=int, default=0)
+    eval_parser.add_argument("--experiment-mode", action="store_true")
+    eval_parser.add_argument("--workload-contract")
+    eval_parser.add_argument("--artifact-binding")
     eval_parser.add_argument("--energy-sample-path", action="append", default=[])
     eval_parser.add_argument("--energy-sample-map", action="append", default=[], help="Sample schema mapping as SOURCE=TARGET")
     eval_parser.add_argument("--energy-sample-map-file", help="JSON object mapping sample source columns to target columns")
@@ -176,6 +191,7 @@ def main():
     eval_parser.add_argument("--llm-api-key-env")
     eval_parser.add_argument("--synthetic-cache", default="use", choices=["use", "refresh", "off"])
     eval_parser.add_argument("--out-dir", type=str)
+    eval_parser.add_argument("--out-file", type=str)
     eval_parser.add_argument("--stdout", action="store_true")
 
     diag_parser = sub.add_parser("diagnostics", help="Report environment readiness before evaluation")
@@ -241,7 +257,21 @@ def main():
             energy_max_rows=args.energy_max_rows,
             energy_max_tasks=args.energy_max_tasks,
             energy_timeout_s=args.energy_timeout_s,
+            energy_runtime_python=(
+                Path(args.energy_runtime_python)
+                if args.energy_runtime_python
+                else None
+            ),
             energy_execution_adapter=args.energy_execution_adapter,
+            energy_measurement_minimum_duration_s=args.energy_minimum_duration_s,
+            energy_measurement_minimum_repetitions=args.energy_minimum_repetitions,
+            energy_measurement_maximum_repetitions=args.energy_maximum_repetitions,
+            energy_measurement_warmup_repetitions=(
+                args.energy_warmup_repetitions
+            ),
+            experiment_mode=args.experiment_mode,
+            workload_contract=Path(args.workload_contract) if args.workload_contract else None,
+            artifact_binding=Path(args.artifact_binding) if args.artifact_binding else None,
             energy_sample_paths=[Path(p) for p in args.energy_sample_path],
             energy_sample_schema_map=sample_schema_map,
             llm_provider=args.llm_provider,
@@ -255,13 +285,23 @@ def main():
         if args.stdout:
             print(json.dumps(report, indent=2, default=str))
         else:
-            out_dir = config.out_dir
-            out_dir.mkdir(parents=True, exist_ok=True)
-            from datetime import datetime
-            wf = Path(args.workflow)
-            out_path = out_dir / f"pisces_{wf.stem}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+            if args.out_file:
+                out_path = Path(args.out_file).expanduser().resolve()
+                out_path.parent.mkdir(parents=True, exist_ok=True)
+            else:
+                out_dir = config.out_dir
+                out_dir.mkdir(parents=True, exist_ok=True)
+                from datetime import datetime
+                wf = Path(args.workflow)
+                out_path = out_dir / f"pisces_{wf.stem}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
             out_path.write_text(json.dumps(report, indent=2, default=str), encoding="utf-8")
             print(f"Report written to: {out_path}")
+        energy_errors = report.get("energy", {}).get("errors")
+        runtime = report.get("energy", {}).get("runtime_measurement")
+        if report.get("errors") or energy_errors or (
+            isinstance(runtime, dict) and runtime.get("status") == "failed"
+        ):
+            raise SystemExit(2)
     elif args.command == "diagnostics":
         from .diagnostics import DiagnosticsConfig, collect_diagnostics
 

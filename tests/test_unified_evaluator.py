@@ -97,7 +97,7 @@ def test_zero_fill_runtime_subprocess_works_from_source_checkout(tmp_path: Path)
     assert report["energy"]["attempted_modes"][0]["mode"] == "zero_fill"
     assert report["energy"]["mode_used"] == "zero_fill"
     assert report["energy"]["runtime_measurement"]["status"] == "ok"
-    assert report["energy"]["evidence"]["measurement_kind"] == "representative_runtime"
+    assert report["energy"]["evidence"]["measurement_kind"] == "surrogate_benchmark"
     assert report["energy"]["evidence"]["data_source"] == "zero_fill"
     assert report["energy"]["evidence"]["production_equivalent"] is False
     assert report["energy"]["measurements"]["runtime"] == report["energy"]["runtime_measurement"]
@@ -117,7 +117,7 @@ def test_fuzz_fill_runtime_mode(tmp_path: Path) -> None:
     )
 
     assert report["energy"]["mode_used"] == "fuzz_fill"
-    assert report["energy"]["evidence"]["measurement_kind"] == "representative_runtime"
+    assert report["energy"]["evidence"]["measurement_kind"] == "surrogate_benchmark"
     assert report["energy"]["evidence"]["data_source"] == "fuzz_fill"
     assert report["energy"]["runtime_measurement"]["status"] == "ok"
 

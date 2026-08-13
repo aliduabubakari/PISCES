@@ -2,10 +2,10 @@
   "energy": {
     "data_source": "sample",
     "evidence": {
-      "confidence": "medium",
+      "confidence": "low",
       "data_source": "sample",
       "execution_adapter": "representative",
-      "measurement_kind": "sample_runtime",
+      "measurement_kind": "surrogate_benchmark",
       "production_equivalent": false
     },
     "estimate": {
@@ -30,7 +30,7 @@
     "enabled": true,
     "mode_requested": "sample"
   },
-  "report_schema_version": "1.1.0",
+  "report_schema_version": "1.2.0",
   "tool": "pisces-unified",
   "workflow": {
     "name": "flow",

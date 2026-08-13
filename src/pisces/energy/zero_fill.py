@@ -185,7 +185,13 @@ def _extract_schema_hints(code_text: str) -> Dict[str, Any]:
     try:
         tree = ast.parse(code_text)
     except SyntaxError:
-        return {"columns": {}, "task_ids": [], "operator_types": [], "xcom_keys": []}
+        return {
+            "columns": {},
+            "task_ids": [],
+            "operator_types": [],
+            "xcom_keys": [],
+            "table_refs": [],
+        }
 
     visitor = _SchemaVisitor()
     visitor.visit(tree)

@@ -10,9 +10,10 @@ PISCES provides a comprehensive suite for sustainability assessment of generated
 
 | Feature | Description |
 |---------|-------------|
-| **Carbon Tracking** | Measures CO₂ emissions during workflow import/execution using [CodeCarbon](https://codecarbon.io/) |
-| **Runtime Energy Evaluation** | Runs workflows with fuzz-fill, zero-fill, scale-probe, sample, or synthetic data to measure bounded runtime energy |
-| **No-Data Data Generation** | AST-powered zero-fill and deterministic fuzz-fill generators — no LLM needed, exercises real code paths for baseline energy measurement |
+| **Operational Measurement** | Records wall-clock time, process CPU time, and peak resident memory in a dedicated runner process |
+| **Modeled Energy Evidence** | Records CodeCarbon estimates as secondary evidence and identifies the power-source basis |
+| **Runtime Evaluation** | Runs bounded native or surrogate workloads with explicit completion and comparison-eligibility status |
+| **No-Data Data Generation** | Produces AST-guided zero-fill and deterministic fuzz-fill rows for bounded diagnostic workloads |
 | **Eco-Design Heuristics** | Static analysis rules that flag energy-inefficient patterns (poke-mode sensors, sequential chains, high XCom, etc.) |
 | **Unified Reports** | Combines all assessments into a single JSON report artifact |
 | **DAG Comparator** | Compares sustainability profiles across multiple workflows and orchestrators |
@@ -101,11 +102,10 @@ pisces-unified path/to/pipeline.py \
   --track-carbon \
   --carbon-country-iso ITA
 
-# Apply a scale factor for more conservative estimates
+# Keep raw per-run output unscaled; place repeated-use assumptions in a scenario
 pisces-unified path/to/pipeline.py \
   --track-carbon \
-  --carbon-country-iso GBR \
-  --carbon-scale-factor 50
+  --carbon-country-iso GBR
 ```
 
 ### Scenario Estimates
@@ -144,16 +144,13 @@ pisces-unified path/to/pipeline.py \
   --enable-energy-eval \
   --energy-mode auto
 
-# Zero-fill mode: AST-inferred trivial data — NO LLM needed!
-# Analyses pipeline code to infer input schemas, generates all-zero data,
-# and measures actual energy/carbon during real code execution.
+# Zero-fill mode: AST-inferred trivial data, with no LLM call
 pisces-unified path/to/pipeline.py \
   --track-carbon \
   --enable-energy-eval \
   --energy-mode zero_fill
 
-# Fuzz-fill mode: AST-inferred deterministic non-zero data — NO LLM needed!
-# Better than zero-fill for exercising branches and non-empty transformations.
+# Fuzz-fill mode: AST-inferred deterministic non-zero data, with no LLM call
 pisces-unified path/to/pipeline.py \
   --track-carbon \
   --enable-energy-eval \
@@ -223,6 +220,39 @@ Synthetic recipe caching defaults to `use`. Cache keys include the minimized wor
 provider, model, seed, max rows, and recipe schema version. Use `refresh` for live API validation
 runs, and `off` when an experiment must avoid writing cache artifacts.
 
+For controlled studies, use an explicit mode, native execution, a stable measurement
+window, and an exact output path:
+
+```bash
+pisces-unified path/to/pipeline.py \
+  --enable-energy-eval \
+  --energy-mode sample \
+  --energy-sample-path ./frozen_fixture.csv \
+  --energy-execution-adapter native \
+  --energy-runtime-python /path/to/airflow-2.8.1/bin/python \
+  --experiment-mode \
+  --workload-contract ./contracts/pipeline_v1.json \
+  --artifact-binding ./bindings/artifact.json \
+  --energy-minimum-duration-s 30 \
+  --energy-minimum-repetitions 3 \
+  --energy-maximum-repetitions 1000 \
+  --out-file ./reports/assigned_run_id.json
+```
+
+Strict experiment mode disables automatic surrogate fallback. A failed, zero-work, or
+partial native execution has no primary resource measurement. Its counters remain under
+`attempt_diagnostics`; they are not encoded as numerical zero.
+
+The Airflow adapter executes the full DAG through `DAG.test()`. Contract-bound
+runs use temporary scoped storage, registered HTTP and FTP fixtures, expected-task
+coverage, required-input consumption checks, and output assertions. Declared
+branch alternatives may skip the unselected path. The Airflow metadata
+database is initialized before measurement. Task retries are disabled for the
+first-pass outcome and their declared values remain in report metadata. A
+separate pairwise output-equivalence check is required before resource
+comparison. Prefect and Dagster still require corresponding contract-aware
+adapters before confirmatory paired use.
+
 ### Combined: Full Assessment
 
 ```bash
@@ -253,7 +283,7 @@ Each evaluation produces a structured JSON report:
 
 ```json
 {
-  "report_schema_version": "1.0.0",
+  "report_schema_version": "1.2.0",
   "tool": "pisces-unified",
   "timestamp": "2026-06-16T12:00:00Z",
   "workflow": {
@@ -267,17 +297,17 @@ Each evaluation produces a structured JSON report:
     "scale_factor": 50.0
   },
   "energy": {
-    "schema_version": "1.1.0",
+    "schema_version": "1.2.0",
     "mode_used": "sample",
     "evidence": {
-      "measurement_kind": "sample_runtime",
+      "measurement_kind": "native_runtime",
       "confidence": "medium",
       "production_equivalent": false,
       "data_source": "sample",
-      "execution_adapter": "representative",
-      "measurement_scope": "runtime_representative_workload",
+      "execution_adapter": "native",
+      "measurement_scope": "native_local_runtime",
       "limitations": [
-        "Runtime used a bounded representative workload; it is useful for comparison but is not production-equivalent."
+        "Wall-clock time, process CPU time, and peak resident memory are the primary operational measurements."
       ]
     },
     "attempts": [
@@ -291,6 +321,20 @@ Each evaluation produces a structured JSON report:
     "measurements": {
       "import_build": null,
       "runtime": {
+        "execution_outcome": "completed",
+        "eligible_for_resource_comparison": true,
+        "eligible_for_paired_equivalence_comparison": false,
+        "operational_metrics": {
+          "evidence_role": "primary",
+          "wall_clock_s": 30.4,
+          "process_cpu_s": 21.8,
+          "peak_rss_mb": 412.3
+        },
+        "modeled_energy": {
+          "evidence_role": "secondary",
+          "interpretation": "modeled_energy",
+          "hardware_power_source_verified": false
+        },
         "energy_profile": {
           "energy_consumed_kwh": 0.00042,
           "emissions_kgco2eq": 0.00012
@@ -321,9 +365,10 @@ PISCES labels every result by evidence strength so reports do not overstate what
 |---------------|------------|---------|
 | `static` | Low | Static heuristic analysis only; no workflow execution or hardware measurement |
 | `import_build` | Low | Workflow import/DAG-build measurement only; task runtime is not included |
-| `representative_runtime` | Low | Bounded local workload using generated/synthetic data; useful for comparison, not production-equivalent |
-| `sample_runtime` | Medium | Bounded local workload using user-supplied sample data |
-| `native_runtime` | High | Local native orchestrator execution when dependencies and safety limits allow it |
+| `surrogate_benchmark` | Low | PISCES diagnostic workload; it does not execute the workflow and is ineligible for route comparison |
+| `sample_runtime` | Medium | Legacy evidence label for bounded sample-data runs |
+| `native_runtime` | Medium | Complete local native execution; paired equivalence still requires output assertions |
+| `native_runtime` with verified equivalent output | High | Complete native execution of the frozen workload contract with passing output assertions |
 
 `production_equivalent` is `false` by default. PISCES separates raw measurements from scaled estimates, and limitations are included in the `evidence.limitations` list.
 
@@ -403,8 +448,8 @@ PISCES/
 ```
 
 - **`auto`** — Uses sample data first if supplied; otherwise cascades through fuzz_fill → zero_fill → synthetic → heuristic
-- **`zero_fill`** — AST-powered trivial data (all zeros/empty strings). Exercises real code paths for baseline measurement. **No LLM, no data files needed.**
-- **`fuzz_fill`** — AST-powered deterministic non-zero data. Exercises more branches than zero-fill. **No LLM, no data files needed.**
+- **`zero_fill`** — AST-powered trivial data (all zeros/empty strings) for a bounded diagnostic workload. **No LLM or data files needed.**
+- **`fuzz_fill`** — AST-powered deterministic non-zero data for a bounded diagnostic workload. **No LLM or data files needed.**
 - **`scale_probe`** — Runs deterministic generated workloads at multiple row counts to estimate runtime growth trends.
 - **`operator_profile`** — Uses static operator-tier signals to scale a bounded representative workload.
 - **`sample`** — Uses provided CSV/JSON/JSONL data to exercise the workflow
@@ -418,18 +463,21 @@ PISCES report.
 
 ### Execution Adapters
 
-- **`representative`** — Bounded synthetic workload (safe, no orchestrator import required)
+- **`surrogate_benchmark`** — Target-neutral PISCES diagnostic workload; it is not workflow execution
+- **`representative`** — Deprecated alias for `surrogate_benchmark`
 - **`native`** — Loads and executes supported workflow objects through a guarded local adapter
-- **`auto`** — Tries native first, falls back to representative
+- **`auto`** — Tries native first, then uses the surrogate benchmark outside strict experiment mode
 
 Native execution is intentionally conservative. PISCES runs native adapters under a safety guard
-that blocks network calls, subprocess creation, and file writes by default. Effectful tasks are
-reported as skipped rather than allowed to mutate local or external systems. Native reports include
+that blocks unregistered network calls, subprocess creation, and file writes outside approved
+temporary roots. Registered contract fixtures serve approved external reads. Strict experiment mode
+marks any failed or skipped task run ineligible. Native reports include
 `native_tasks_executed`, `native_tasks_skipped`, per-task status, and the active safety policy.
 
 ### Carbon Scale Factor
 
-Amplifies measured carbon values to estimate the impact of repeated execution. For example, `--carbon-scale-factor 50` would multiply the per-run emissions by 50 — useful when a DAG runs thousands of times.
+Keep `--carbon-scale-factor` at `1.0` for experimental raw records. Express repeated
+execution through an explicit scenario so measured and projected quantities remain separate.
 
 ## Troubleshooting
 
@@ -440,8 +488,9 @@ system `Password:` prompt. This comes from CodeCarbon's powermetrics capability
 check, which runs `sudo powermetrics` to detect Apple hardware power metrics.
 
 **PISCES disables this check by default** via the `PISCES_SKIP_POWERMETRICS`
-environment variable (defaults to `1`). CodeCarbon falls back to TDP-based
-estimation, which requires no elevated privileges.
+environment variable (defaults to `1`). CodeCarbon then uses a TDP-based model.
+PISCES labels this output as secondary modeled-energy evidence. Wall-clock time,
+process CPU time, and peak resident memory are the primary Mac measurements.
 
 If you need hardware-level power metrics, configure passwordless sudo for
 powermetrics (see [CodeCarbon docs](https://docs.codecarbon.io/latest/explanation/methodology/#power-usage))

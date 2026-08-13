@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any, Dict
 
-from .airflow import AirflowNativeAdapter
+from .airflow import AirflowNativeAdapter, prepare_airflow_test_environment
 from .base import NativeAdapterError, NativeExecutionResult, NativeSafetyPolicy
 from .dagster import DagsterNativeAdapter
 from .prefect import PrefectNativeAdapter
@@ -26,13 +26,21 @@ def execute_native_workload(
     orchestrator: str,
     max_tasks: int,
     safety_policy: NativeSafetyPolicy | None = None,
+    logical_date=None,
+    run_index: int = 0,
+    fixture_registry=None,
 ) -> Dict[str, Any]:
     adapter = get_native_adapter(orchestrator)
-    result = adapter.execute(
-        workflow_file=workflow_file,
-        max_tasks=max_tasks,
-        safety_policy=safety_policy or NativeSafetyPolicy(),
-    )
+    kwargs = {
+        "workflow_file": workflow_file,
+        "max_tasks": max_tasks,
+        "safety_policy": safety_policy or NativeSafetyPolicy(),
+    }
+    if adapter.name == "airflow":
+        kwargs["logical_date"] = logical_date
+        kwargs["run_index"] = run_index
+        kwargs["fixture_registry"] = fixture_registry
+    result = adapter.execute(**kwargs)
     return result.to_dict()
 
 
@@ -45,4 +53,5 @@ __all__ = [
     "PrefectNativeAdapter",
     "execute_native_workload",
     "get_native_adapter",
+    "prepare_airflow_test_environment",
 ]

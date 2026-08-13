@@ -24,6 +24,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Any, Dict, Optional
+import os
 import platform
 import time
 import sys
@@ -162,6 +163,16 @@ def try_stop_tracker(handle: Optional[TrackerHandle]) -> Dict[str, Any]:
     base = {
         "tool": "codecarbon",
         "available": bool(handle is not None),
+        "evidence_role": "secondary",
+        "interpretation": "modeled_energy",
+        "power_source_kind": (
+            "modeled_tdp"
+            if platform.system() == "Darwin"
+            and os.environ.get("PISCES_SKIP_POWERMETRICS", "1").strip().lower()
+            not in ("0", "false", "no", "off")
+            else "unverified"
+        ),
+        "hardware_power_source_verified": False,
         "python": sys.executable,
         "python_version": platform.python_version(),
         "platform": platform.platform(),

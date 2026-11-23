@@ -4,12 +4,15 @@ from __future__ import annotations
 import argparse
 import importlib.util
 import json
-import time
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict
 
 from .carbon_tracker import add_scaled_estimate, try_start_tracker, try_stop_tracker
+from .operational_metrics import (
+    start_operational_measurement,
+    stop_operational_measurement,
+)
 
 
 def _emit(payload: Dict[str, Any], out: Path) -> None:
@@ -69,7 +72,7 @@ def main() -> None:
         },
     )
 
-    started = time.time()
+    operational_started = start_operational_measurement()
     import_status = "ok"
     import_error = None
     try:
@@ -79,6 +82,10 @@ def main() -> None:
         import_error = {"error_type": type(e).__name__, "message": str(e)}
 
     energy = add_scaled_estimate(try_stop_tracker(tracker), scale_factor)
+    operational_metrics = stop_operational_measurement(
+        operational_started,
+        scope="workflow_import_build",
+    )
     if tracker is None:
         energy["measurement_scope"] = "import_build_only"
         energy["disclaimer"] = (
@@ -93,12 +100,28 @@ def main() -> None:
         "orchestrator": orchestrator,
         "workflow_file": str(workflow_file),
         "measurement": {
-            "status": "ok" if energy.get("status") == "ok" else "not_measured",
+            "status": "ok" if import_status == "ok" else "failed",
             "measurement_scope": "import_build_only",
-            "duration_s": round(max(0.0, time.time() - started), 6),
+            "duration_s": operational_metrics["wall_clock_s"],
+            "execution_outcome": (
+                "import_completed" if import_status == "ok" else "import_failed"
+            ),
+            "operational_metrics": (
+                operational_metrics if import_status == "ok" else None
+            ),
+            "modeled_energy": energy if import_status == "ok" else None,
+            "attempt_diagnostics": (
+                None
+                if import_status == "ok"
+                else {
+                    "operational_metrics": operational_metrics,
+                    "modeled_energy": energy,
+                }
+            ),
+            "eligible_for_resource_comparison": import_status == "ok",
             "import_status": import_status,
             "import_error": import_error,
-            "energy_profile": energy,
+            "energy_profile": energy if import_status == "ok" else None,
         },
     }
     _emit(payload, out_path)

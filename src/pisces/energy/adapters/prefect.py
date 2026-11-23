@@ -72,5 +72,6 @@ class PrefectNativeAdapter:
                     import_safety=import_safety,
                     execution_safety=execution_safety,
                 ),
-                metadata={"flow_count": len(flows)},
+                metadata={"flow_count": len(flows), "engine_execution_verified": False,
+                          "execution_interface": "legacy_underlying_function_probe"},
             )

@@ -1,9 +1,8 @@
 # PISCES — Dependencies
 # ======================
 #
-# PISCES has no hard dependencies beyond the Python standard library.
-# All integrations are optional and loaded lazily at runtime with
-# graceful degradation.
+# Report schema validation is installed with PISCES by pyproject.toml.
+# Orchestrator, energy, and LLM integrations are optional.
 #
 # Use pyproject.toml optional dependency groups:
 #   pip install "pisces[yaml,energy,cli,dev]"

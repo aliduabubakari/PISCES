@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "binding_id", "contract_id", "target", "artifact_path", "artifact_sha256", "file_bindings", "integration_bindings", "output_bindings", "expected_task_ids"],
+  "properties": {
+    "schema_version": {"const": "2.0"},
+    "binding_id": {"type": "string", "minLength": 1},
+    "contract_id": {"type": "string", "minLength": 1},
+    "target": {"enum": ["airflow", "prefect", "dagster"]},
+    "route": {"type": "string", "minLength": 1},
+    "artifact_path": {"type": "string", "minLength": 1},
+    "artifact_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "file_bindings": {"$ref": "#/$defs/mapping"},
+    "integration_bindings": {"$ref": "#/$defs/mapping"},
+    "output_bindings": {"$ref": "#/$defs/mapping"},
+    "expected_task_ids": {"$ref": "#/$defs/taskIds", "minItems": 1},
+    "allowed_additional_task_ids": {"$ref": "#/$defs/taskIds"},
+    "allowed_skipped_task_ids": {"$ref": "#/$defs/taskIds"},
+    "alternative_task_groups": {"type": "array", "items": {"$ref": "#/$defs/taskIds", "minItems": 1}}
+  },
+  "$defs": {
+    "taskIds": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "mapping": {"type": "object", "additionalProperties": {"type": "string", "minLength": 1}}
+  }
+}

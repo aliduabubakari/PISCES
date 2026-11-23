@@ -2,10 +2,10 @@
   "energy": {
     "data_source": "sample",
     "evidence": {
-      "confidence": "medium",
+      "confidence": "low",
       "data_source": "sample",
       "execution_adapter": "representative",
-      "measurement_kind": "sample_runtime",
+      "measurement_kind": "surrogate_benchmark",
       "production_equivalent": false
     },
     "estimate": {
@@ -15,10 +15,23 @@
         "scenario_name": "golden-demo",
         "years": 1.0
       },
-      "measurement_kind": "calibrated_estimate",
-      "status": "ok"
+      "measurement_kind": "scenario_projection",
+      "reason": "surrogate_is_not_workflow_execution",
+      "status": "not_available"
     },
     "mode_used": "sample",
+    "runtime": {
+      "execution_outcome": "surrogate",
+      "contract_validation": {"status": "not_requested", "scope": null},
+      "telemetry": {"operational": "not_collected", "modeled_energy": "available", "use": "attempt_diagnostics"},
+      "pairwise_equivalence": {"status": "not_evaluated", "screening_eligible": false},
+      "normalized": {
+        "status": "not_available",
+        "reason": "verified_workload_units_unavailable",
+        "energy_kwh_per_1k_rows": null,
+        "emissions_kgco2eq_per_1k_rows": null
+      }
+    },
     "sample_summary": {
       "mapping_enabled": true,
       "mapped_column_count": 3,
@@ -30,7 +43,7 @@
     "enabled": true,
     "mode_requested": "sample"
   },
-  "report_schema_version": "1.1.0",
+  "report_schema_version": "1.4.0",
   "tool": "pisces-unified",
   "workflow": {
     "name": "flow",

@@ -1,0 +1,92 @@
+name: pisces
+services:
+  api:
+    build: {context: ., dockerfile: containers/service/Dockerfile, target: base}
+    image: pisces-api:${PISCES_IMAGE_TAG:-local}
+    environment:
+      PISCES_STATE_DIR: /var/lib/pisces
+      PISCES_API_TOKEN_FILE: /run/secrets/api_token
+      PISCES_ALLOWED_HOSTS: ${PISCES_ALLOWED_HOSTS:-localhost,127.0.0.1,api}
+      PISCES_ALLOWED_ORIGINS: ${PISCES_ALLOWED_ORIGINS:-http://localhost:8080,http://127.0.0.1:8080}
+    secrets: [api_token]
+    volumes: [job-data:/var/lib/pisces]
+    read_only: true
+    tmpfs: ["/tmp:rw,noexec,nosuid,nodev,size=64m,mode=1777"]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    mem_limit: 512m
+    cpus: 1
+    pids_limit: 128
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/healthz')"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks: [application]
+  executor-image:
+    build: {context: ., dockerfile: containers/service/Dockerfile, target: executor}
+    image: pisces-executor:${PISCES_IMAGE_TAG:-local}
+    network_mode: none
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+  worker:
+    build: {context: ., dockerfile: containers/service/Dockerfile, target: worker}
+    image: pisces-worker:${PISCES_IMAGE_TAG:-local}
+    environment:
+      PISCES_STATE_DIR: /var/lib/pisces
+      DOCKER_HOST: unix:///var/run/docker.sock
+      PISCES_EXECUTION_IMAGES: ${PISCES_EXECUTION_IMAGES:-}
+      PISCES_DEFAULT_EXECUTOR_IMAGE: pisces-executor:${PISCES_IMAGE_TAG:-local}
+    volumes:
+      - job-data:/var/lib/pisces
+      - ${PISCES_DOCKER_SOCKET:-/var/run/docker.sock}:/var/run/docker.sock
+    depends_on:
+      api: {condition: service_healthy}
+      executor-image: {condition: service_completed_successfully}
+    read_only: true
+    tmpfs: ["/tmp:rw,noexec,nosuid,nodev,size=64m,mode=1777"]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    mem_limit: 512m
+    cpus: 1
+    pids_limit: 128
+    network_mode: none
+    healthcheck:
+      test: [CMD, python, -c, "from pathlib import Path; from pisces.service.store import JobStore; assert any(p['ready'] for p in JobStore(Path('/var/lib/pisces')).readiness())"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 30s
+  frontend:
+    build: {context: ., dockerfile: containers/frontend/Dockerfile, target: production}
+    image: pisces-frontend:${PISCES_IMAGE_TAG:-local}
+    environment:
+      PISCES_API_UPSTREAM: ${PISCES_API_UPSTREAM:-api:8000}
+      NGINX_ENVSUBST_FILTER: PISCES_API_UPSTREAM
+    ports: ["127.0.0.1:${PISCES_HTTP_PORT:-8080}:8080"]
+    depends_on: {api: {condition: service_healthy}}
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev,size=64m,mode=1777
+      - /etc/nginx/conf.d:rw,noexec,nosuid,nodev,size=1m,mode=1777
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    mem_limit: 256m
+    cpus: 1
+    pids_limit: 128
+    healthcheck:
+      test: [CMD, wget, -q, -O, '-', 'http://127.0.0.1:8080/healthz']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks: [application, ingress]
+volumes:
+  job-data:
+networks:
+  ingress:
+  application:
+    internal: true
+secrets:
+  api_token:
+    file: ${PISCES_API_TOKEN_FILE:-.secrets/api-token}

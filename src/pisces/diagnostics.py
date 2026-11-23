@@ -39,6 +39,7 @@ class DiagnosticsConfig:
     carbon_country_iso: Optional[str] = None
     carbon_measure_power_secs: int = 1
     validate_codecarbon: bool = True
+    oci_image: Optional[str] = None
 
 
 def _package_status(import_name: str, distribution_name: Optional[str] = None) -> Dict[str, Any]:
@@ -105,6 +106,19 @@ def _validate_codecarbon(config: DiagnosticsConfig) -> Dict[str, Any]:
 
 
 def collect_diagnostics(config: DiagnosticsConfig) -> Dict[str, Any]:
+    if config.oci_image:
+        from .energy.oci_runtime import check_oci
+
+        oci = check_oci(config.oci_image)
+        actual_target = (oci.get("environment") or {}).get("runtime_target", "airflow")
+        if config.orchestrator != "auto" and config.orchestrator != actual_target:
+            oci.update(ready=False, reason="oci_image_target_mismatch")
+        return {
+            "schema_version": DIAGNOSTICS_SCHEMA_VERSION, "tool": "pisces-diagnostics",
+            "timestamp": datetime.now(timezone.utc).isoformat(), "profile": "oci",
+            "ready": oci["ready"], "oci": oci,
+            "blockers": [] if oci["ready"] else [oci["reason"]],
+        }
     provider = (config.llm_provider or "openrouter").strip().lower()
     key_env = _provider_key_env(provider, config.llm_api_key_env)
     codecarbon_status = _package_status("codecarbon")
@@ -196,6 +210,7 @@ def main() -> None:
     parser.add_argument("--carbon-country-iso")
     parser.add_argument("--carbon-measure-power-secs", type=int, default=1)
     parser.add_argument("--skip-codecarbon-smoke", action="store_true")
+    parser.add_argument("--oci-image", help="Probe a local immutable OCI image without importing a workflow")
     parser.add_argument("--out", type=str, help="Optional JSON output path")
     args = parser.parse_args()
 
@@ -209,6 +224,7 @@ def main() -> None:
             carbon_country_iso=args.carbon_country_iso,
             carbon_measure_power_secs=args.carbon_measure_power_secs,
             validate_codecarbon=not args.skip_codecarbon_smoke,
+            oci_image=args.oci_image,
         )
     )
 

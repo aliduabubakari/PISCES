@@ -5,6 +5,9 @@ env/
 
 # API keys & secrets
 .env
+.env.*
+!.env.example
+.secrets/
 *.env.local
 
 # Python
@@ -18,6 +21,12 @@ build/
 # Tests
 .pytest_cache/
 .coverage
+.coverage.*
+htmlcov/
+coverage/
+.ruff_cache/
+.mypy_cache/
+.hypothesis/
 
 # IDE
 .vscode/
@@ -36,3 +45,30 @@ diagnostics/
 demo/output/
 synthetic_recipes.json
 powermetrics_log.txt
+/reports/
+/output/
+/outputs/
+/artifacts/
+/benchmark-runs/
+/runtime/
+/.pisces/
+/.cache/
+/tmp/
+/temp/
+*.log
+*.log.*
+*.prof
+*.pstats
+*.sqlite
+*.sqlite3
+*.sqlite-wal
+*.sqlite-shm
+*.sqlite3-wal
+*.sqlite3-shm
+
+# Frontend
+node_modules/
+frontend/test-results/
+frontend/playwright-report/
+frontend/.vite/
+*.tsbuildinfo

@@ -17,16 +17,18 @@ Usage:
 from __future__ import annotations
 
 import json
+import hashlib
+import importlib.metadata
+import platform
+import subprocess
+import sys
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from .energy.runtime_evaluation import EnergyEvaluationRequest, evaluate_energy
-
-
-REPORT_SCHEMA_VERSION = "1.1.0"
-RUNTIME_SUPPORTED = {"airflow", "prefect", "dagster"}
+from .energy.runtime_evaluation import RUNTIME_SUPPORTED, EnergyEvaluationRequest, evaluate_energy
+from .report_validation import REPORT_SCHEMA_VERSION, render_report
 
 
 def _detect_orchestrator(file_path: Path) -> str:
@@ -103,8 +105,17 @@ class UnifiedEnergyConfig:
     energy_max_rows: int = 500
     energy_max_tasks: int = 25
     energy_timeout_s: int = 120
+    energy_runtime_python: Optional[Path] = None
     energy_seed: int = 1729
-    energy_execution_adapter: str = "representative"
+    energy_execution_adapter: str = "surrogate_benchmark"
+    oci_image: Optional[str] = None
+    energy_measurement_minimum_duration_s: float = 0.0
+    energy_measurement_minimum_repetitions: int = 1
+    energy_measurement_maximum_repetitions: int = 1000
+    energy_measurement_warmup_repetitions: int = 0
+    experiment_mode: bool = False
+    workload_contract: Optional[Path] = None
+    artifact_binding: Optional[Path] = None
 
     # LLM (for synthetic data generation)
     llm_provider: Optional[str] = None
@@ -128,9 +139,10 @@ def _build_report(
     errors: List[Dict[str, Any]],
     warnings: List[Dict[str, Any]],
     duration_s: float,
+    detected_orchestrator: str,
+    resolved_orchestrator: str,
 ) -> Dict[str, Any]:
     """Assemble the unified PISCES energy report."""
-    orchestrator = _detect_orchestrator(config.workflow_path)
     mode_requested = config.energy_mode if config.enable_energy_evaluation else "heuristic"
 
     report: Dict[str, Any] = {
@@ -140,8 +152,11 @@ def _build_report(
         "workflow": {
             "path": str(config.workflow_path),
             "name": config.workflow_path.stem,
-            "orchestrator": orchestrator,
-            "runtime_supported": orchestrator in RUNTIME_SUPPORTED,
+            "orchestrator": resolved_orchestrator,
+            "orchestrator_requested": config.orchestrator,
+            "orchestrator_detected": detected_orchestrator,
+            "runtime_supported": resolved_orchestrator in RUNTIME_SUPPORTED,
+            "target_validation": "not_evaluated",
         },
         "carbon_tracking": {
             "enabled": config.track_carbon,
@@ -163,9 +178,54 @@ def _build_report(
     if warnings:
         report["warnings"] = warnings
 
+    try:
+        artifact_sha256 = hashlib.sha256(
+            config.workflow_path.read_bytes()
+        ).hexdigest()
+    except Exception:
+        artifact_sha256 = None
+
+    package_versions: Dict[str, Optional[str]] = {}
+    for package_name in ("pisces", "codecarbon", "apache-airflow", "prefect", "dagster"):
+        try:
+            package_versions[package_name] = importlib.metadata.version(package_name)
+        except importlib.metadata.PackageNotFoundError:
+            package_versions[package_name] = None
+
+    git_commit = None
+    git_dirty = None
+    try:
+        project_root = Path(__file__).resolve().parents[2]
+        git_commit = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=project_root,
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout.strip()
+        git_dirty = bool(
+            subprocess.run(
+                ["git", "status", "--porcelain"],
+                cwd=project_root,
+                check=True,
+                capture_output=True,
+                text=True,
+            ).stdout.strip()
+        )
+    except Exception:
+        pass
+
     report["metadata"] = {
         "duration_s": round(duration_s, 4),
         "knowledge_pack_mode": config.knowledge_pack_mode,
+        "artifact_sha256": artifact_sha256,
+        "pisces_git_commit": git_commit,
+        "pisces_git_dirty": git_dirty,
+        "python_executable": sys.executable,
+        "python_version": platform.python_version(),
+        "platform": platform.platform(),
+        "package_versions": package_versions,
+        "environment_scope": "controller",
     }
 
     return report
@@ -179,6 +239,13 @@ def run_unified_energy_evaluation(config: UnifiedEnergyConfig) -> Dict[str, Any]
     warnings: List[Dict[str, Any]] = []
 
     wf = config.workflow_path.expanduser().resolve()
+    detected = _detect_orchestrator(wf)
+    orchestrator = detected if config.orchestrator == "auto" else config.orchestrator
+    if config.orchestrator != "auto" and detected not in {"unknown", orchestrator}:
+        warnings.append({
+            "code": "ORCHESTRATOR_DETECTION_MISMATCH",
+            "message": f"Requested {orchestrator}, detected {detected}; using the explicit target.",
+        })
     if not wf.exists():
         return _build_report(
             config=config,
@@ -186,6 +253,8 @@ def run_unified_energy_evaluation(config: UnifiedEnergyConfig) -> Dict[str, Any]
             errors=[{"code": "WORKFLOW_NOT_FOUND", "message": f"File not found: {wf}"}],
             warnings=[],
             duration_s=time.time() - t0,
+            detected_orchestrator=detected,
+            resolved_orchestrator=orchestrator,
         )
 
     try:
@@ -197,11 +266,9 @@ def run_unified_energy_evaluation(config: UnifiedEnergyConfig) -> Dict[str, Any]
             errors=[{"code": "FILE_READ_ERROR", "message": str(e)}],
             warnings=[],
             duration_s=time.time() - t0,
+            detected_orchestrator=detected,
+            resolved_orchestrator=orchestrator,
         )
-
-    orchestrator = config.orchestrator
-    if orchestrator == "auto":
-        orchestrator = _detect_orchestrator(wf)
 
     energy_result: Optional[Dict[str, Any]] = None
 
@@ -211,6 +278,7 @@ def run_unified_energy_evaluation(config: UnifiedEnergyConfig) -> Dict[str, Any]
             code_text=code_text,
             orchestrator=orchestrator,
             repo_root=_find_repo_root(wf),
+            runtime_python=config.energy_runtime_python,
             mode_selected=config.energy_mode if config.enable_energy_evaluation else "heuristic",
             sample_paths=config.energy_sample_paths,
             sample_schema_map=config.energy_sample_schema_map,
@@ -219,6 +287,16 @@ def run_unified_energy_evaluation(config: UnifiedEnergyConfig) -> Dict[str, Any]
             timeout_s=config.energy_timeout_s,
             seed=config.energy_seed,
             execution_adapter=config.energy_execution_adapter,
+            oci_image=config.oci_image,
+            measurement_minimum_duration_s=config.energy_measurement_minimum_duration_s,
+            measurement_minimum_repetitions=config.energy_measurement_minimum_repetitions,
+            measurement_maximum_repetitions=config.energy_measurement_maximum_repetitions,
+            measurement_warmup_repetitions=(
+                config.energy_measurement_warmup_repetitions
+            ),
+            experiment_mode=config.experiment_mode,
+            workload_contract=config.workload_contract,
+            artifact_binding=config.artifact_binding,
             track_carbon=config.track_carbon,
             carbon_country_iso=config.carbon_country_iso,
             carbon_measure_power_secs=config.carbon_measure_power_secs,
@@ -248,6 +326,8 @@ def run_unified_energy_evaluation(config: UnifiedEnergyConfig) -> Dict[str, Any]
         errors=errors,
         warnings=warnings,
         duration_s=time.time() - t0,
+        detected_orchestrator=detected,
+        resolved_orchestrator=orchestrator,
     )
 
     return report
@@ -268,6 +348,7 @@ def main():
         help="Orchestrator target (default: auto-detect)",
     )
     parser.add_argument("--out-dir", type=str, help="Output directory for reports")
+    parser.add_argument("--out-file", type=str, help="Exact output JSON path")
     parser.add_argument("--stdout", action="store_true", help="Print report to stdout")
 
     # Carbon tracking
@@ -279,7 +360,7 @@ def main():
     # Scenario estimates
     parser.add_argument("--estimate-scenario-file", type=str, help="JSON scenario file with runs_per_year, years, repetitions_per_run, and optional name")
     parser.add_argument("--estimate-scenario-name", type=str, help="Name for the explicit estimate scenario")
-    parser.add_argument("--estimate-runs-per-year", type=int, help="Explicit workflow runs per year for calibrated estimates")
+    parser.add_argument("--estimate-runs-per-year", type=int, help="Requested workflow runs per year (currently recorded without projection totals)")
     parser.add_argument("--estimate-years", type=float, default=1.0, help="Scenario period in years (default: 1)")
     parser.add_argument("--estimate-repetitions-per-run", type=float, default=1.0, help="How many measured runs correspond to one workflow run")
 
@@ -290,7 +371,7 @@ def main():
         default="auto",
         choices=["auto", "zero_fill", "fuzz_fill", "scale_probe", "operator_profile", "sample", "synthetic", "heuristic"],
         help=(
-            "Energy mode: auto (sample if provided, otherwise fuzz_fill → zero_fill → synthetic → heuristic), "
+            "Energy mode: auto (sample, fuzz_fill, zero_fill, heuristic; no hosted fallback), "
             "zero_fill (all-zero generated data), fuzz_fill (deterministic schema-guided values), "
             "scale_probe (multi-size generated workloads), operator_profile (static tier-weighted representative workload), "
             "sample (real CSV/JSON), synthetic (LLM-generated), heuristic (static rules only)"
@@ -312,7 +393,28 @@ def main():
     parser.add_argument("--energy-max-tasks", type=int, default=25)
     parser.add_argument("--energy-timeout-s", type=int, default=120)
     parser.add_argument("--energy-seed", type=int, default=1729)
-    parser.add_argument("--energy-execution-adapter", default="representative", choices=["representative", "native", "auto"])
+    parser.add_argument(
+        "--energy-runtime-python",
+        type=str,
+        help="Python interpreter for orchestrator-native execution",
+    )
+    parser.add_argument(
+        "--energy-execution-adapter",
+        default="surrogate_benchmark",
+        choices=["surrogate_benchmark", "representative", "native", "auto", "oci"],
+    )
+    parser.add_argument("--oci-image", help="Local immutable OCI image ID or repository digest")
+    parser.add_argument("--energy-minimum-duration-s", type=float, default=0.0)
+    parser.add_argument("--energy-minimum-repetitions", type=int, default=1)
+    parser.add_argument("--energy-maximum-repetitions", type=int, default=1000)
+    parser.add_argument("--energy-warmup-repetitions", type=int, default=0)
+    parser.add_argument(
+        "--experiment-mode",
+        action="store_true",
+        help="Use strict execution semantics and disable automatic surrogate fallback",
+    )
+    parser.add_argument("--workload-contract", type=str)
+    parser.add_argument("--artifact-binding", type=str)
 
     # LLM
     parser.add_argument("--llm-provider", type=str, default="openrouter",
@@ -387,8 +489,21 @@ def main():
         energy_max_rows=args.energy_max_rows,
         energy_max_tasks=args.energy_max_tasks,
         energy_timeout_s=args.energy_timeout_s,
+        energy_runtime_python=(
+            Path(args.energy_runtime_python)
+            if args.energy_runtime_python
+            else None
+        ),
         energy_seed=args.energy_seed,
         energy_execution_adapter=args.energy_execution_adapter,
+        oci_image=args.oci_image,
+        energy_measurement_minimum_duration_s=args.energy_minimum_duration_s,
+        energy_measurement_minimum_repetitions=args.energy_minimum_repetitions,
+        energy_measurement_maximum_repetitions=args.energy_maximum_repetitions,
+        energy_measurement_warmup_repetitions=args.energy_warmup_repetitions,
+        experiment_mode=args.experiment_mode,
+        workload_contract=Path(args.workload_contract) if args.workload_contract else None,
+        artifact_binding=Path(args.artifact_binding) if args.artifact_binding else None,
         llm_provider=args.llm_provider,
         llm_model=args.llm_model,
         llm_api_key_env=args.llm_api_key_env,
@@ -399,14 +514,30 @@ def main():
 
     report = run_unified_energy_evaluation(config)
 
+    try:
+        rendered = render_report(report)
+    except ValueError as exc:
+        raise SystemExit(f"Cannot write PISCES report: {exc}") from exc
+
     if args.stdout:
-        print(json.dumps(report, indent=2, default=str))
+        print(rendered)
     else:
-        out_dir = config.out_dir
-        out_dir.mkdir(parents=True, exist_ok=True)
-        out_path = out_dir / f"pisces_{wf.stem}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-        out_path.write_text(json.dumps(report, indent=2, default=str), encoding="utf-8")
+        if args.out_file:
+            out_path = Path(args.out_file).expanduser().resolve()
+            out_path.parent.mkdir(parents=True, exist_ok=True)
+        else:
+            out_dir = config.out_dir
+            out_dir.mkdir(parents=True, exist_ok=True)
+            out_path = out_dir / f"pisces_{wf.stem}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        out_path.write_text(rendered, encoding="utf-8")
         print(f"Report written to: {out_path}")
+
+    energy_errors = report.get("energy", {}).get("errors")
+    runtime = report.get("energy", {}).get("runtime_measurement")
+    if report.get("errors") or energy_errors or (
+        isinstance(runtime, dict) and runtime.get("status") == "failed"
+    ):
+        raise SystemExit(2)
 
 
 if __name__ == "__main__":

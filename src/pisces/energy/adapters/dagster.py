@@ -79,5 +79,6 @@ class DagsterNativeAdapter:
                     import_safety=import_safety,
                     execution_safety=execution_safety,
                 ),
-                metadata={"job_count": len(jobs)},
+                metadata={"job_count": len(jobs), "engine_execution_verified": False,
+                          "execution_interface": "legacy_job_level_probe"},
             )

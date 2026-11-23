@@ -1,488 +1,233 @@
-# PISCES
+<p align="center">
+  <img src="assets/brand/pisces-wordmark.svg" alt="PISCES" width="360" />
+</p>
 
-**P**ipeline **I**ntelligent **S**ustainability & **C**arbon **E**valuation **S**uite
+# Pipeline Intelligent Sustainability & Carbon Evaluation Suite
 
-A standalone toolkit for evaluating the energy/carbon impact and eco-design quality of LLM-generated workflow code targeting orchestrators like Airflow, Prefect, and Dagster.
+**PISCES evaluates pipeline code and makes the evidence behind its results inspectable.**
+Use the browser workspace or the Python CLI to inspect static design findings,
+run bounded diagnostics, execute approved workloads in isolated Linux containers,
+and export comprehensive JSON reports. Airflow, Prefect and Dagster have separate
+native execution profiles; the browser and CLI share the Python evaluation core.
 
-## What PISCES Does
+**Status: research/developer preview.** The bounded execution and reporting paths
+are usable today. PISCES is not a calibrated power meter, a general proof of
+pipeline equivalence, or a public service for running hostile code. Missing data
+and ineligible comparisons are reported explicitly, not converted to zeroes.
 
-PISCES provides a comprehensive suite for sustainability assessment of generated pipeline code:
+[Get Started](#get-started) · [CLI Guide](docs/CLI_REFERENCE.md) ·
+[HTTP API](docs/API.md) · [Deployment](docs/EXECUTION_SERVICE.md) ·
+[Documentation Index](docs/README.md)
 
-| Feature | Description |
-|---------|-------------|
-| **Carbon Tracking** | Measures CO₂ emissions during workflow import/execution using [CodeCarbon](https://codecarbon.io/) |
-| **Runtime Energy Evaluation** | Runs workflows with fuzz-fill, zero-fill, scale-probe, sample, or synthetic data to measure bounded runtime energy |
-| **No-Data Data Generation** | AST-powered zero-fill and deterministic fuzz-fill generators — no LLM needed, exercises real code paths for baseline energy measurement |
-| **Eco-Design Heuristics** | Static analysis rules that flag energy-inefficient patterns (poke-mode sensors, sequential chains, high XCom, etc.) |
-| **Unified Reports** | Combines all assessments into a single JSON report artifact |
-| **DAG Comparator** | Compares sustainability profiles across multiple workflows and orchestrators |
+## The Workspace
 
-## Installation
+![Report overview with output verdicts and scoped pipeline metrics](assets/screenshots/report-overview.png)
 
-Base install:
+The workspace separates deployment runs from saved examples. Reports open on an
+overview with output verdicts, measurement scopes and comparison eligibility.
+Optional source inspection, task states, metric definitions and provenance are
+available without crowding the overview.
 
-```bash
-pip install pisces
-```
+![Load campaign with numeric row counts, readings and coverage](assets/screenshots/load-campaign.png)
 
-With carbon tracking support:
+Campaigns plot actual numeric load sizes, show coverage and median/MAD, and keep
+independent sessions separate. A larger dataset is **not assumed** to produce a
+linear increase: fixed startup costs, caching, scheduling and memory high-water
+behavior can all affect the observations. Source fits are displayed only where
+the supplied campaign evidence permits them.
 
-```bash
-pip install "pisces[energy]"
-```
+![New evaluation workflow with script inspection](assets/screenshots/new-evaluation.png)
 
-With CLI enhancements (recommended):
+Upload a script, supply native contract inputs where applicable, choose a ready
+profile, and review the request before authorizing execution. Screenshots use
+sanitized, committed examples; they are not new benchmark results.
 
-```bash
-pip install "pisces[energy,cli]"
-```
+## Get Started
 
-With LLM synthetic data generation:
+### Browser: Docker Compose
 
-```bash
-pip install "pisces[llm]"
-```
-
-With YAML support (for Argo/Kestra manifests):
-
-```bash
-pip install "pisces[energy,cli,yaml]"
-```
-
-All optional features:
-
-```bash
-pip install "pisces[energy,cli,yaml,llm,dotenv]"
-```
-
-## Quick Start
-
-For a complete release demo with sample input data, schema mapping, scenario estimates, and
-comparison output, see [demo/README.md](demo/README.md).
-
-### Setup API Keys
-
-Create a `.env` file in the project root:
+Requires Docker Engine/Desktop running Linux containers, cgroup v2, the default
+seccomp profile, a local Docker Unix socket, and Compose **2.24.4+**. Python 3 is
+used once to prepare the local deployment secret. No host Node.js install is
+needed for this route.
 
 ```bash
-# OpenRouter (for LLM synthetic data generation)
-OPENROUTER_API_KEY=sk-or-v1-your-key-here
-
-# Optional: site info for OpenRouter rankings
-OPENROUTER_HTTP_REFERER=https://github.com/your-repo
-OPENROUTER_TITLE=PISCES
+git clone https://github.com/aliduabubakari/PISCES.git
+cd PISCES
+python3 scripts/prepare_compose.py
+docker compose -f compose.yaml -f compose.prod.yaml up --build -d
 ```
 
-PISCES auto-loads `.env` via `python-dotenv` if installed.
+Open **[http://127.0.0.1:8080/](http://127.0.0.1:8080/)**. Open **Deployment
+connection**, enter the token from `.secrets/api-token`, and select **Connect
+API**. The token is local and must not be committed or included in screenshots.
+Select **New evaluation**, or browse **Examples** without connecting.
 
-### Basic Sustainability Evaluation
+Only `static` and self-contained `python` execution are enabled by default.
+Airflow/Prefect/Dagster need separately approved engine images and contract-bound
+inputs. See [native profile setup](docs/EXECUTION_SERVICE.md#enable-native-engines).
+
+This deployment is for a **single trusted operator**. The API has no Docker
+socket; the worker does. Do not expose it to untrusted users. Remote deployments
+need TLS, an operator access boundary and explicit host/origin configuration.
+Uploaded source, fixtures and reports are retained in the deployment's SQLite
+volume until their terminal job is deleted. `docker compose down` retains data;
+`down --volumes` destroys it. Deletion is not secure erasure of disk/backups.
+
+### CLI: Install From This Checkout
+
+Python **3.10+** is declared; **3.12** is the tested container runtime. Install
+from source so the CLI, schemas, examples and documentation stay together. These
+instructions do not assume that a matching release exists on PyPI.
 
 ```bash
-# Check local readiness before running measurements
-pisces diagnostics path/to/generated_workflow.py
+python3.12 -m venv .venv
+source .venv/bin/activate
+python -m pip install -e '.[web,dev,yaml]'
 
-# Write diagnostics to JSON for CI or experiment logs
-pisces-diagnostics path/to/generated_workflow.py --out ./diagnostics/readiness.json
+# Static analysis: does not execute the uploaded workflow.
+pisces evaluate test_scripts/airflow/simple_etl.py --out-file reports/static.json
+
+# Environment readiness; skip the optional CodeCarbon smoke check here.
+pisces diagnostics test_scripts/airflow/simple_etl.py --skip-codecarbon-smoke
+
+# Export a portable, schema-validated view for the browser.
+pisces report-view reports/static.json --out reports/static.view.json
 ```
+
+`evaluate` creates the output parent directory. View exports refuse to overwrite
+an existing file. Open the view JSON in the browser with **Open report**. Raw
+canonical reports can also be admitted through a connected report API.
+
+For bounded no-data diagnostics, **not native workflow execution**:
 
 ```bash
-# Evaluate a workflow with eco-design heuristics only
-pisces-unified path/to/generated_workflow.py
-
-# Specify orchestrator explicitly (otherwise auto-detected)
-pisces-unified path/to/pipeline.py --orchestrator airflow
+pisces evaluate test_scripts/airflow/simple_etl.py \
+  --enable-energy-eval --energy-mode fuzz_fill --energy-seed 1729 \
+  --out-file reports/surrogate.json
 ```
 
-### Carbon Tracking
+CodeCarbon estimates, LLM-assisted recipes and dotenv loading are opt-in extras:
+`.[energy]`, `.[llm]`, `.[dotenv]`. No LLM API key is needed for static evaluation,
+deterministic fuzz-fill, the default execution service or saved examples.
+See [CLI modes, native execution, exit codes and all flags](docs/CLI_REFERENCE.md).
+
+### HTTP API: Another Client Of The Same Backend
+
+The frontend is optional. Submit a script to `POST /api/v1/jobs`, poll the job,
+then retrieve its comprehensive JSON from `GET /api/v1/jobs/{id}/report`.
+Use `GET /api/v1/jobs/profiles` before submitting; enabled images are an operator
+decision, not a client-provided Docker command.
+
+For report viewing only, with no execution worker:
 
 ```bash
-# Track carbon emissions during workflow import
-pisces-unified path/to/pipeline.py \
-  --track-carbon \
-  --carbon-country-iso ITA
-
-# Apply a scale factor for more conservative estimates
-pisces-unified path/to/pipeline.py \
-  --track-carbon \
-  --carbon-country-iso GBR \
-  --carbon-scale-factor 50
+pisces serve-api --port 8000
 ```
 
-### Scenario Estimates
+This command binds loopback. Execution requires the authenticated API/worker
+deployment above. See the [HTTP API guide](docs/API.md) for authentication,
+copyable Python requests, native input bundles, errors, limits and retention.
+The [generated OpenAPI snapshot](docs/reference/openapi.json) is committed;
+authenticated `/openapi.json` describes a running deployment.
 
-Calibrated estimates are disabled unless you provide explicit scenario assumptions. Estimates are
-stored under `energy.measurements.estimate` and never replace raw measured values.
+## What The Results Mean
+
+| Evidence | Available now | Important boundary |
+| --- | --- | --- |
+| Static design findings | AST/manifest rules, locations and explanations | A possible design issue is not measured energy use |
+| No-data diagnostics | Deterministic surrogate/sample-data modes | Do not execute the original workflow or establish its correctness |
+| Operational telemetry | Scoped wall time, process CPU/RSS and Linux cgroup counters | Software observations; Docker Desktop counters belong to its Linux VM |
+| Native engine evidence | Airflow, Prefect and Dagster task/step states in qualified bounded profiles | Not a production scheduler/executor-parity guarantee |
+| Output verification | Contract-bound assertions and equivalence against supplied reference artifacts | Only as strong as the contract, oracle and covered inputs |
+| Energy/carbon | Optional CodeCarbon software estimates with assumptions and missingness | Secondary modeled evidence, not electrical measurement |
+| Comparisons | Output/telemetry gates and controlled campaign summaries | Standalone jobs are not eligible resource rankings |
+| Task inspection | Task states and explicit missing readings | General per-task CPU/time/memory collection is **not yet implemented** |
+
+Execution success, output correctness, measurement availability and comparison
+eligibility are separate verdicts. PISCES does not divide whole-pipeline metrics
+among tasks, treat missing readings as zero, or infer annual workflow emissions
+from a surrogate run. Scaling results establish observed behavior under their
+recorded environment, not calibrated accuracy or universal linearity.
+
+Canonical unified reports currently use schema **1.4.0**; report/campaign view
+contracts use **1.0.0**. The CLI/API return canonical reports; views are derived
+presentation artifacts. Hashes bind source and inputs, but reports are not signed
+or remotely attested. [Schemas](src/pisces/schemas) and
+[measurement protocol](docs/CONTROLLED_EXPERIMENT_PROTOCOL.md) define the boundaries.
+
+## Benchmark And Demo Set
+
+Five deterministic pipeline families test more than one workload shape:
+
+| Pipeline | Workload |
+| --- | --- |
+| Climate Fusion | Normalize temperature observations from five sources |
+| Event Aggregation | Group event records by key |
+| Order Enrichment | Join orders with lookup data |
+| Sensor Windows | Aggregate sensor readings into windows |
+| Inventory Latest | Select the latest inventory state |
+
+Every family includes `valid`, `equivalent`, `same_shape_wrong` and `partial`
+cases. The latter two should be rejected by output checks even when execution
+succeeds. A standalone suite checks the generated Python workload/oracle; it
+does **not** qualify an orchestrator.
 
 ```bash
-# Project one measured runtime into an explicit annual scenario
-pisces-unified path/to/pipeline.py \
-  --enable-energy-eval \
-  --energy-mode sample \
-  --energy-sample-path ./my_data.csv \
-  --estimate-scenario-name daily-production \
-  --estimate-runs-per-year 365 \
-  --estimate-years 1 \
-  --estimate-repetitions-per-run 1
-
-# Or load the scenario from JSON:
-# {"name": "daily-production", "runs_per_year": 365, "years": 1, "repetitions_per_run": 1}
-pisces-unified path/to/pipeline.py \
-  --enable-energy-eval \
-  --energy-mode sample \
-  --energy-sample-path ./my_data.csv \
-  --estimate-scenario-file ./scenario.json
+pisces-benchmarks list
+pisces-benchmarks build benchmark-runs/demo --rows 10000 --keys 32 --target airflow
+pisces-benchmarks run benchmark-runs/demo benchmark-runs/results --backend standalone
 ```
 
-Each estimate includes assumptions, a scenario hash, per-run/yearly/period totals, the measured
-baseline used, and uncertainty bands derived from the evidence tier.
+Use fresh build/result directories. See [the benchmark suite](docs/BENCHMARK_SUITE.md)
+for OCI execution, and [engine qualification](docs/ENGINE_QUALIFICATION.md) for
+native failure tests. [Climate Fusion](benchmarks/climate_fusion/README.md) also
+provides controlled 10k/100k/500k/1M-row sweeps and independent session checks.
+The [small release demo](demo/README.md) covers sample mapping, report export and
+intentional comparison/projection refusals without private datasets.
 
-### Runtime Energy Evaluation
-
-```bash
-# Auto-mode: sample if provided, otherwise fuzz_fill → zero_fill → synthetic → heuristic
-pisces-unified path/to/pipeline.py \
-  --enable-energy-eval \
-  --energy-mode auto
-
-# Zero-fill mode: AST-inferred trivial data — NO LLM needed!
-# Analyses pipeline code to infer input schemas, generates all-zero data,
-# and measures actual energy/carbon during real code execution.
-pisces-unified path/to/pipeline.py \
-  --track-carbon \
-  --enable-energy-eval \
-  --energy-mode zero_fill
-
-# Fuzz-fill mode: AST-inferred deterministic non-zero data — NO LLM needed!
-# Better than zero-fill for exercising branches and non-empty transformations.
-pisces-unified path/to/pipeline.py \
-  --track-carbon \
-  --enable-energy-eval \
-  --energy-mode fuzz_fill
-
-# Scale-probe mode: runs generated workloads at multiple row counts
-# to estimate growth trends under bounded local execution.
-pisces-unified path/to/pipeline.py \
-  --enable-energy-eval \
-  --energy-mode scale_probe \
-  --energy-max-rows 1000
-
-# Operator-profile mode: uses static operator tiers to weight
-# a bounded representative workload.
-pisces-unified path/to/pipeline.py \
-  --enable-energy-eval \
-  --energy-mode operator_profile
-
-# Sample mode: provide real data files
-pisces-unified path/to/pipeline.py \
-  --enable-energy-eval \
-  --energy-mode sample \
-  --energy-sample-path ./my_data.csv
-
-# Sample mode with schema mapping into canonical runtime columns
-pisces-unified path/to/pipeline.py \
-  --enable-energy-eval \
-  --energy-mode sample \
-  --energy-sample-path ./orders.csv \
-  --energy-sample-map orderIdentifier=order_id \
-  --energy-sample-map totalAmount=amount
-
-# Or provide a JSON object mapping file: {"sourceColumn": "target_column"}
-pisces-unified path/to/pipeline.py \
-  --enable-energy-eval \
-  --energy-mode sample \
-  --energy-sample-path ./orders.csv \
-  --energy-sample-map-file ./sample_schema_map.json
-
-# Synthetic mode: LLM generates representative data
-# (defaults: OpenRouter + openai/gpt-oss-120b — set OPENROUTER_API_KEY in .env)
-pisces-unified path/to/pipeline.py \
-  --enable-energy-eval \
-  --energy-mode synthetic
-
-# Synthetic with custom model/provider
-pisces-unified path/to/pipeline.py \
-  --enable-energy-eval \
-  --energy-mode synthetic \
-  --llm-provider openrouter \
-  --llm-model openai/gpt-oss-120b
-
-# Force a fresh provider call instead of reusing a cached recipe
-pisces-unified path/to/pipeline.py \
-  --enable-energy-eval \
-  --energy-mode synthetic \
-  --synthetic-cache refresh
-
-# Disable synthetic recipe cache reads and writes
-pisces-unified path/to/pipeline.py \
-  --enable-energy-eval \
-  --energy-mode synthetic \
-  --synthetic-cache off
-```
-
-Synthetic recipe caching defaults to `use`. Cache keys include the minimized workflow signature,
-provider, model, seed, max rows, and recipe schema version. Use `refresh` for live API validation
-runs, and `off` when an experiment must avoid writing cache artifacts.
-
-### Combined: Full Assessment
-
-```bash
-# Full assessment with defaults (OpenRouter + gpt-oss-120b for synthetic)
-pisces-unified path/to/pipeline.py \
-  --orchestrator dagster \
-  --track-carbon \
-  --carbon-country-iso ITA \
-  --carbon-scale-factor 50 \
-  --enable-energy-eval \
-  --energy-mode auto \
-  --out-dir ./sustainability_reports
-```
-
-### Interactive CLI
-
-```bash
-# Guided command builder walks you through all options
-pisces agent
-
-# Quick evaluate command
-pisces evaluate path/to/pipeline.py --track-carbon --stdout
-```
-
-## Output: Unified Report
-
-Each evaluation produces a structured JSON report:
-
-```json
-{
-  "report_schema_version": "1.0.0",
-  "tool": "pisces-unified",
-  "timestamp": "2026-06-16T12:00:00Z",
-  "workflow": {
-    "path": "/path/to/workflow.py",
-    "orchestrator": "airflow",
-    "runtime_supported": true
-  },
-  "carbon_tracking": {
-    "enabled": true,
-    "country_iso": "ITA",
-    "scale_factor": 50.0
-  },
-  "energy": {
-    "schema_version": "1.1.0",
-    "mode_used": "sample",
-    "evidence": {
-      "measurement_kind": "sample_runtime",
-      "confidence": "medium",
-      "production_equivalent": false,
-      "data_source": "sample",
-      "execution_adapter": "representative",
-      "measurement_scope": "runtime_representative_workload",
-      "limitations": [
-        "Runtime used a bounded representative workload; it is useful for comparison but is not production-equivalent."
-      ]
-    },
-    "attempts": [
-      {
-        "tier": "sample_runtime",
-        "mode": "sample",
-        "status": "success",
-        "reason": "ok"
-      }
-    ],
-    "measurements": {
-      "import_build": null,
-      "runtime": {
-        "energy_profile": {
-          "energy_consumed_kwh": 0.00042,
-          "emissions_kgco2eq": 0.00012
-        }
-      },
-      "estimate": null
-    },
-    "heuristic": {
-      "rules": [
-        {
-          "rule_id": "SENSOR_POKE_MODE",
-          "severity": "major",
-          "title": "Poke-mode sensor detected",
-          "recommendation": "For Airflow sensors: set mode='reschedule'..."
-        }
-      ]
-    },
-    "runtime_measurement": { "...": "legacy-compatible runtime block" }
-  }
-}
-```
-
-### Evidence Tiers and Confidence
-
-PISCES labels every result by evidence strength so reports do not overstate what was measured:
-
-| Evidence kind | Confidence | Meaning |
-|---------------|------------|---------|
-| `static` | Low | Static heuristic analysis only; no workflow execution or hardware measurement |
-| `import_build` | Low | Workflow import/DAG-build measurement only; task runtime is not included |
-| `representative_runtime` | Low | Bounded local workload using generated/synthetic data; useful for comparison, not production-equivalent |
-| `sample_runtime` | Medium | Bounded local workload using user-supplied sample data |
-| `native_runtime` | High | Local native orchestrator execution when dependencies and safety limits allow it |
-
-`production_equivalent` is `false` by default. PISCES separates raw measurements from scaled estimates, and limitations are included in the `evidence.limitations` list.
-
-### Comparing Reports
-
-```bash
-pisces-compare ./reports/*.json --out ./reports/comparison.json
-```
-
-The comparator ranks workflows by static rule risk, measured runtime energy when present, and
-estimated yearly emissions when reports contain calibrated estimates. It warns when reports mix
-confidence tiers or use incompatible scenario assumptions.
-
-## Eco-Design Rules
-
-PISCES ships with static heuristic rules that flag sustainability concerns **without running the workflow**:
-
-| Rule ID | Severity | What It Detects |
-|---------|----------|-----------------|
-| `SENSOR_POKE_MODE` | Major | Poke-mode sensors wasting resources |
-| `DEEP_SEQUENTIAL_CHAIN` | Minor | Limited parallelism increasing wall-clock |
-| `HIGH_XCOM_INTENSITY` | Minor | Excessive metadata DB traffic |
-| `HIGH_FREQUENCY_HEAVY_COMPUTE` | Major | Hourly-or-faster heavy compute |
-| `LARGE_FAN_OUT` | Info | Scheduling overhead from large fan-out |
-| `NO_DEPENDENCIES_DETECTED` | Minor | Missing dependency edges |
-| `SPEC_CODE_EDGE_MISMATCH` | Info | OPOS vs code graph divergence |
-
-## Project Structure
+## Architecture And Development
 
 ```text
-PISCES/
-├── pyproject.toml
-├── README.md
-├── LICENSE
-├── demo/                       # Release demo inputs and commands
-├── src/pisces/
-│   ├── __init__.py
-│   ├── unified_evaluator.py       # Main unified evaluation entry point
-│   ├── cli.py                     # Interactive CLI
-│   ├── dag_comparator.py          # Batch comparison reports
-│   ├── diagnostics.py             # Environment readiness checks
-│   ├── base_evaluator.py          # Core types (Orchestrator, Severity, Issue)
-│   ├── subprocess_json_runner.py  # Subprocess management for venvs
-│   ├── knowledge_pack.py          # Version-aware capability resolution
-│   ├── knowledge_packs/
-│   │   └── default_pack_v1.json   # Bundled knowledge pack
-│   └── energy/
-│       ├── __init__.py
-│       ├── carbon_tracker.py      # CodeCarbon wrapper
-│       ├── runtime_evaluation.py  # Main energy evaluation engine
-│       ├── runtime_runner_cli.py  # Subprocess workload runner
-│       ├── import_runner_cli.py   # Import/build carbon runner
-│       ├── data_strategies.py     # No-data runtime strategies
-│       ├── adapters/              # Native Airflow/Prefect/Dagster adapters
-│       ├── structural_energy_analyzer.py  # Static code structure analysis (Python)
-│       ├── structural_yaml_analyzer.py    # Static manifest analysis (Argo, Kestra)
-│       ├── design_rules.py                # Eco-design heuristic rule engine
-│       └── zero_fill.py                   # AST-powered trivial data generator (no LLM)
-└── tests/
-    ├── __init__.py
-    └── test_runtime_evaluation.py
+CLI ---------------------------> Python evaluator -> canonical JSON
+Browser -> frontend -> HTTP API -> SQLite queue -> trusted worker
+                                                    |
+                                       disposable evaluation container
+                                                    |
+                                    canonical JSON -> report/campaign views
 ```
 
-## Concepts
-
-### Energy Evaluation Modes
-
-```
- ┌────────────┐   no deps   ┌──────────┐   needs data   ┌──────────┐   needs LLM   ┌───────────┐
- │fuzz_fill   │────────────▶│zero_fill │───────────────▶│synthetic │──────────────▶│ heuristic │
- │ AST-infer  │             │ AST-infer│                │ LLM-gen  │               │  static   │
- │ non-zero   │             │ all zero │                │   data   │               │  rules    │
- └────────────┘             └──────────┘                └──────────┘               └───────────┘
-      ↓                          ↓                          ↓                          ↓
- executes code             executes code              executes code                no runtime
- no LLM needed             needs data files           needs API key               always works
-```
-
-- **`auto`** — Uses sample data first if supplied; otherwise cascades through fuzz_fill → zero_fill → synthetic → heuristic
-- **`zero_fill`** — AST-powered trivial data (all zeros/empty strings). Exercises real code paths for baseline measurement. **No LLM, no data files needed.**
-- **`fuzz_fill`** — AST-powered deterministic non-zero data. Exercises more branches than zero-fill. **No LLM, no data files needed.**
-- **`scale_probe`** — Runs deterministic generated workloads at multiple row counts to estimate runtime growth trends.
-- **`operator_profile`** — Uses static operator-tier signals to scale a bounded representative workload.
-- **`sample`** — Uses provided CSV/JSON/JSONL data to exercise the workflow
-- **`synthetic`** — Uses an LLM to generate representative synthetic test data
-- **`heuristic`** — Static eco-design rules only (no runtime measurement needed)
-
-Sample mode persists only privacy-preserving metadata in reports: file hashes, row counts,
-column-name hashes, type counts, mapping summaries, and validation status. Raw sample rows and
-raw cell values are passed only to the bounded runtime subprocess and are not written into the
-PISCES report.
-
-### Execution Adapters
-
-- **`representative`** — Bounded synthetic workload (safe, no orchestrator import required)
-- **`native`** — Loads and executes supported workflow objects through a guarded local adapter
-- **`auto`** — Tries native first, falls back to representative
-
-Native execution is intentionally conservative. PISCES runs native adapters under a safety guard
-that blocks network calls, subprocess creation, and file writes by default. Effectful tasks are
-reported as skipped rather than allowed to mutate local or external systems. Native reports include
-`native_tasks_executed`, `native_tasks_skipped`, per-task status, and the active safety policy.
-
-### Carbon Scale Factor
-
-Amplifies measured carbon values to estimate the impact of repeated execution. For example, `--carbon-scale-factor 50` would multiply the per-run emissions by 50 — useful when a DAG runs thousands of times.
-
-## Troubleshooting
-
-### macOS Password Prompt (`Password:`)
-
-When running with `--track-carbon` on Apple Silicon Macs, PISCES may trigger a
-system `Password:` prompt. This comes from CodeCarbon's powermetrics capability
-check, which runs `sudo powermetrics` to detect Apple hardware power metrics.
-
-**PISCES disables this check by default** via the `PISCES_SKIP_POWERMETRICS`
-environment variable (defaults to `1`). CodeCarbon falls back to TDP-based
-estimation, which requires no elevated privileges.
-
-If you need hardware-level power metrics, configure passwordless sudo for
-powermetrics (see [CodeCarbon docs](https://docs.codecarbon.io/latest/explanation/methodology/#power-usage))
-and then re-enable the check:
+The evaluator owns report semantics and admission; React/TypeScript renders
+Python-owned view schemas. API and worker are separate processes/images. The
+frontend has no evaluator logic and accepts neither arbitrary Docker flags nor
+server filesystem paths. See [service architecture](docs/EXECUTION_SERVICE.md),
+[workspace development](docs/FRONTEND_WORKSPACE.md) and the
+[documentation index](docs/README.md).
 
 ```bash
-PISCES_SKIP_POWERMETRICS=0 pisces-unified ... --track-carbon
+# Python unit/contract tests; native integration tests are opt-in.
+python -m pytest -q
+python scripts/export_reference_docs.py --check
+
+# Frontend: Node 22.12+; use the version in frontend/.nvmrc.
+cd frontend
+npm ci
+npm test
+npm run build
+npm run test:e2e
 ```
 
-## Development
+Live execution browser tests need a disposable Compose stack and the explicit
+test credentials described in [the testing guide](docs/EXECUTION_SERVICE.md#development-and-tests).
+Never use its deliberately public token for production.
 
-```bash
-# Clone and install in editable mode with dev dependencies
-pip install -e ".[dev,energy,cli]"
+Generated run reports, diagnostics, databases, caches, secrets and build outputs
+are ignored by Git. Curated examples, golden reports, schemas, source fixtures,
+the [editable logo and screenshots](assets/README.md) remain versioned. Do not
+add private datasets or credentials to a report fixture.
 
-# Run tests
-pytest tests/
+## License
 
-# Run a single test
-pytest tests/test_runtime_evaluation.py -v
-
-# Run the release demo end to end
-python -m pisces.diagnostics test_scripts/airflow/simple_etl.py --out demo/output/readiness.json
-python -m pisces.unified_evaluator test_scripts/airflow/simple_etl.py \
-  --enable-energy-eval \
-  --energy-mode sample \
-  --energy-sample-path demo/input/weather_observations.csv \
-  --energy-sample-map-file demo/input/sample_schema_map.json \
-  --estimate-scenario-file demo/input/scenario_daily.json \
-  --out-dir demo/output
-```
-
-## Citation
-
-If you use PISCES in your research, please cite it as:
-
-```
-@software{pisces2026,
-  author = {Abubakari, Alidu},
-  title  = {PISCES: Pipeline Intelligent Sustainability & Carbon Evaluation Suite},
-  year   = {2026},
-  url    = {https://github.com/aliduabubakari/pisces}
-}
-```
+[MIT](LICENSE). This is a research tool: validate its assumptions against your
+workload and environment before using its results to support an optimization or
+carbon claim.

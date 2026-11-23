@@ -1,0 +1,4 @@
+services:
+  api:
+    ports: ["${PISCES_API_BIND_ADDRESS:-127.0.0.1}:${PISCES_API_PORT:-8001}:8000"]
+    networks: [application, ingress]

@@ -8,6 +8,19 @@ from pisces.energy.data_strategies import (
     ScaleProbeStrategy,
     ZeroFillStrategy,
 )
+from pisces.energy.zero_fill import generate_zero_fill_dataset
+
+
+def test_zero_fill_handles_invalid_python_without_internal_key_error() -> None:
+    result = generate_zero_fill_dataset(
+        code_text="def broken(:\n",
+        max_rows=2,
+        orchestrator="airflow",
+    )
+
+    provenance = result["provenance"][0]
+    assert provenance["table_refs_detected"] == []
+    assert provenance["task_ids_detected"] == []
 
 
 def _workflow_text() -> str:

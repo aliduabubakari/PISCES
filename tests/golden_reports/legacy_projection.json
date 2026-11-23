@@ -1,0 +1,18 @@
+{
+  "tool": "pisces-unified",
+  "report_schema_version": "1.2.0",
+  "workflow": {"name": "archived_sample", "orchestrator": "airflow"},
+  "energy": {
+    "mode_used": "sample",
+    "data_source": "sample",
+    "evidence": {"measurement_kind": "surrogate_benchmark", "confidence": "low"},
+    "measurements": {
+      "estimate": {
+        "status": "ok",
+        "measurement_kind": "calibrated_estimate",
+        "scenario_hash": "historical",
+        "yearly": {"emissions_kgco2eq": 1.25}
+      }
+    }
+  }
+}

@@ -23,6 +23,7 @@ class NativeSafetyPolicy:
     block_network: bool = True
     block_subprocess: bool = True
     block_file_writes: bool = True
+    allowed_write_roots: List[str] = field(default_factory=list)
 
 
 @dataclass
@@ -95,10 +96,40 @@ def _blocked_operation(name: str, blocked: List[Dict[str, Any]]):
     return _raise
 
 
-def _safe_open(original_open, blocked: List[Dict[str, Any]]):
+def _is_allowed_write(path: Any, allowed_roots: List[str]) -> bool:
+    try:
+        candidate = Path(path).expanduser().resolve()
+    except (OSError, TypeError, ValueError):
+        return False
+    for raw_root in allowed_roots:
+        try:
+            root = Path(raw_root).expanduser().resolve()
+        except (OSError, TypeError, ValueError):
+            continue
+        if candidate == root or root in candidate.parents:
+            return True
+    return False
+
+
+def _safe_open(
+    original_open,
+    blocked: List[Dict[str, Any]],
+    accessed: List[Dict[str, Any]],
+    allowed_roots: List[str],
+):
     def _open(file, mode="r", *args: Any, **kwargs: Any) -> Any:
         mode_s = str(mode or "r")
-        if any(flag in mode_s for flag in ("w", "a", "x", "+")):
+        accessed.append(
+            {
+                "operation": "file_open",
+                "path": str(file),
+                "mode": mode_s,
+            }
+        )
+        if (
+            any(flag in mode_s for flag in ("w", "a", "x", "+"))
+            and not _is_allowed_write(file, allowed_roots)
+        ):
             blocked.append({"operation": "file_write", "path": str(file), "mode": mode_s})
             raise NativeAdapterError("native_safety_blocked:file_write")
         return original_open(file, mode, *args, **kwargs)
@@ -106,10 +137,25 @@ def _safe_open(original_open, blocked: List[Dict[str, Any]]):
     return _open
 
 
-def _safe_path_open(original_path_open, blocked: List[Dict[str, Any]]):
+def _safe_path_open(
+    original_path_open,
+    blocked: List[Dict[str, Any]],
+    accessed: List[Dict[str, Any]],
+    allowed_roots: List[str],
+):
     def _path_open(self, mode="r", *args: Any, **kwargs: Any) -> Any:
         mode_s = str(mode or "r")
-        if any(flag in mode_s for flag in ("w", "a", "x", "+")):
+        accessed.append(
+            {
+                "operation": "path_open",
+                "path": str(self),
+                "mode": mode_s,
+            }
+        )
+        if (
+            any(flag in mode_s for flag in ("w", "a", "x", "+"))
+            and not _is_allowed_write(self, allowed_roots)
+        ):
             blocked.append({"operation": "file_write", "path": str(self), "mode": mode_s})
             raise NativeAdapterError("native_safety_blocked:file_write")
         return original_path_open(self, mode, *args, **kwargs)
@@ -120,14 +166,17 @@ def _safe_path_open(original_path_open, blocked: List[Dict[str, Any]]):
 @contextlib.contextmanager
 def native_safety_guard(policy: NativeSafetyPolicy) -> Iterator[Dict[str, Any]]:
     blocked: List[Dict[str, Any]] = []
+    accessed: List[Dict[str, Any]] = []
     if not policy.enabled:
         yield {
             "enabled": False,
             "blocked_operations": blocked,
+            "accessed_operations": accessed,
             "policy": policy.__dict__,
         }
         return
 
+    allowed_write_roots = [str(value) for value in policy.allowed_write_roots]
     original_open = builtins.open
     original_path_open = pathlib.Path.open
     original_create_connection = socket.create_connection
@@ -143,8 +192,18 @@ def native_safety_guard(policy: NativeSafetyPolicy) -> Iterator[Dict[str, Any]]:
 
     try:
         if policy.block_file_writes:
-            builtins.open = _safe_open(original_open, blocked)  # type: ignore[assignment]
-            pathlib.Path.open = _safe_path_open(original_path_open, blocked)  # type: ignore[assignment]
+            builtins.open = _safe_open(  # type: ignore[assignment]
+                original_open,
+                blocked,
+                accessed,
+                allowed_write_roots,
+            )
+            pathlib.Path.open = _safe_path_open(  # type: ignore[assignment]
+                original_path_open,
+                blocked,
+                accessed,
+                allowed_write_roots,
+            )
         if policy.block_network:
             socket.create_connection = _blocked_operation("network", blocked)  # type: ignore[assignment]
             socket.socket.connect = _blocked_operation("network", blocked)  # type: ignore[assignment]
@@ -169,6 +228,7 @@ def native_safety_guard(policy: NativeSafetyPolicy) -> Iterator[Dict[str, Any]]:
         yield {
             "enabled": True,
             "blocked_operations": blocked,
+            "accessed_operations": accessed,
             "policy": policy.__dict__,
         }
     finally:
@@ -220,6 +280,7 @@ def import_safety_policy(policy: NativeSafetyPolicy) -> NativeSafetyPolicy:
         block_network=policy.block_network,
         block_subprocess=policy.block_subprocess,
         block_file_writes=False,
+        allowed_write_roots=list(policy.allowed_write_roots),
     )
 
 
@@ -237,6 +298,10 @@ def combine_safety(
         "blocked_operations": (
             list(import_safety.get("blocked_operations") or [])
             + list(execution_safety.get("blocked_operations") or [])
+        ),
+        "accessed_operations": (
+            list(import_safety.get("accessed_operations") or [])
+            + list(execution_safety.get("accessed_operations") or [])
         ),
         "phases": {
             "import": import_safety,

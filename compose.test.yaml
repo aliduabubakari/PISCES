@@ -1,0 +1,25 @@
+services:
+  api:
+    image: pisces-api:${PISCES_IMAGE_TAG:-test}
+  worker:
+    image: pisces-worker:${PISCES_IMAGE_TAG:-test}
+    environment:
+      PISCES_DEFAULT_EXECUTOR_IMAGE: pisces-executor:${PISCES_IMAGE_TAG:-test}
+  executor-image:
+    image: pisces-executor:${PISCES_IMAGE_TAG:-test}
+  frontend:
+    image: pisces-frontend:${PISCES_IMAGE_TAG:-test}
+  tests:
+    build: {context: ., dockerfile: containers/service/Dockerfile, target: test}
+    environment:
+      PISCES_TEST_API_ORIGIN: http://api:8000
+      PISCES_TEST_API_TOKEN_FILE: /run/secrets/api_token
+    secrets: [api_token]
+    depends_on:
+      api: {condition: service_healthy}
+      worker: {condition: service_healthy}
+    command: [python, scripts/compose_smoke.py]
+    networks: [application]
+secrets:
+  api_token:
+    file: containers/service/test-token.txt

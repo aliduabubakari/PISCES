@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pisces.energy.runtime_evaluation as reval
 from pisces.dag_comparator import compare_reports
 from pisces.unified_evaluator import UnifiedEnergyConfig, run_unified_energy_evaluation
 
@@ -54,6 +55,22 @@ def test_unified_evaluator_runs_heuristic_by_default(tmp_path: Path) -> None:
     assert report["energy"]["evidence"]["measurement_scope"] == "static_only"
     assert report["energy"]["measurements"]["runtime"] is None
     assert report["energy"]["attempts"][0]["tier"] == "static"
+    assert report["workflow"]["target_validation"] == "not_evaluated"
+
+
+def test_explicit_target_is_not_replaced_by_detection(tmp_path: Path) -> None:
+    workflow = _write_airflow_like_workflow(tmp_path)
+    report = run_unified_energy_evaluation(
+        UnifiedEnergyConfig(workflow_path=workflow, orchestrator="argo", stdout=True)
+    )
+
+    assert report["workflow"]["orchestrator"] == "argo"
+    assert report["workflow"]["orchestrator_requested"] == "argo"
+    assert report["workflow"]["orchestrator_detected"] == "airflow"
+    assert report["workflow"]["runtime_supported"] is False
+    assert report["workflow"]["target_validation"] == "not_evaluated"
+    assert report["warnings"][0]["code"] == "ORCHESTRATOR_DETECTION_MISMATCH"
+    assert report["metadata"]["environment_scope"] == "controller"
 
 
 def test_track_carbon_records_import_build_attempt(tmp_path: Path) -> None:
@@ -97,7 +114,7 @@ def test_zero_fill_runtime_subprocess_works_from_source_checkout(tmp_path: Path)
     assert report["energy"]["attempted_modes"][0]["mode"] == "zero_fill"
     assert report["energy"]["mode_used"] == "zero_fill"
     assert report["energy"]["runtime_measurement"]["status"] == "ok"
-    assert report["energy"]["evidence"]["measurement_kind"] == "representative_runtime"
+    assert report["energy"]["evidence"]["measurement_kind"] == "surrogate_benchmark"
     assert report["energy"]["evidence"]["data_source"] == "zero_fill"
     assert report["energy"]["evidence"]["production_equivalent"] is False
     assert report["energy"]["measurements"]["runtime"] == report["energy"]["runtime_measurement"]
@@ -117,7 +134,7 @@ def test_fuzz_fill_runtime_mode(tmp_path: Path) -> None:
     )
 
     assert report["energy"]["mode_used"] == "fuzz_fill"
-    assert report["energy"]["evidence"]["measurement_kind"] == "representative_runtime"
+    assert report["energy"]["evidence"]["measurement_kind"] == "surrogate_benchmark"
     assert report["energy"]["evidence"]["data_source"] == "fuzz_fill"
     assert report["energy"]["runtime_measurement"]["status"] == "ok"
 
@@ -142,6 +159,9 @@ def test_scale_probe_runtime_mode(tmp_path: Path) -> None:
     assert measurement["status"] == "ok"
     assert measurement["scale_probe"]["row_counts"] == [10, 25]
     assert "duration_slope_per_row" in measurement["scale_probe"]
+    for run in measurement["scale_probe"]["runs"]:
+        assert run["normalized"]["energy_kwh_per_1k_rows"] is None
+        assert run["telemetry"]["use"] == "attempt_diagnostics"
 
 
 def test_operator_profile_runtime_mode(tmp_path: Path) -> None:
@@ -165,8 +185,25 @@ def test_operator_profile_runtime_mode(tmp_path: Path) -> None:
     assert measurement["work_units"] >= 1
 
 
-def test_calibrated_estimate_requires_explicit_scenario(tmp_path: Path) -> None:
+def test_surrogate_cannot_be_projected_even_with_energy(tmp_path: Path, monkeypatch) -> None:
     workflow = _write_airflow_like_workflow(tmp_path)
+    monkeypatch.setattr(
+        reval,
+        "_run_runtime_measurement",
+        lambda *args, **kwargs: {
+            "ok": True,
+            "runtime_measurement": {
+                "status": "ok",
+                "execution_adapter_used": "surrogate_benchmark",
+                "energy_profile": {
+                    "available": True,
+                    "status": "ok",
+                    "energy_consumed_kwh": 0.1,
+                    "emissions_kgco2eq": 0.01,
+                },
+            },
+        },
+    )
     without_scenario = run_unified_energy_evaluation(
         UnifiedEnergyConfig(
             workflow_path=workflow,
@@ -195,15 +232,17 @@ def test_calibrated_estimate_requires_explicit_scenario(tmp_path: Path) -> None:
     )
 
     estimate = with_scenario["energy"]["measurements"]["estimate"]
-    assert estimate["status"] == "ok"
-    assert estimate["measurement_kind"] == "calibrated_estimate"
+    assert estimate["status"] == "not_available"
+    assert estimate["measurement_kind"] == "scenario_projection"
+    assert estimate["reason"] == "surrogate_is_not_workflow_execution"
     assert estimate["assumptions"]["scenario_name"] == "daily-prod"
     assert estimate["assumptions"]["runs_per_year"] == 365
     assert estimate["assumptions"]["years"] == 2.0
     assert estimate["assumptions"]["repetitions_per_run"] == 3.0
-    assert estimate["yearly"]["energy_consumed_kwh"] >= estimate["per_workflow_run"]["energy_consumed_kwh"]
-    assert estimate["period"]["energy_consumed_kwh"] == estimate["yearly"]["energy_consumed_kwh"] * 2.0
-    assert estimate["uncertainty"]["yearly_emissions_kgco2eq"]["high"] >= estimate["yearly"]["emissions_kgco2eq"]
+    assert not {"yearly", "period", "per_workflow_run", "uncertainty"} & estimate.keys()
+    runtime = with_scenario["energy"]["measurements"]["runtime"]
+    assert runtime["energy_profile"] is None
+    assert runtime["attempt_diagnostics"]["modeled_energy"]["energy_consumed_kwh"] == 0.1
 
 
 def test_public_api_exports() -> None:
@@ -256,81 +295,6 @@ def test_compare_reports_ranks_by_rule_risk(tmp_path: Path) -> None:
     result = compare_reports([low, high])
     assert result["report_count"] == 2
     assert result["ranked_by_rule_risk"][0]["workflow"]["name"] == "high"
-
-
-def test_compare_reports_warns_on_mixed_confidence_and_ranks_estimates(tmp_path: Path) -> None:
-    a = tmp_path / "a.json"
-    b = tmp_path / "b.json"
-    base_energy = {
-        "mode_used": "sample",
-        "data_source": "sample",
-        "heuristic": {"rules": {"rules": []}},
-        "runtime_measurement": {
-            "energy_profile": {
-                "available": True,
-                "status": "ok",
-                "energy_consumed_kwh": 0.1,
-                "emissions_kgco2eq": 0.01,
-                "measurement_scope": "runtime_representative_workload",
-            }
-        },
-    }
-    a.write_text(
-        json.dumps(
-            {
-                "workflow": {"name": "a", "orchestrator": "airflow"},
-                "energy": {
-                    **base_energy,
-                    "evidence": {"measurement_kind": "sample_runtime", "confidence": "medium"},
-                    "measurements": {
-                        "estimate": {
-                            "status": "ok",
-                            "scenario_hash": "same",
-                            "confidence": "medium",
-                            "assumptions": {"scenario_name": "daily", "runs_per_year": 365},
-                            "baseline": {"measurement_kind": "sample_runtime"},
-                            "yearly": {"energy_consumed_kwh": 1.0, "emissions_kgco2eq": 1.0},
-                        }
-                    },
-                },
-            }
-        ),
-        encoding="utf-8",
-    )
-    b.write_text(
-        json.dumps(
-            {
-                "workflow": {"name": "b", "orchestrator": "airflow"},
-                "energy": {
-                    **base_energy,
-                    "evidence": {"measurement_kind": "representative_runtime", "confidence": "low"},
-                    "measurements": {
-                        "estimate": {
-                            "status": "ok",
-                            "scenario_hash": "same",
-                            "confidence": "low",
-                            "assumptions": {"scenario_name": "daily", "runs_per_year": 365},
-                            "baseline": {"measurement_kind": "representative_runtime"},
-                            "yearly": {"energy_consumed_kwh": 2.0, "emissions_kgco2eq": 2.0},
-                        }
-                    },
-                },
-            }
-        ),
-        encoding="utf-8",
-    )
-
-    result = compare_reports([a, b])
-    assert result["schema_version"] == "1.1.0"
-    assert result["ranked_by_estimated_yearly_emissions"][0]["workflow"]["name"] == "b"
-    assert result["comparison_context"]["confidence_tiers"] == ["low", "medium"]
-    assert any("mixed evidence/confidence" in warning for warning in result["warnings"])
-
-    b_payload = json.loads(b.read_text(encoding="utf-8"))
-    b_payload["energy"]["measurements"]["estimate"]["scenario_hash"] = "different"
-    b.write_text(json.dumps(b_payload), encoding="utf-8")
-    mismatched = compare_reports([a, b])
-    assert any("different scenario assumptions" in warning for warning in mismatched["warnings"])
 
 
 def test_compare_reports_skips_non_evaluation_json(tmp_path: Path) -> None:

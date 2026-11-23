@@ -387,7 +387,7 @@ def detect_orchestrator_version(
     if not package:
         return None
 
-    if python_exe is None or Path(python_exe).resolve() == Path(sys.executable).resolve():
+    if python_exe is None or Path(python_exe).expanduser().absolute() == Path(sys.executable).absolute():
         if importlib_metadata is None:
             return None
         try:
@@ -405,14 +405,14 @@ def detect_orchestrator_version(
     )
     try:
         proc = subprocess.run(
-            [str(python_exe), "-c", code],
+            [str(Path(python_exe).expanduser().absolute()), "-c", code],
             capture_output=True,
             text=True,
             check=False,
             timeout=int(timeout_s),
         )
         out = (proc.stdout or "").strip()
-        return out or None
+        return (out or None) if proc.returncode == 0 else None
     except Exception:
         return None
 

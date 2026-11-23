@@ -193,7 +193,14 @@ def _find_sidecar(code_file: Path, *, base_names: List[str]) -> Optional[Path]:
     return None
 
 
-def _load_sidecar(code_file: Path, *, kind: str, explicit_path: Optional[Path], base_names: List[str]) -> Tuple[Optional[Dict[str, Any]], Dict[str, Any]]:
+def _load_sidecar(
+    code_file: Path,
+    *,
+    kind: str,
+    explicit_path: Optional[Path],
+    base_names: List[str],
+    discover: bool = True,
+) -> Tuple[Optional[Dict[str, Any]], Dict[str, Any]]:
     meta: Dict[str, Any] = {
         f"{kind}_found": False,
         f"{kind}_loaded": False,
@@ -203,7 +210,9 @@ def _load_sidecar(code_file: Path, *, kind: str, explicit_path: Optional[Path], 
         "error": None,
     }
 
-    path = explicit_path or _find_sidecar(code_file, base_names=base_names)
+    path = explicit_path
+    if path is None and discover:
+        path = _find_sidecar(code_file, base_names=base_names)
     if path is None:
         return None, meta
 
@@ -266,6 +275,20 @@ def _flatten_task_ref(node: ast.AST) -> List[str]:
     return [n] if n else []
 
 
+def _shift_entry_refs(node: ast.AST, op_type: type[ast.operator]) -> List[str]:
+    """Return the first task references in a nested ``>>``/``<<`` expression."""
+    if isinstance(node, ast.BinOp) and isinstance(node.op, op_type):
+        return _shift_entry_refs(node.left, op_type)
+    return _flatten_task_ref(node)
+
+
+def _shift_exit_refs(node: ast.AST, op_type: type[ast.operator]) -> List[str]:
+    """Return the last task references in a nested ``>>``/``<<`` expression."""
+    if isinstance(node, ast.BinOp) and isinstance(node.op, op_type):
+        return _shift_exit_refs(node.right, op_type)
+    return _flatten_task_ref(node)
+
+
 def _call_func_name(call: ast.Call) -> str:
     fn = call.func
     if isinstance(fn, ast.Name):
@@ -310,6 +333,7 @@ class StructuralEnergyAnalyzer:
         orchestrator: Optional[str] = None,
         opos_path: Optional[Path] = None,
         pipespec_path: Optional[Path] = None,
+        discover_sidecars: bool = True,
         min_edge_confidence_for_metrics: float = 0.70,
         min_edge_confidence_for_mismatch: float = 0.85,
     ) -> Dict[str, Any]:
@@ -329,11 +353,13 @@ class StructuralEnergyAnalyzer:
 
         opos_payload, opos_meta = _load_sidecar(
             code_file, kind="opos", explicit_path=opos_path,
-            base_names=["opos", "intermediate_opos"]
+            base_names=["opos", "intermediate_opos"],
+            discover=discover_sidecars,
         )
         pipespec_payload, pipespec_meta = _load_sidecar(
             code_file, kind="pipespec", explicit_path=pipespec_path,
-            base_names=["pipespec", "intermediate_pipespec"]
+            base_names=["pipespec", "intermediate_pipespec"],
+            discover=discover_sidecars,
         )
 
         opos_tasks, opos_edges = self._extract_opos_graph(opos_payload)
@@ -455,8 +481,18 @@ class StructuralEnergyAnalyzer:
         )
         code_edge_records = self._canonicalize_edge_pairs(code_edge_records, alias_map)
 
-        payload["edges"]["opos_edges"] = [{"from": e.src, "to": e.dst} for e in sorted({(e.src, e.dst) for e in opos_edge_records})]
-        payload["edges"]["pipespec_edges"] = [{"from": e.src, "to": e.dst} for e in sorted({(e.src, e.dst) for e in pipespec_edge_records})]
+        payload["edges"]["opos_edges"] = [
+            {"from": src, "to": dst}
+            for src, dst in sorted(
+                {(edge.src, edge.dst) for edge in opos_edge_records}
+            )
+        ]
+        payload["edges"]["pipespec_edges"] = [
+            {"from": src, "to": dst}
+            for src, dst in sorted(
+                {(edge.src, edge.dst) for edge in pipespec_edge_records}
+            )
+        ]
         payload["edges"]["code_edges"] = [
             {"from": e.src, "to": e.dst, "source": e.source, "confidence": round(float(e.confidence), 3)}
             for e in sorted(set(code_edge_records), key=lambda x: (x.src, x.dst, x.source))
@@ -829,8 +865,14 @@ class StructuralEnergyAnalyzer:
         # >> and <<
         for node in ast.walk(tree):
             if isinstance(node, ast.BinOp) and isinstance(node.op, (ast.RShift, ast.LShift)):
-                left = _flatten_task_ref(node.left)
-                right = _flatten_task_ref(node.right)
+                # Python parses ``a >> b >> c`` as nested BinOps. Looking up the
+                # immediate left operand therefore loses all but the innermost
+                # edge because a BinOp is not a task reference. Use the boundary
+                # tasks of each nested expression; ast.walk will visit every
+                # BinOp and reconstruct the complete chain.
+                op_type = type(node.op)
+                left = _shift_exit_refs(node.left, op_type)
+                right = _shift_entry_refs(node.right, op_type)
                 if not left or not right:
                     continue
                 if isinstance(node.op, ast.RShift):

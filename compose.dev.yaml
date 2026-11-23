@@ -1,0 +1,26 @@
+services:
+  api:
+    image: pisces-api:${PISCES_IMAGE_TAG:-dev}
+    environment: {PYTHONPATH: /opt/pisces/src}
+    command: [python, -m, uvicorn, 'pisces.web:create_app', --factory, --host, 0.0.0.0, --port, '8000', --reload, --no-access-log]
+    volumes:
+      - ./src:/opt/pisces/src:ro
+  worker:
+    image: pisces-worker:${PISCES_IMAGE_TAG:-dev}
+    environment:
+      PYTHONPATH: /opt/pisces/src
+      PISCES_DEFAULT_EXECUTOR_IMAGE: pisces-executor:${PISCES_IMAGE_TAG:-dev}
+    volumes:
+      - ./src:/opt/pisces/src:ro
+  frontend:
+    image: pisces-frontend:${PISCES_IMAGE_TAG:-dev}
+    build: {target: development}
+    environment: {PISCES_API_PROXY: 'http://api:8000'}
+    volumes:
+      - ./frontend/src:/app/frontend/src:ro
+      - ./src/pisces/schemas:/app/src/pisces/schemas:ro
+      - ./assets/brand:/app/assets/brand:ro
+    read_only: false
+    mem_limit: 768m
+  executor-image:
+    image: pisces-executor:${PISCES_IMAGE_TAG:-dev}

@@ -1,0 +1,201 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PISCES unified report 1.4.0",
+  "type": "object",
+  "required": ["tool", "report_schema_version", "timestamp", "workflow", "metadata", "energy_evaluation", "carbon_tracking"],
+  "anyOf": [{"required": ["energy"]}, {"required": ["errors"], "properties": {"errors": {"minItems": 1}}}],
+  "properties": {
+    "tool": {"const": "pisces-unified"},
+    "report_schema_version": {"const": "1.4.0"},
+    "timestamp": {"type": "string", "format": "date-time"},
+    "workflow": {
+      "type": "object",
+      "required": ["name", "orchestrator", "orchestrator_requested", "orchestrator_detected", "runtime_supported", "target_validation"],
+      "properties": {
+        "name": {"type": "string"},
+        "path": {"type": "string"},
+        "orchestrator": {"type": "string"},
+        "orchestrator_requested": {"type": "string"},
+        "orchestrator_detected": {"type": "string"},
+        "runtime_supported": {"type": "boolean"},
+        "target_validation": {"const": "not_evaluated"}
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "required": ["artifact_sha256", "environment_scope"],
+      "properties": {
+        "artifact_sha256": {"type": ["string", "null"], "pattern": "^[a-f0-9]{64}$"},
+        "environment_scope": {"const": "controller"}
+      }
+    },
+    "energy_evaluation": {
+      "type": "object",
+      "required": ["enabled", "mode_requested"],
+      "properties": {"enabled": {"type": "boolean"}, "mode_requested": {"type": "string"}}
+    },
+    "carbon_tracking": {
+      "type": "object",
+      "required": ["enabled", "scale_factor"],
+      "properties": {"enabled": {"type": "boolean"}, "scale_factor": {"type": "number"}}
+    },
+    "errors": {"type": "array", "items": {"type": "object"}},
+    "energy": {
+      "type": "object",
+      "required": ["schema_version", "mode_used", "data_source", "evidence", "measurements", "heuristic"],
+      "properties": {
+        "schema_version": {"const": "1.4.0"},
+        "mode_used": {"type": "string"},
+        "data_source": {"type": "string"},
+        "evidence": {
+          "type": "object",
+          "required": ["measurement_kind", "confidence", "production_equivalent"],
+          "properties": {
+            "measurement_kind": {"enum": ["static", "import_build", "surrogate_benchmark", "native_runtime", "sample_runtime", "runtime_attempt"]},
+            "confidence": {"enum": ["low", "medium"]},
+            "production_equivalent": {"const": false}
+          }
+        },
+        "heuristic": {
+          "type": "object",
+          "required": ["rules"],
+          "properties": {"rules": {
+            "type": "object", "required": ["rules"],
+            "properties": {"rules": {"type": "array", "items": {"type": "object"}}}
+          }}
+        },
+        "runtime_measurement": {"$ref": "#/$defs/runtime"},
+        "import_build_measurement": {"$ref": "#/$defs/observation"},
+        "measurements": {
+          "type": "object",
+          "required": ["import_build", "runtime", "estimate"],
+          "properties": {
+            "import_build": {"$ref": "#/$defs/observation"},
+            "runtime": {"$ref": "#/$defs/runtime"},
+            "estimate": {
+              "type": ["object", "null"],
+              "required": ["status", "measurement_kind", "reason"],
+              "properties": {
+                "status": {"const": "not_available"},
+                "measurement_kind": {"const": "scenario_projection"},
+                "reason": {"type": "string"},
+                "yearly": false, "period": false, "per_workflow_run": false, "per_measured_run": false, "uncertainty": false
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "metric": {"type": ["number", "null"], "minimum": 0},
+    "energyProfile": {
+      "type": ["object", "null"],
+      "properties": {
+        "energy_consumed_kwh": {"$ref": "#/$defs/metric"},
+        "emissions_kgco2eq": {"$ref": "#/$defs/metric"},
+        "scaled_estimate": {"$ref": "#/$defs/energyProfile"}
+      }
+    },
+    "operationalMetrics": {
+      "type": ["object", "null"],
+      "properties": {
+        "wall_clock_s": {"$ref": "#/$defs/metric"},
+        "process_cpu_s": {"$ref": "#/$defs/metric"},
+        "peak_rss_mb": {"$ref": "#/$defs/metric"}
+      }
+    },
+    "observation": {
+      "type": ["object", "null"],
+      "properties": {
+        "energy_profile": {"$ref": "#/$defs/energyProfile"},
+        "modeled_energy": {"$ref": "#/$defs/energyProfile"},
+        "operational_metrics": {"$ref": "#/$defs/operationalMetrics"},
+        "attempt_diagnostics": {"$ref": "#/$defs/observation"}
+      }
+    },
+    "telemetryStatus": {"enum": ["not_collected", "unavailable", "partial", "available", "invalid", "failed"]},
+    "runtime": {
+      "$ref": "#/$defs/observation",
+      "required": ["status", "execution_outcome", "execution_adapter_requested", "execution_adapter_used", "contract_validation", "pairwise_equivalence", "telemetry", "normalized", "eligible_for_resource_comparison"],
+      "properties": {
+        "status": {"enum": ["ok", "failed"]},
+        "execution_outcome": {"enum": ["completed", "partial", "zero_work", "failed", "surrogate", "mixed_execution", "preflight_rejected", "contract_invalid", "known_ineligible", "environment_setup_failed", "warmup_failed", "runner_failed", "timed_out", "container_oom_killed", "container_exit_failed", "container_worker_failed", "container_state_unverified"]},
+        "execution_adapter_requested": {"type": ["string", "null"]},
+        "execution_adapter_used": {"type": ["string", "null"]},
+        "eligible_for_resource_comparison": {"const": false},
+        "engine_evidence": {
+          "type": "object",
+          "required": ["target", "version", "interface", "run_state", "task_states", "source", "control_plane", "setup_in_execution_window"],
+          "properties": {
+            "target": {"enum": ["prefect", "dagster"]},
+            "version": {"type": "string"}, "interface": {"type": "string"}, "run_state": {"type": "string"},
+            "source": {"enum": ["local_api_task_run_states", "dagster_step_events"]},
+            "control_plane": {"type": "string"}, "setup_in_execution_window": {"const": true},
+            "task_states": {"type": "array", "items": {
+              "type": "object", "required": ["task_id", "state", "status"],
+              "properties": {"task_id": {"type": "string"}, "state": {"type": "string"},
+                             "status": {"enum": ["executed", "failed", "skipped"]}}
+            }}
+          }
+        },
+        "container_telemetry_missing_reason": {"type": ["string", "null"]},
+        "container_telemetry": {
+          "type": ["object", "null"],
+          "required": ["scope", "wall_clock_s", "cpu_s", "memory_peak_bytes", "block_read_bytes", "block_write_bytes"],
+          "properties": {
+            "scope": {"const": "container_worker_window_including_descendants_setup_and_validation"},
+            "wall_clock_s": {"$ref": "#/$defs/metric"},
+            "cpu_s": {"$ref": "#/$defs/metric"},
+            "cpu_throttled_usec": {"$ref": "#/$defs/metric"},
+            "memory_peak_bytes": {"$ref": "#/$defs/metric"},
+            "memory_peak_scope": {"const": "container_cgroup_lifetime_including_page_cache"},
+            "block_read_bytes": {"$ref": "#/$defs/metric"},
+            "block_write_bytes": {"$ref": "#/$defs/metric"},
+            "oom_kill_delta": {"$ref": "#/$defs/metric"},
+            "metric_quality": {
+              "type": "object",
+              "required": ["wall_clock_s", "cpu_s", "cpu_throttled_usec", "memory_peak_bytes", "block_read_bytes", "block_write_bytes", "oom_kill_delta"],
+              "additionalProperties": {
+                "type": "object", "required": ["status", "reasons"],
+                "properties": {
+                  "status": {"enum": ["available", "unavailable", "invalid"]},
+                  "reasons": {"type": "object", "additionalProperties": {"type": "string"}}
+                }
+              }
+            }
+          }
+        },
+        "contract_validation": {
+          "type": "object", "required": ["status", "scope"],
+          "properties": {
+            "status": {"enum": ["invalid", "not_requested", "not_verified", "failed", "checks_passed"]},
+            "scope": {"enum": [null, "final_repetition_checks", "single_execution_checks"]}
+          }
+        },
+        "pairwise_equivalence": {
+          "type": "object", "required": ["status", "screening_eligible"],
+          "properties": {"status": {"const": "not_evaluated"}, "screening_eligible": {"type": "boolean"}}
+        },
+        "telemetry": {
+          "type": "object", "required": ["operational", "modeled_energy", "use"],
+          "properties": {
+            "operational": {"$ref": "#/$defs/telemetryStatus"},
+            "container": {"$ref": "#/$defs/telemetryStatus"},
+            "modeled_energy": {"$ref": "#/$defs/telemetryStatus"},
+            "use": {"enum": ["none", "attempt_diagnostics", "workload_screening"]}
+          }
+        },
+        "normalized": {
+          "type": "object", "required": ["status", "reason", "energy_kwh_per_1k_rows", "emissions_kgco2eq_per_1k_rows"],
+          "properties": {
+            "status": {"const": "not_available"},
+            "reason": {"const": "verified_workload_units_unavailable"},
+            "energy_kwh_per_1k_rows": {"type": "null"},
+            "emissions_kgco2eq_per_1k_rows": {"type": "null"}
+          }
+        }
+      }
+    }
+  }
+}

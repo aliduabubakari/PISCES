@@ -174,8 +174,9 @@ def main():
     eval_parser.add_argument(
         "--energy-execution-adapter",
         default="surrogate_benchmark",
-        choices=["surrogate_benchmark", "representative", "native", "auto"],
+        choices=["surrogate_benchmark", "representative", "native", "auto", "oci"],
     )
+    eval_parser.add_argument("--oci-image", help="Local immutable OCI image ID or repository digest")
     eval_parser.add_argument("--energy-minimum-duration-s", type=float, default=0.0)
     eval_parser.add_argument("--energy-minimum-repetitions", type=int, default=1)
     eval_parser.add_argument("--energy-maximum-repetitions", type=int, default=1000)
@@ -203,16 +204,64 @@ def main():
     diag_parser.add_argument("--carbon-country-iso")
     diag_parser.add_argument("--carbon-measure-power-secs", type=int, default=1)
     diag_parser.add_argument("--skip-codecarbon-smoke", action="store_true")
+    diag_parser.add_argument("--oci-image", help="Probe a local immutable OCI image")
     diag_parser.add_argument("--out", type=str)
+
+    view_parser = sub.add_parser("report-view", help="Export a portable read-only report view")
+    view_parser.add_argument("report", type=Path)
+    view_parser.add_argument("--out", type=Path, help="Write a new view bundle; defaults to stdout")
+    campaign_parser = sub.add_parser("campaign-view", help="Export a saved load campaign without executing it")
+    campaign_parser.add_argument("directory", type=Path)
+    campaign_parser.add_argument("--pipeline", default="Load campaign")
+    campaign_parser.add_argument("--out", type=Path, required=True)
+    serve_parser = sub.add_parser("serve-api", aliases=["serve-reports"], help="Serve the PISCES API on loopback")
+    serve_parser.add_argument("--port", type=int, default=8000)
 
     # agent subcommand
     sub.add_parser("agent", help="Interactive guided command builder")
 
     args = parser.parse_args()
 
-    if args.command == "agent":
+    if args.command == "campaign-view":
+        from .report_views import build_view_bundle
+        from .report_views.campaigns import load_campaign_directory
+
+        try:
+            report = load_campaign_directory(args.directory, pipeline=args.pipeline)
+            rendered = json.dumps(build_view_bundle(report), indent=2, allow_nan=False) + "\n"
+            with args.out.open("x", encoding="utf-8") as stream:
+                stream.write(rendered)
+            print(f"Campaign view written to: {args.out}")
+        except (OSError, ValueError) as exc:
+            raise SystemExit(f"Cannot export campaign view: {exc}") from exc
+    elif args.command == "report-view":
+        from .report_views import MAX_REPORT_BYTES, build_view_bundle, load_report
+
+        try:
+            with args.report.open("rb") as stream:
+                report = load_report(stream.read(MAX_REPORT_BYTES + 1))
+            rendered = json.dumps(build_view_bundle(report), indent=2, allow_nan=False) + "\n"
+            if args.out:
+                with args.out.open("x", encoding="utf-8") as stream:
+                    stream.write(rendered)
+                print(f"Report view written to: {args.out}")
+            else:
+                print(rendered, end="")
+        except (OSError, ValueError) as exc:
+            raise SystemExit(f"Cannot export report view: {exc}") from exc
+    elif args.command in ("serve-api", "serve-reports"):
+        if not 1 <= args.port <= 65535:
+            parser.error("--port must be between 1 and 65535")
+        try:
+            import uvicorn
+            from .web import create_app
+        except ImportError as exc:
+            raise SystemExit("Install the optional API dependencies: pip install -e '.[web]'") from exc
+        uvicorn.run(create_app(), host="127.0.0.1", port=args.port, access_log=False)
+    elif args.command == "agent":
         agent()
     elif args.command == "evaluate":
+        from .report_validation import render_report
         from .unified_evaluator import UnifiedEnergyConfig, run_unified_energy_evaluation
 
         sample_schema_map = {}
@@ -263,6 +312,7 @@ def main():
                 else None
             ),
             energy_execution_adapter=args.energy_execution_adapter,
+            oci_image=args.oci_image,
             energy_measurement_minimum_duration_s=args.energy_minimum_duration_s,
             energy_measurement_minimum_repetitions=args.energy_minimum_repetitions,
             energy_measurement_maximum_repetitions=args.energy_maximum_repetitions,
@@ -282,8 +332,12 @@ def main():
             stdout=args.stdout,
         )
         report = run_unified_energy_evaluation(config)
+        try:
+            rendered = render_report(report)
+        except ValueError as exc:
+            raise SystemExit(f"Cannot write PISCES report: {exc}") from exc
         if args.stdout:
-            print(json.dumps(report, indent=2, default=str))
+            print(rendered)
         else:
             if args.out_file:
                 out_path = Path(args.out_file).expanduser().resolve()
@@ -294,7 +348,7 @@ def main():
                 from datetime import datetime
                 wf = Path(args.workflow)
                 out_path = out_dir / f"pisces_{wf.stem}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-            out_path.write_text(json.dumps(report, indent=2, default=str), encoding="utf-8")
+            out_path.write_text(rendered, encoding="utf-8")
             print(f"Report written to: {out_path}")
         energy_errors = report.get("energy", {}).get("errors")
         runtime = report.get("energy", {}).get("runtime_measurement")
@@ -315,6 +369,7 @@ def main():
                 carbon_country_iso=args.carbon_country_iso,
                 carbon_measure_power_secs=args.carbon_measure_power_secs,
                 validate_codecarbon=not args.skip_codecarbon_smoke,
+                oci_image=args.oci_image,
             )
         )
         rendered = json.dumps(report, indent=2, default=str)

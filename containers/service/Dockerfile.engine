@@ -1,0 +1,9 @@
+ARG BASE_ENGINE_IMAGE
+FROM ${BASE_ENGINE_IMAGE}
+USER root
+WORKDIR /opt/pisces
+COPY pyproject.toml README.md LICENSE ./
+COPY src/ ./src/
+RUN python -m pip install --no-deps --no-cache-dir .
+LABEL io.pisces.sandbox="1"
+USER 50000:50000

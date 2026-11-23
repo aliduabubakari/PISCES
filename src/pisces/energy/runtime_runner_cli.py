@@ -6,11 +6,17 @@ import atexit
 import hashlib
 import json
 import os
+import platform
+import shutil
 import statistics
+import sys
 import tempfile
 import time
 from datetime import datetime, timezone
+from importlib.metadata import distributions
+from importlib.util import find_spec
 from pathlib import Path
+from unittest.mock import patch
 from typing import Any, Dict, List, Optional
 
 from .adapters import (
@@ -19,6 +25,7 @@ from .adapters import (
     execute_native_workload,
     prepare_airflow_test_environment,
 )
+from .adapters.airflow import airflow_runtime_major
 from .carbon_tracker import add_scaled_estimate, try_start_tracker, try_stop_tracker
 from .execution_sandbox import ExecutionSandbox, prepared_execution_sandbox
 from .fixture_registry import FixtureRegistry
@@ -27,7 +34,10 @@ from .operational_metrics import (
     stop_operational_measurement,
 )
 from .output_assertions import evaluate_output_assertions
-from .workload_contract import WorkloadContractError, load_workload_contract
+from .runtime_evidence import finalize_runtime_measurement
+from .runtime_preflight import runtime_policy_error
+from .task_timing import read_task_timing
+from .workload_contract import WorkloadContractError, load_workload_contract, sha256_file
 
 
 def _emit(payload: Dict[str, Any], out: Path) -> None:
@@ -195,7 +205,9 @@ def _input_consumption(
         candidate = (sandbox.working / str(raw_destination)).resolve()
         if str(candidate) in read_paths:
             served.add(str(integration_id))
-            consumed_files[str(integration_id)] = str(candidate)
+            consumed_files[str(integration_id)] = (
+                str(raw_destination) if workload.contract["schema_version"] == "2.0" else str(candidate)
+            )
     missing = sorted(required - served)
     passed = bool(required) and not missing
     return {
@@ -319,7 +331,76 @@ def main() -> None:
     workload_contract_path = req.get("workload_contract")
     artifact_binding_path = req.get("artifact_binding")
 
+    def emit_runtime(payload: Dict[str, Any]) -> None:
+        measurement = payload["runtime_measurement"]
+        if workload is not None and workload.contract["schema_version"] == "2.0":
+            binding = measurement.get("execution_binding")
+            if isinstance(binding, dict):
+                binding.pop("bound_workflow_path", None)
+            # The guards' raw traces can contain host paths and request locators.
+            measurement.pop("native_safety", None)
+            measurement.pop("native_metadata", None)
+            measurement.pop("native_task_results", None)
+        measurement["runner_environment"] = {
+            "python_executable": sys.executable,
+            "python_version": platform.python_version(),
+            "platform": platform.platform(),
+        }
+        if workload is not None and workload.contract["schema_version"] == "2.0":
+            installed = sorted((item.metadata["Name"], item.version) for item in distributions() if item.metadata["Name"])
+            measurement["runner_environment"]["distributions_sha256"] = hashlib.sha256(
+                json.dumps(installed, separators=(",", ":")).encode("utf-8")
+            ).hexdigest()
+        finalize_runtime_measurement(
+            measurement,
+            adapter_requested=str(req.get("execution_adapter") or "surrogate_benchmark"),
+            contract_requested=bool(workload_contract_path or artifact_binding_path),
+        )
+        _emit(payload, out_path)
+
     workload = None
+    qualified_oci_target = os.environ.get("PISCES_OCI_TARGET")
+    collect_modeled_energy = req.get("collect_modeled_energy", True)
+    preflight_reason = runtime_policy_error(
+        mode=mode, adapter=execution_adapter, target=orchestrator, experiment=experiment_mode,
+        has_contract=bool(workload_contract_path), has_binding=bool(artifact_binding_path),
+        scale_factor=req.get("carbon_scale_factor", 1.0),
+        qualified_oci_target=qualified_oci_target,
+    )
+    if qualified_oci_target in {"prefect", "dagster"}:
+        try:
+            is_private_worker = (
+                (
+                    req.get("read_only_fixture_mount") is True
+                    or (
+                        req.get("fixture_delivery") == "private_stdin_bundle"
+                        and os.environ.get("PISCES_OCI_INPUT_DELIVERY") == "private_stdin_bundle"
+                    )
+                ) and os.geteuid() == 50000
+                and bool(os.statvfs("/").f_flag & os.ST_RDONLY)
+                and Path("/proc/self/cgroup").read_text(encoding="ascii").strip() == "0::/"
+            )
+        except OSError:
+            is_private_worker = False
+        if not is_private_worker:
+            preflight_reason = "qualified_engine_requires_private_oci_worker"
+    if not preflight_reason and experiment_mode and not (
+        native_safety.enabled and native_safety.block_network and native_safety.block_subprocess
+        and native_safety.block_file_writes and not native_safety.allowed_write_roots
+    ):
+        preflight_reason = "experiment_requires_default_execution_guards"
+    if preflight_reason:
+        emit_runtime({
+            "evaluation_type": "runtime_energy",
+            "ok": False,
+            "error": {"error_type": "RuntimePreflightFailed", "message": preflight_reason},
+            "runtime_measurement": {
+                "status": "failed", "execution_outcome": "preflight_rejected",
+                "ineligibility_reasons": [preflight_reason],
+            },
+        })
+        return
+
     if bool(workload_contract_path) != bool(artifact_binding_path):
         payload = {
             "evaluation_type": "runtime_energy",
@@ -342,7 +423,7 @@ def main() -> None:
                 "ineligibility_reasons": ["contract_configuration_incomplete"],
             },
         }
-        _emit(payload, out_path)
+        emit_runtime(payload)
         return
     if workload_contract_path and artifact_binding_path:
         try:
@@ -351,6 +432,12 @@ def main() -> None:
                 binding_path=Path(str(artifact_binding_path)),
                 artifact_path=workflow_file,
             )
+            if workload.binding["target"] != orchestrator:
+                raise WorkloadContractError("binding_target_mismatch")
+            if workload.contract["schema_version"] == "2.0" and (
+                execution_adapter != "native" or maximum_repetitions != 1 or warmup_repetitions != 0
+            ):
+                raise WorkloadContractError("v2_requires_single_native_execution_without_warmup")
         except WorkloadContractError as exc:
             payload = {
                 "evaluation_type": "runtime_energy",
@@ -373,7 +460,7 @@ def main() -> None:
                     "ineligibility_reasons": ["contract_validation_failed"],
                 },
             }
-            _emit(payload, out_path)
+            emit_runtime(payload)
             return
         if workload.binding.get("status") == "known_ineligible":
             payload = {
@@ -398,7 +485,7 @@ def main() -> None:
                     "workload_contract": workload.provenance(),
                 },
             }
-            _emit(payload, out_path)
+            emit_runtime(payload)
             return
 
     rows_raw = req.get("rows")
@@ -409,13 +496,7 @@ def main() -> None:
                 rows.append(r)
 
     adapter_attempts: List[Dict[str, Any]] = []
-    selected_adapter = (
-        execution_adapter
-        if execution_adapter in {"native", "surrogate_benchmark", "auto"}
-        else "surrogate_benchmark"
-    )
-    if experiment_mode and selected_adapter == "auto":
-        selected_adapter = "native"
+    selected_adapter = execution_adapter
 
     sandbox: ExecutionSandbox | None = None
     execution_workflow_file = workflow_file
@@ -426,8 +507,12 @@ def main() -> None:
     )
     if selected_adapter in {"native", "auto"}:
         try:
+            if selected_adapter == "native" and find_spec(orchestrator) is None:
+                raise NativeAdapterError(f"{orchestrator}_runtime_not_available")
             if workload is not None:
-                sandbox_context = prepared_execution_sandbox(workload)
+                sandbox_context = prepared_execution_sandbox(
+                    workload, read_only_fixture_mount=req.get("read_only_fixture_mount") is True,
+                )
                 sandbox = sandbox_context.__enter__()
                 atexit.register(sandbox_context.__exit__, None, None, None)
                 fixture_registry = FixtureRegistry(
@@ -444,32 +529,44 @@ def main() -> None:
                 )
                 airflow_home = Path(airflow_context.__enter__()).resolve()
                 atexit.register(airflow_context.__exit__, None, None, None)
-                os.environ.update(
-                    {
-                        "AIRFLOW_HOME": str(airflow_home),
-                        "AIRFLOW__CORE__LOAD_EXAMPLES": "False",
-                        "AIRFLOW__CORE__EXECUTOR": "SequentialExecutor",
-                        "AIRFLOW__CORE__DAGS_FOLDER": str(
-                            execution_workflow_file.parent
-                        ),
-                        "AIRFLOW__DATABASE__SQL_ALCHEMY_CONN": (
-                            f"sqlite:///{airflow_home / 'airflow.db'}"
-                        ),
-                        "AIRFLOW__LOGGING__BASE_LOG_FOLDER": str(
-                            airflow_home / "logs"
-                        ),
-                    }
-                )
+                airflow_major = airflow_runtime_major()
+                dags_folder = execution_workflow_file.parent
+                if airflow_major == 3:
+                    dags_folder = airflow_home / "dags"
+                    dags_folder.mkdir()
+                    staged_dag = dags_folder / execution_workflow_file.name
+                    shutil.copyfile(execution_workflow_file, staged_dag)
+                    if sandbox is not None and sha256_file(staged_dag) != sandbox.workflow_sha256:
+                        raise NativeAdapterError("airflow_bundle_artifact_sha256_mismatch")
+                    execution_workflow_file = staged_dag
+                airflow_env = {
+                    "AIRFLOW_HOME": str(airflow_home),
+                    "AIRFLOW_CONFIG": str(airflow_home / "airflow.cfg"),
+                    "AIRFLOW__CORE__LOAD_EXAMPLES": "False",
+                    "AIRFLOW__CORE__DAGS_FOLDER": str(dags_folder),
+                    "AIRFLOW__DATABASE__SQL_ALCHEMY_CONN": f"sqlite:///{airflow_home / 'airflow.db'}",
+                    "AIRFLOW__LOGGING__BASE_LOG_FOLDER": str(airflow_home / "logs"),
+                }
+                if airflow_major == 3:
+                    airflow_env["AIRFLOW__CORE__EXECUTOR"] = "LocalExecutor"
+                else:
+                    airflow_env["AIRFLOW__CORE__EXECUTOR"] = "SequentialExecutor"
+                environment = patch.dict(os.environ, airflow_env)
+                environment.__enter__()
+                atexit.register(environment.__exit__, None, None, None)
+                if airflow_major == 3:
+                    # Ignore inherited deployment settings, including remote DAG bundles.
+                    for key in tuple(os.environ):
+                        if key.startswith("AIRFLOW_") and key not in airflow_env:
+                            del os.environ[key]
                 native_safety.allowed_write_roots.append(str(airflow_home))
+                if airflow_major == 3:
+                    # Airflow's bundle parser uses the null device as a log sink.
+                    native_safety.allowed_write_roots.append(os.devnull)
                 try:
                     native_environment = prepare_airflow_test_environment()
                 except NativeAdapterError as exc:
-                    # Contract-bound experiments require a real Airflow
-                    # runtime and must fail closed.  Without a workload
-                    # contract, however, the native adapter also supports
-                    # small DAG-like fixtures used to validate its execution
-                    # semantics independently of an Airflow installation.
-                    if workload is not None or str(exc) != "airflow_runtime_not_available":
+                    if selected_adapter == "native" or workload is not None or str(exc) != "airflow_runtime_not_available":
                         raise
                     native_environment = {
                         "status": "not_initialized",
@@ -481,7 +578,6 @@ def main() -> None:
                         "python_executable": os.sys.executable,
                         "airflow_home_scope": "temporary",
                         "database": "temporary_sqlite",
-                        "executor": "SequentialExecutor",
                         "initialization_in_measurement_window": False,
                     }
                 )
@@ -500,6 +596,7 @@ def main() -> None:
                 "runtime_measurement": {
                     "status": "failed",
                     "execution_outcome": "environment_setup_failed",
+                    "native_environment": native_environment,
                     "operational_metrics": None,
                     "modeled_energy": None,
                     "eligible_for_resource_comparison": False,
@@ -509,14 +606,14 @@ def main() -> None:
                     ],
                 },
             }
-            _emit(payload, out_path)
+            emit_runtime(payload)
             return
 
     run_stats: Dict[str, Any]
-    adapter_used = "surrogate_benchmark"
+    adapter_used = None
+    measured_adapters: set[str] = set()
     repetitions_completed = 0
     execution_index = 0
-    repeated_stats: List[Dict[str, Any]] = []
     repetition_metrics: List[Dict[str, Any]] = []
     warmup_stats: List[Dict[str, Any]] = []
 
@@ -524,6 +621,8 @@ def main() -> None:
         nonlocal adapter_used, execution_index
         current_execution_index = execution_index
         execution_index += 1
+        if fixture_registry is not None and fixture_registry.workload.contract["schema_version"] == "2.0":
+            fixture_registry.access_log.clear()
         if selected_adapter == "surrogate_benchmark":
             adapter_used = "surrogate_benchmark"
             return _run_workload(
@@ -543,8 +642,10 @@ def main() -> None:
                 logical_date=logical_date,
                 run_index=current_execution_index,
                 fixture_registry=fixture_registry,
+                **({"qualified_oci_target": qualified_oci_target} if qualified_oci_target in {"prefect", "dagster"} else {}),
             )
         try:
+            adapter_used = "native"
             candidate = execute_native_workload(
                 execution_workflow_file,
                 orchestrator=orchestrator,
@@ -608,6 +709,7 @@ def main() -> None:
             "runtime_measurement": {
                 "status": "failed",
                 "execution_outcome": "warmup_failed",
+                "native_environment": native_environment,
                 "operational_metrics": None,
                 "modeled_energy": None,
                 "eligible_for_resource_comparison": False,
@@ -620,7 +722,7 @@ def main() -> None:
                 },
             },
         }
-        _emit(payload, out_path)
+        emit_runtime(payload)
         return
 
     tracker = try_start_tracker(
@@ -634,7 +736,14 @@ def main() -> None:
                 "as wall-clock time, process CPU time, and peak resident memory."
             ),
         },
+    ) if collect_modeled_energy else None
+    timing_task_id = req.get("trusted_task_timing_id")
+    timing_enabled = (
+        isinstance(timing_task_id, str) and workload is not None and workload.contract["schema_version"] == "2.0"
+        and workload.binding["target"] == "airflow" and workload.binding["expected_task_ids"] == [timing_task_id]
+        and experiment_mode and maximum_repetitions == 1 and not warmup_repetitions and sandbox is not None
     )
+    execution_start_ns = time.perf_counter_ns() if timing_enabled else None
     operational_started = start_operational_measurement()
 
     try:
@@ -642,7 +751,7 @@ def main() -> None:
             repetition_wall_started = time.perf_counter()
             repetition_cpu_started = time.process_time()
             run_stats = run_once()
-            repeated_stats.append(run_stats)
+            measured_adapters.add(adapter_used)
             repetition_wall_s = (
                 time.perf_counter() - repetition_wall_started
             )
@@ -674,7 +783,9 @@ def main() -> None:
             operational_started,
             scope="failed_bounded_execution_attempt",
         )
-        modeled_energy = add_scaled_estimate(try_stop_tracker(tracker), scale_factor)
+        modeled_energy = (
+            add_scaled_estimate(try_stop_tracker(tracker), scale_factor) if collect_modeled_energy else None
+        )
         payload = {
             "evaluation_type": "runtime_energy",
             "timestamp": datetime.now().isoformat(),
@@ -686,6 +797,7 @@ def main() -> None:
             "runtime_measurement": {
                 "status": "failed",
                 "execution_outcome": "failed",
+                "native_environment": native_environment,
                 "operational_metrics": None,
                 "modeled_energy": None,
                 "attempt_diagnostics": {
@@ -699,12 +811,13 @@ def main() -> None:
                 "adapter_attempts": adapter_attempts,
             },
         }
-        _emit(payload, out_path)
+        emit_runtime(payload)
         return
     operational_metrics = stop_operational_measurement(
         operational_started,
         scope="bounded_execution_block",
     )
+    execution_end_ns = time.perf_counter_ns() if timing_enabled else None
     operational_metrics["completed_repetitions"] = repetitions_completed
     operational_metrics["wall_clock_s_per_repetition"] = round(
         operational_metrics["wall_clock_s"] / repetitions_completed,
@@ -746,14 +859,14 @@ def main() -> None:
         "wall_clock_s": stability(wall_values),
         "process_cpu_s": stability(cpu_values),
     }
-    energy = add_scaled_estimate(try_stop_tracker(tracker), scale_factor)
-    if adapter_used == "native":
+    energy = add_scaled_estimate(try_stop_tracker(tracker), scale_factor) if collect_modeled_energy else None
+    if energy is not None and adapter_used == "native":
         energy["measurement_scope"] = "native_local_runtime"
         energy["disclaimer"] = (
             "This measurement covers bounded local native execution under PISCES safety guards. "
             "External effects are blocked by default, so results may skip effectful tasks."
         )
-    if tracker is None:
+    if energy is not None and tracker is None:
         if adapter_used == "native":
             energy["measurement_scope"] = "native_local_runtime"
             energy["disclaimer"] = (
@@ -767,18 +880,26 @@ def main() -> None:
                 "workflow execution and is ineligible for workflow resource comparison."
             )
 
-    measured_kwh = energy.get("energy_consumed_kwh")
-    measured_kg = energy.get("emissions_kgco2eq")
     output_assertions = None
+    output_verification_wall_s = None
     task_coverage = None
     input_consumption = None
-    if workload is not None and sandbox is not None:
+    task_timing = None
+    if workload is not None and sandbox is not None and adapter_used == "native":
+        verification_start = time.perf_counter_ns()
         output_assertions = evaluate_output_assertions(
             workload,
             workspace_root=sandbox.working,
             native_metadata=run_stats.get("native_metadata"),
         )
+        output_verification_wall_s = (time.perf_counter_ns() - verification_start) / 1e9
         task_coverage = _task_coverage(workload, run_stats)
+        if timing_enabled:
+            if task_coverage["passed"]:
+                task_timing = read_task_timing(sandbox.working, task_id=timing_task_id,
+                                               block_start_ns=execution_start_ns, block_end_ns=execution_end_ns)
+            else:
+                task_timing = {"status": "unavailable", "reason": "task_coverage_not_verified"}
         input_consumption = _input_consumption(
             workload,
             sandbox,
@@ -796,7 +917,19 @@ def main() -> None:
             rows_processed = max(asserted_row_counts)
     native_executed = int(run_stats.get("native_tasks_executed") or 0)
     native_skipped = int(run_stats.get("native_tasks_skipped") or 0)
-    if adapter_used == "surrogate_benchmark":
+    native_task_failed = any(
+        item.get("status") not in {"executed", "skipped"}
+        for item in run_stats.get("native_task_results") or []
+    )
+    if len(measured_adapters) > 1:
+        execution_outcome = "mixed_execution"
+        eligible = False
+        ineligibility_reasons = ["mixed_execution_adapters"]
+        adapter_used = "mixed"
+        if energy is not None:
+            energy["measurement_scope"] = "mixed_execution_block"
+            energy["disclaimer"] = "This diagnostic block mixes native execution with the surrogate benchmark."
+    elif adapter_used == "surrogate_benchmark":
         execution_outcome = "surrogate"
         eligible = False
         ineligibility_reasons = ["surrogate_is_not_workflow_execution"]
@@ -804,6 +937,14 @@ def main() -> None:
         execution_outcome = "zero_work"
         eligible = False
         ineligibility_reasons = ["no_native_tasks_executed"]
+    elif native_task_failed or (run_stats.get("native_metadata") or {}).get("dag_state") == "failed" or (run_stats.get("native_metadata") or {}).get("engine_state") == "failed":
+        execution_outcome = "failed"
+        eligible = False
+        ineligibility_reasons = ["native_execution_failed"]
+    elif orchestrator in {"prefect", "dagster"} and qualified_oci_target != orchestrator:
+        execution_outcome = "partial"
+        eligible = False
+        ineligibility_reasons = ["legacy_adapter_engine_evidence_not_qualified"]
     elif workload is None and native_skipped > 0:
         execution_outcome = "partial"
         eligible = False
@@ -820,7 +961,10 @@ def main() -> None:
         ineligibility_reasons.append("minimum_measurement_duration_not_reached")
     if output_assertions is not None and not output_assertions.get("passed"):
         eligible = False
-        ineligibility_reasons.append("output_assertions_failed")
+        ineligibility_reasons.append(
+            "output_assertions_not_verified"
+            if output_assertions.get("status") == "not_verified" else "output_assertions_failed"
+        )
     if task_coverage is not None and not task_coverage.get("passed"):
         eligible = False
         ineligibility_reasons.append("task_coverage_failed")
@@ -838,7 +982,7 @@ def main() -> None:
         and input_consumption.get("passed")
     )
 
-    strict_execution_failed = experiment_mode and not eligible
+    strict_execution_failed = (experiment_mode or selected_adapter == "native") and not eligible
     primary_operational_metrics = (
         None if strict_execution_failed else operational_metrics
     )
@@ -852,15 +996,6 @@ def main() -> None:
         else None
     )
 
-    normalized = {
-        "energy_kwh_per_1k_rows": None,
-        "emissions_kgco2eq_per_1k_rows": None,
-    }
-    if isinstance(measured_kwh, (int, float)) and rows_processed > 0:
-        normalized["energy_kwh_per_1k_rows"] = round((float(measured_kwh) / rows_processed) * 1000.0, 10)
-    if isinstance(measured_kg, (int, float)) and rows_processed > 0:
-        normalized["emissions_kgco2eq_per_1k_rows"] = round((float(measured_kg) / rows_processed) * 1000.0, 10)
-
     payload = {
         "evaluation_type": "runtime_energy",
         "timestamp": datetime.now().isoformat(),
@@ -870,6 +1005,9 @@ def main() -> None:
         "orchestrator": orchestrator,
         "runtime_measurement": {
             "status": "failed" if strict_execution_failed else "ok",
+            "input_delivery": req.get("fixture_delivery") or (
+                "read_only_fixture_mount" if req.get("read_only_fixture_mount") is True else None
+            ),
             "execution_outcome": execution_outcome,
             "operational_metrics": primary_operational_metrics,
             "repetition_metrics": repetition_metrics,
@@ -894,6 +1032,8 @@ def main() -> None:
                 "included_in_measurement_window": False,
             },
             "output_assertions": output_assertions,
+            **({"output_verification_wall_s": output_verification_wall_s} if output_verification_wall_s is not None else {}),
+            **({"task_timing": task_timing} if task_timing is not None else {}),
             "task_coverage": task_coverage,
             "input_consumption": input_consumption,
             "eligible_for_resource_comparison": eligible,
@@ -921,15 +1061,9 @@ def main() -> None:
             "native_safety": run_stats.get("native_safety"),
             "native_metadata": run_stats.get("native_metadata"),
             "native_environment": native_environment,
+            **({"engine_evidence": run_stats["native_metadata"]["engine_evidence"]}
+               if qualified_oci_target in {"prefect", "dagster"} and (run_stats.get("native_metadata") or {}).get("engine_evidence") else {}),
             "energy_profile": primary_modeled_energy,
-            "normalized": (
-                normalized
-                if not strict_execution_failed
-                else {
-                    "energy_kwh_per_1k_rows": None,
-                    "emissions_kgco2eq_per_1k_rows": None,
-                }
-            ),
             "bounds": {
                 "max_rows": max_rows,
                 "max_tasks": max_tasks,
@@ -943,7 +1077,7 @@ def main() -> None:
             },
         },
     }
-    _emit(payload, out_path)
+    emit_runtime(payload)
 
 
 if __name__ == "__main__":

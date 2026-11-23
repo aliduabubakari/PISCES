@@ -1,6 +1,11 @@
 from __future__ import annotations
 
 import time
+import sys
+import subprocess
+import json
+
+import pytest
 
 from pisces.energy.carbon_tracker import try_stop_tracker
 from pisces.energy.operational_metrics import (
@@ -41,3 +46,19 @@ def test_surrogate_workload_is_target_neutral() -> None:
     assert second["tasks_exercised"] == 4
     assert first["numeric_accumulator"] == second["numeric_accumulator"]
     assert first["hash_accumulator"] == second["hash_accumulator"]
+
+
+@pytest.mark.skipif(sys.platform not in {"darwin", "linux"}, reason="POSIX reference counters required")
+def test_process_counter_agreement_and_child_scope() -> None:
+    result = subprocess.run(
+        [sys.executable, "-m", "benchmarks.climate_fusion.counter_check"],
+        capture_output=True, text=True, check=True, timeout=25,
+    )
+    check = json.loads(result.stdout)
+    for item in check["observations"].values():
+        assert abs(item["measured"]["wall_clock_s"] - item["reference_wall_s"]) < 0.025
+        assert abs(item["measured"]["process_cpu_s"] - item["reference_self_cpu_s"]) < 0.025
+        assert item["measured"]["peak_rss_scope"] == "dedicated_runner_process_lifetime"
+    child = check["observations"]["child_cpu"]
+    assert child["reference_child_cpu_s"] > child["measured"]["process_cpu_s"]
+    assert check["empty_monitor_median_wall_s"] >= 0

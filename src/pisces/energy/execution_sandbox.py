@@ -14,7 +14,7 @@ import tempfile
 import tokenize
 from typing import Any, Dict, Iterator, List
 
-from .workload_contract import LoadedWorkloadContract
+from .workload_contract import LoadedWorkloadContract, WorkloadContractError, sha256_file
 
 
 @dataclass(frozen=True)
@@ -81,6 +81,8 @@ def _rewrite_string_literals(
 @contextlib.contextmanager
 def prepared_execution_sandbox(
     workload: LoadedWorkloadContract,
+    *,
+    read_only_fixture_mount: bool = False,
 ) -> Iterator[ExecutionSandbox]:
     original_cwd = Path.cwd()
     with tempfile.TemporaryDirectory(prefix="pisces_contract_") as temp:
@@ -92,9 +94,16 @@ def prepared_execution_sandbox(
         outputs.mkdir()
         working.mkdir()
         copied: Dict[str, Path] = {}
+        v2 = workload.contract["schema_version"] == "2.0"
+        expected_fixtures = {item["integration_id"]: item["sha256"] for item in workload.contract["inputs"]}
         for integration_id, source in workload.fixtures.items():
             destination = inputs / f"{integration_id}{source.suffix}"
-            shutil.copy2(source, destination)
+            if read_only_fixture_mount:
+                destination.symlink_to(source)
+            else:
+                shutil.copy2(source, destination)
+            if v2 and sha256_file(destination) != expected_fixtures[integration_id]:
+                raise WorkloadContractError("staged_fixture_sha256_mismatch")
             copied[integration_id] = destination
 
         file_bindings = workload.binding.get("file_bindings")
@@ -115,7 +124,12 @@ def prepared_execution_sandbox(
                         f"file_binding_outside_workspace:{integration_id}"
                     )
                 destination.parent.mkdir(parents=True, exist_ok=True)
-                shutil.copy2(copied[integration_id], destination)
+                if read_only_fixture_mount:
+                    destination.symlink_to(copied[integration_id])
+                else:
+                    shutil.copy2(copied[integration_id], destination)
+                if v2 and sha256_file(destination) != expected_fixtures[integration_id]:
+                    raise WorkloadContractError("bound_fixture_sha256_mismatch")
 
         expanded_rewrites: Dict[str, str] = {}
         literal_rewrites = workload.binding.get("literal_rewrites")
@@ -129,13 +143,19 @@ def prepared_execution_sandbox(
                 outputs=outputs,
                 working=working,
             )
-        source = workload.artifact_path.read_text(encoding="utf-8")
+        if v2:
+            source_bytes = workload.artifact_path.read_bytes()
+            if _sha256_bytes(source_bytes) != workload.artifact_sha256:
+                raise WorkloadContractError("staged_artifact_sha256_mismatch")
+            source = source_bytes.decode("utf-8")
+        else:
+            source = workload.artifact_path.read_text(encoding="utf-8")
         bound_source, applied_rewrites = _rewrite_string_literals(
             source,
             rewrites=expanded_rewrites,
         )
         workflow_file = working / workload.artifact_path.name
-        workflow_file.write_text(bound_source, encoding="utf-8")
+        workflow_file.write_bytes(bound_source.encode("utf-8"))
 
         previous_environment: Dict[str, str | None] = {}
         environment = workload.binding.get("environment")

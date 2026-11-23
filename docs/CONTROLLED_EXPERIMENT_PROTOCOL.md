@@ -3,6 +3,13 @@
 This protocol defines the evidence boundary for confirmatory PISCES studies on
 macOS. It does not retroactively change historical reports.
 
+For unified report schema `1.4.0`, the current runtime contract checks still
+screen the final repetition only. Passing them marks an artifact as a candidate
+for a separate equivalence check; it does not qualify the block for resource
+comparison or provide verified units. `telemetry.use` identifies screening
+observations versus attempt diagnostics. This change does not rerun or alter
+the frozen study.
+
 ## Measurement hierarchy
 
 The primary operational outcomes are:
@@ -23,6 +30,7 @@ Each assigned artifact receives one execution outcome:
 - `zero_work`: no native task completed;
 - `failed`: the bounded execution raised an error;
 - `surrogate`: PISCES ran its diagnostic benchmark instead of the workflow.
+- `mixed_execution`: a measurement block used both native and surrogate execution.
 
 Only complete native executions can contribute primary operational measurements.
 Failed, partial, and zero-work attempts retain diagnostic counters under
@@ -46,7 +54,13 @@ A confirmatory run uses:
 - an exact immutable `--out-file`.
 - a validated `--workload-contract` and `--artifact-binding`.
 
-Strict mode rejects `auto` mode and disables surrogate fallback.
+Strict mode rejects `auto` as either a data mode or adapter, hosted synthesis,
+scaled carbon, and targets other than Airflow. The controller checks the
+interpreter and contract before execution, and the worker enforces the same
+mode and adapter policy. Native task inputs are bound by the workload contract.
+The separate import-only probe is skipped; it is not a target acceptance gate.
+Use an exact output path for reproducibility. The CLI does not enforce archival
+immutability, so the experiment driver must avoid reusing result paths.
 
 ## Workload-equivalence requirement
 
@@ -77,6 +91,9 @@ transformations. Prefect and Dagster require equivalent target-specific
 integration before confirmatory paired use.
 
 ## Frozen Airflow environment
+
+This section describes the archived study. Use the
+[Airflow 3 runtime profile](AIRFLOW_3_RUNTIME.md) for new work.
 
 The Airflow study target is Apache Airflow 2.8.1 on Python 3.11.8. PISCES uses
 Airflow's `DAG.test()` interface with a temporary SQLite metadata database and

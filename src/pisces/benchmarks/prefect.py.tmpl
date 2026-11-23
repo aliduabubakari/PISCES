@@ -1,0 +1,14 @@
+    from prefect import flow, task
+    from prefect.cache_policies import NO_CACHE
+
+    normalize_task = task(name="normalize", retries=0, persist_result=False, cache_policy=NO_CACHE)(normalize)
+    transform_task = task(name="transform", retries=0, persist_result=False, cache_policy=NO_CACHE)(transform)
+    write_task = task(name="write_outputs", retries=0, persist_result=False, cache_policy=NO_CACHE)(write_outputs)
+
+    @flow(name="pisces_" + PIPELINE + "_" + VARIANT, retries=0, persist_result=False)
+    def pipeline():
+        normalize_task()
+        transform_task()
+        write_task()
+
+    pisces_entrypoint = pipeline

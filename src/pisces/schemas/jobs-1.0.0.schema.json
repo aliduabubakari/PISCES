@@ -1,0 +1,265 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "JobContract",
+  "type": "object",
+  "properties": {
+    "job": {
+      "$ref": "#/$defs/JobStatus"
+    },
+    "submission": {
+      "$ref": "#/$defs/JobSubmission"
+    },
+    "profile": {
+      "$ref": "#/$defs/ProfileReadiness"
+    }
+  },
+  "required": [
+    "job",
+    "submission",
+    "profile"
+  ],
+  "$defs": {
+    "JobStatus": {
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "filename": {
+          "title": "Filename",
+          "type": "string"
+        },
+        "profile": {
+          "title": "Profile",
+          "type": "string"
+        },
+        "artifact_sha256": {
+          "title": "Artifact Sha256",
+          "type": "string"
+        },
+        "state": {
+          "enum": [
+            "queued",
+            "running",
+            "completed",
+            "failed",
+            "cancelled",
+            "timed_out"
+          ],
+          "title": "State",
+          "type": "string"
+        },
+        "created_at": {
+          "title": "Created At",
+          "type": "number"
+        },
+        "started_at": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Started At"
+        },
+        "finished_at": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Finished At"
+        },
+        "cancel_requested": {
+          "title": "Cancel Requested",
+          "type": "boolean"
+        },
+        "error": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Error"
+        },
+        "has_report": {
+          "title": "Has Report",
+          "type": "boolean"
+        },
+        "evaluation_succeeded": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Evaluation Succeeded"
+        }
+      },
+      "required": [
+        "id",
+        "filename",
+        "profile",
+        "artifact_sha256",
+        "state",
+        "created_at",
+        "started_at",
+        "finished_at",
+        "cancel_requested",
+        "error",
+        "has_report",
+        "evaluation_succeeded"
+      ],
+      "title": "JobStatus",
+      "type": "object"
+    },
+    "FixtureFile": {
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "maxLength": 160,
+          "title": "Path",
+          "type": "string"
+        },
+        "content_base64": {
+          "maxLength": 8388608,
+          "title": "Content Base64",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "content_base64"
+      ],
+      "title": "FixtureFile",
+      "type": "object"
+    },
+    "JobSubmission": {
+      "additionalProperties": false,
+      "properties": {
+        "filename": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,95}\\.py$",
+          "title": "Filename",
+          "type": "string"
+        },
+        "source": {
+          "maxLength": 1048576,
+          "minLength": 1,
+          "title": "Source",
+          "type": "string"
+        },
+        "profile": {
+          "default": "static",
+          "enum": [
+            "static",
+            "python",
+            "airflow",
+            "prefect",
+            "dagster"
+          ],
+          "title": "Profile",
+          "type": "string"
+        },
+        "timeout_s": {
+          "default": 60,
+          "maximum": 120,
+          "minimum": 5,
+          "title": "Timeout S",
+          "type": "integer"
+        },
+        "contract": {
+          "anyOf": [
+            {
+              "maxLength": 1048576,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Contract"
+        },
+        "binding": {
+          "anyOf": [
+            {
+              "maxLength": 1048576,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Binding"
+        },
+        "files": {
+          "items": {
+            "$ref": "#/$defs/FixtureFile"
+          },
+          "maxItems": 16,
+          "title": "Files",
+          "type": "array"
+        }
+      },
+      "required": [
+        "filename",
+        "source"
+      ],
+      "title": "JobSubmission",
+      "type": "object"
+    },
+    "ProfileReadiness": {
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "ready": {
+          "title": "Ready",
+          "type": "boolean"
+        },
+        "image_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Image Id"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason"
+        }
+      },
+      "required": [
+        "name",
+        "ready"
+      ],
+      "title": "ProfileReadiness",
+      "type": "object"
+    }
+  }
+}

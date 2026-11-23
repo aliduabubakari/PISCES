@@ -1,0 +1,1456 @@
+{
+  "components": {
+    "schemas": {
+      "CampaignView": {
+        "$defs": {
+          "inventory": {
+            "additionalProperties": false,
+            "properties": {
+              "attempted": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "case": {
+                "type": "string"
+              },
+              "expected_behavior_matched": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "pipeline": {
+                "type": "string"
+              },
+              "planned": {
+                "minimum": 1,
+                "type": "integer"
+              },
+              "pointer": {
+                "type": "string"
+              },
+              "verified_outputs": {
+                "minimum": 0,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "pipeline",
+              "case",
+              "planned",
+              "attempted",
+              "expected_behavior_matched",
+              "verified_outputs",
+              "pointer"
+            ],
+            "type": "object"
+          },
+          "metric": {
+            "additionalProperties": false,
+            "properties": {
+              "definition": {
+                "type": "string"
+              },
+              "fit": {
+                "additionalProperties": false,
+                "properties": {
+                  "intercept": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
+                  },
+                  "pointer": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "r_squared": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
+                  },
+                  "reason": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "slope_per_100k_rows": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
+                  },
+                  "status": {
+                    "enum": [
+                      "reported_descriptive",
+                      "not_available"
+                    ]
+                  }
+                },
+                "required": [
+                  "status",
+                  "intercept",
+                  "slope_per_100k_rows",
+                  "r_squared",
+                  "reason",
+                  "pointer"
+                ],
+                "type": "object"
+              },
+              "id": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              },
+              "points": {
+                "items": {
+                  "$ref": "#/components/schemas/CampaignView/$defs/point"
+                },
+                "maxItems": 64,
+                "minItems": 1,
+                "type": "array"
+              },
+              "raw_unit": {
+                "type": "string"
+              },
+              "scope": {
+                "type": "string"
+              },
+              "source": {
+                "type": "string"
+              },
+              "unit": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "label",
+              "unit",
+              "raw_unit",
+              "scope",
+              "definition",
+              "source",
+              "points",
+              "fit"
+            ],
+            "type": "object"
+          },
+          "point": {
+            "additionalProperties": false,
+            "properties": {
+              "attempted": {
+                "minimum": 0,
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "coverage": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "fingerprints_match": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              },
+              "fitted": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "mad": {
+                "minimum": 0,
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "median": {
+                "minimum": 0,
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "missing_reason": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "planned": {
+                "minimum": 1,
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "pointer": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "raw_median": {
+                "minimum": 0,
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "rows": {
+                "minimum": 1,
+                "type": "integer"
+              },
+              "verified": {
+                "minimum": 0,
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "rows",
+              "median",
+              "raw_median",
+              "mad",
+              "coverage",
+              "attempted",
+              "verified",
+              "planned",
+              "fingerprints_match",
+              "missing_reason",
+              "pointer",
+              "fitted"
+            ],
+            "type": "object"
+          },
+          "session": {
+            "additionalProperties": false,
+            "properties": {
+              "engine": {
+                "type": "string"
+              },
+              "environment": {
+                "type": "string"
+              },
+              "id": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              },
+              "metrics": {
+                "items": {
+                  "$ref": "#/components/schemas/CampaignView/$defs/metric"
+                },
+                "minItems": 1,
+                "type": "array"
+              },
+              "pipeline": {
+                "type": "string"
+              },
+              "planned_repetitions": {
+                "minimum": 1,
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "profile_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "started_at": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "label",
+              "pipeline",
+              "engine",
+              "environment",
+              "profile_id",
+              "started_at",
+              "planned_repetitions",
+              "metrics"
+            ],
+            "type": "object"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {
+          "admission": {
+            "additionalProperties": false,
+            "properties": {
+              "reason": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "status": {
+                "enum": [
+                  "campaign_inventory",
+                  "summary_inventory"
+                ]
+              }
+            },
+            "required": [
+              "status",
+              "reason"
+            ],
+            "type": "object"
+          },
+          "identity": {
+            "additionalProperties": false,
+            "properties": {
+              "case": {
+                "type": "null"
+              },
+              "engine": {
+                "type": "string"
+              },
+              "evidence_kind": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "engine",
+              "case",
+              "evidence_kind"
+            ],
+            "type": "object"
+          },
+          "inventory": {
+            "items": {
+              "$ref": "#/components/schemas/CampaignView/$defs/inventory"
+            },
+            "maxItems": 1000,
+            "type": "array"
+          },
+          "report_id": {
+            "pattern": "^[a-f0-9]{64}$",
+            "type": "string"
+          },
+          "report_kind": {
+            "enum": [
+              "load_sweep",
+              "scaling_sessions",
+              "suite_summary"
+            ]
+          },
+          "sessions": {
+            "items": {
+              "$ref": "#/components/schemas/CampaignView/$defs/session"
+            },
+            "maxItems": 32,
+            "type": "array"
+          },
+          "status": {
+            "type": "string"
+          },
+          "view_schema_version": {
+            "const": "1.0.0"
+          },
+          "view_type": {
+            "const": "campaign"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "view_type",
+          "view_schema_version",
+          "report_id",
+          "report_kind",
+          "identity",
+          "admission",
+          "status",
+          "sessions",
+          "inventory",
+          "warnings"
+        ],
+        "title": "CampaignView",
+        "type": "object"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "JobStatus": {
+        "properties": {
+          "artifact_sha256": {
+            "title": "Artifact Sha256",
+            "type": "string"
+          },
+          "cancel_requested": {
+            "title": "Cancel Requested",
+            "type": "boolean"
+          },
+          "created_at": {
+            "title": "Created At",
+            "type": "number"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "evaluation_succeeded": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Evaluation Succeeded"
+          },
+          "filename": {
+            "title": "Filename",
+            "type": "string"
+          },
+          "finished_at": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Finished At"
+          },
+          "has_report": {
+            "title": "Has Report",
+            "type": "boolean"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "profile": {
+            "title": "Profile",
+            "type": "string"
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started At"
+          },
+          "state": {
+            "enum": [
+              "queued",
+              "running",
+              "completed",
+              "failed",
+              "cancelled",
+              "timed_out"
+            ],
+            "title": "State",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "filename",
+          "profile",
+          "artifact_sha256",
+          "state",
+          "created_at",
+          "started_at",
+          "finished_at",
+          "cancel_requested",
+          "error",
+          "has_report",
+          "evaluation_succeeded"
+        ],
+        "title": "JobStatus",
+        "type": "object"
+      },
+      "JobSubmission": {
+        "$defs": {
+          "FixtureFile": {
+            "additionalProperties": false,
+            "properties": {
+              "content_base64": {
+                "maxLength": 8388608,
+                "title": "Content Base64",
+                "type": "string"
+              },
+              "path": {
+                "maxLength": 160,
+                "title": "Path",
+                "type": "string"
+              }
+            },
+            "required": [
+              "path",
+              "content_base64"
+            ],
+            "title": "FixtureFile",
+            "type": "object"
+          }
+        },
+        "additionalProperties": false,
+        "properties": {
+          "binding": {
+            "anyOf": [
+              {
+                "maxLength": 1048576,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Binding"
+          },
+          "contract": {
+            "anyOf": [
+              {
+                "maxLength": 1048576,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Contract"
+          },
+          "filename": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,95}\\.py$",
+            "title": "Filename",
+            "type": "string"
+          },
+          "files": {
+            "items": {
+              "$ref": "#/components/schemas/JobSubmission/$defs/FixtureFile"
+            },
+            "maxItems": 16,
+            "title": "Files",
+            "type": "array"
+          },
+          "profile": {
+            "default": "static",
+            "enum": [
+              "static",
+              "python",
+              "airflow",
+              "prefect",
+              "dagster"
+            ],
+            "title": "Profile",
+            "type": "string"
+          },
+          "source": {
+            "maxLength": 1048576,
+            "minLength": 1,
+            "title": "Source",
+            "type": "string"
+          },
+          "timeout_s": {
+            "default": 60,
+            "maximum": 120,
+            "minimum": 5,
+            "title": "Timeout S",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "filename",
+          "source"
+        ],
+        "title": "JobSubmission",
+        "type": "object"
+      },
+      "ProfileReadiness": {
+        "properties": {
+          "image_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image Id"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "ready": {
+            "title": "Ready",
+            "type": "boolean"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          }
+        },
+        "required": [
+          "name",
+          "ready"
+        ],
+        "title": "ProfileReadiness",
+        "type": "object"
+      },
+      "ReportView": {
+        "$defs": {
+          "metric": {
+            "additionalProperties": false,
+            "properties": {
+              "availability": {
+                "enum": [
+                  "available",
+                  "unavailable",
+                  "invalid",
+                  "not_collected"
+                ]
+              },
+              "definition": {
+                "type": "string"
+              },
+              "evidence_role": {
+                "enum": [
+                  "reported",
+                  "diagnostic",
+                  "modeled"
+                ]
+              },
+              "id": {
+                "type": "string"
+              },
+              "includes": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              },
+              "pointer": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "raw_unit": {
+                "type": "string"
+              },
+              "raw_value": {
+                "minimum": 0,
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "reason_codes": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "scope": {
+                "type": "string"
+              },
+              "source": {
+                "type": "string"
+              },
+              "unit": {
+                "type": "string"
+              },
+              "value": {
+                "minimum": 0,
+                "type": [
+                  "number",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "label",
+              "value",
+              "raw_value",
+              "unit",
+              "raw_unit",
+              "scope",
+              "definition",
+              "source",
+              "includes",
+              "availability",
+              "reason_codes",
+              "pointer",
+              "evidence_role"
+            ],
+            "type": "object"
+          },
+          "output": {
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "passed": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              },
+              "pointer": {
+                "type": "string"
+              },
+              "reason": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "row_count": {
+                "minimum": 0,
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "status": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "status",
+              "passed",
+              "row_count",
+              "reason",
+              "pointer"
+            ],
+            "type": "object"
+          },
+          "task": {
+            "additionalProperties": false,
+            "properties": {
+              "pointer": {
+                "type": "string"
+              },
+              "state": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string"
+              },
+              "task_id": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "task_id",
+              "state",
+              "status",
+              "pointer"
+            ],
+            "type": "object"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {
+          "admission": {
+            "additionalProperties": false,
+            "properties": {
+              "reason": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "status": {
+                "enum": [
+                  "current_inventory",
+                  "suite_inventory",
+                  "legacy_inventory",
+                  "rejected",
+                  "unsupported"
+                ]
+              }
+            },
+            "required": [
+              "status",
+              "reason"
+            ],
+            "type": "object"
+          },
+          "comparison": {
+            "additionalProperties": false,
+            "properties": {
+              "pairwise_status": {
+                "type": "string"
+              },
+              "pointer": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "reasons": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "resource_eligible": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              },
+              "screening_eligible": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "resource_eligible",
+              "pairwise_status",
+              "screening_eligible",
+              "reasons",
+              "pointer"
+            ],
+            "type": "object"
+          },
+          "execution": {
+            "additionalProperties": false,
+            "properties": {
+              "pointer": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "status": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "status",
+              "pointer"
+            ],
+            "type": "object"
+          },
+          "identity": {
+            "additionalProperties": false,
+            "properties": {
+              "artifact_sha256": {
+                "pattern": "^[a-f0-9]{64}$",
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "case": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "engine": {
+                "type": "string"
+              },
+              "evidence_kind": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "engine",
+              "case",
+              "artifact_sha256",
+              "evidence_kind"
+            ],
+            "type": "object"
+          },
+          "metric_registry_version": {
+            "const": "1.0.0"
+          },
+          "metrics": {
+            "items": {
+              "$ref": "#/components/schemas/ReportView/$defs/metric"
+            },
+            "type": "array"
+          },
+          "outputs": {
+            "additionalProperties": false,
+            "properties": {
+              "checks": {
+                "items": {
+                  "$ref": "#/components/schemas/ReportView/$defs/output"
+                },
+                "type": "array"
+              },
+              "expected_behavior_matched": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              },
+              "status": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "status",
+              "checks",
+              "expected_behavior_matched"
+            ],
+            "type": "object"
+          },
+          "report_id": {
+            "pattern": "^[a-f0-9]{64}$",
+            "type": "string"
+          },
+          "report_kind": {
+            "enum": [
+              "unified",
+              "suite_attempt",
+              "unsupported"
+            ]
+          },
+          "source_schema_version": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "tasks": {
+            "items": {
+              "$ref": "#/components/schemas/ReportView/$defs/task"
+            },
+            "type": "array"
+          },
+          "view_schema_version": {
+            "const": "1.0.0"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "view_schema_version",
+          "metric_registry_version",
+          "report_id",
+          "report_kind",
+          "source_schema_version",
+          "admission",
+          "identity",
+          "execution",
+          "outputs",
+          "tasks",
+          "metrics",
+          "comparison",
+          "warnings"
+        ],
+        "title": "ReportView",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "BearerAuth": {
+        "scheme": "bearer",
+        "type": "http"
+      }
+    }
+  },
+  "info": {
+    "title": "PISCES evaluation API",
+    "version": "0.2.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/v1/capabilities": {
+      "get": {
+        "operationId": "capabilities_api_v1_capabilities_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Capabilities"
+      }
+    },
+    "/api/v1/jobs": {
+      "get": {
+        "operationId": "list_jobs_api_v1_jobs_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/JobStatus"
+                  },
+                  "title": "Response List Jobs Api V1 Jobs Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Jobs",
+        "tags": [
+          "Evaluation jobs"
+        ]
+      },
+      "post": {
+        "operationId": "submit_api_v1_jobs_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JobSubmission"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobStatus"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Submit",
+        "tags": [
+          "Evaluation jobs"
+        ]
+      }
+    },
+    "/api/v1/jobs/profiles": {
+      "get": {
+        "operationId": "profiles_api_v1_jobs_profiles_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ProfileReadiness"
+                  },
+                  "title": "Response Profiles Api V1 Jobs Profiles Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Profiles",
+        "tags": [
+          "Evaluation jobs"
+        ]
+      }
+    },
+    "/api/v1/jobs/{identity}": {
+      "delete": {
+        "operationId": "delete_api_v1_jobs__identity__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "identity",
+            "required": true,
+            "schema": {
+              "pattern": "^[a-f0-9]{32}$",
+              "title": "Identity",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delete",
+        "tags": [
+          "Evaluation jobs"
+        ]
+      },
+      "get": {
+        "operationId": "job_api_v1_jobs__identity__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "identity",
+            "required": true,
+            "schema": {
+              "pattern": "^[a-f0-9]{32}$",
+              "title": "Identity",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobStatus"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Job",
+        "tags": [
+          "Evaluation jobs"
+        ]
+      }
+    },
+    "/api/v1/jobs/{identity}/cancel": {
+      "post": {
+        "operationId": "cancel_api_v1_jobs__identity__cancel_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "identity",
+            "required": true,
+            "schema": {
+              "pattern": "^[a-f0-9]{32}$",
+              "title": "Identity",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobStatus"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Cancel",
+        "tags": [
+          "Evaluation jobs"
+        ]
+      }
+    },
+    "/api/v1/jobs/{identity}/report": {
+      "get": {
+        "operationId": "report_api_v1_jobs__identity__report_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "identity",
+            "required": true,
+            "schema": {
+              "pattern": "^[a-f0-9]{32}$",
+              "title": "Identity",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Report",
+        "tags": [
+          "Evaluation jobs"
+        ]
+      }
+    },
+    "/api/v1/jobs/{identity}/source": {
+      "get": {
+        "operationId": "source_api_v1_jobs__identity__source_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "identity",
+            "required": true,
+            "schema": {
+              "pattern": "^[a-f0-9]{32}$",
+              "title": "Identity",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Source",
+        "tags": [
+          "Evaluation jobs"
+        ]
+      }
+    },
+    "/api/v1/jobs/{identity}/view": {
+      "get": {
+        "operationId": "view_api_v1_jobs__identity__view_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "identity",
+            "required": true,
+            "schema": {
+              "pattern": "^[a-f0-9]{32}$",
+              "title": "Identity",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "View",
+        "tags": [
+          "Evaluation jobs"
+        ]
+      }
+    },
+    "/api/v1/reports/view": {
+      "post": {
+        "operationId": "report_view_api_v1_reports_view_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ReportView"
+                    },
+                    {
+                      "$ref": "#/components/schemas/CampaignView"
+                    }
+                  ]
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Report View"
+      }
+    }
+  },
+  "security": [
+    {
+      "BearerAuth": []
+    }
+  ]
+}

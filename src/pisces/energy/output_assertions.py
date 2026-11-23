@@ -7,6 +7,7 @@ import json
 from pathlib import Path
 from typing import Any, Dict, List
 
+from .output_equivalence import verify_output
 from .workload_contract import LoadedWorkloadContract, sha256_file
 
 
@@ -95,6 +96,11 @@ def evaluate_output_assertions(
     workspace_root: Path,
     native_metadata: Dict[str, Any] | None = None,
 ) -> Dict[str, Any]:
+    if workload.contract["schema_version"] == "2.0":
+        return verify_output(
+            workload, workspace_root=workspace_root,
+            service_log=(native_metadata or {}).get("fixture_access_log"),
+        )
     specifications = workload.contract.get("outputs") or []
     bindings = workload.binding.get("output_bindings") or {}
     results: List[Dict[str, Any]] = []

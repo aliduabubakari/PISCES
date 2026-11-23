@@ -4,6 +4,7 @@ import ftplib
 import hashlib
 import json
 from pathlib import Path
+import sys
 import urllib.request
 
 import pytest
@@ -16,6 +17,7 @@ from pisces.energy.fixture_registry import (
 )
 from pisces.energy.output_assertions import evaluate_output_assertions
 from pisces.energy.runtime_runner_cli import _task_coverage
+from pisces.energy.runtime_evaluation import EnergyEvaluationRequest, _run_runtime_measurement
 from pisces.energy.workload_contract import (
     WorkloadContractError,
     load_workload_contract,
@@ -106,6 +108,22 @@ def test_contract_loader_validates_artifact_and_fixture_hashes(tmp_path: Path) -
             binding_path=binding,
             artifact_path=artifact,
         )
+
+
+def test_runtime_rejects_binding_for_different_target(tmp_path: Path) -> None:
+    artifact, _, contract, binding = _write_contract_bundle(tmp_path)
+    request = EnergyEvaluationRequest(
+        file_path=artifact, code_text=artifact.read_text(encoding="utf-8"),
+        orchestrator="prefect", repo_root=tmp_path, runtime_python=Path(sys.executable),
+        execution_adapter="native", workload_contract=contract, artifact_binding=binding,
+    )
+    payload = _run_runtime_measurement(request=request, mode_name="zero_fill", data_source="zero_fill", rows=[])
+    assert payload["ok"] is False
+    assert payload["error"]["message"] == "binding_target_mismatch"
+    measurement = payload["runtime_measurement"]
+    assert measurement["execution_outcome"] == "contract_invalid"
+    assert measurement["contract_validation"]["status"] == "invalid"
+    assert measurement["execution_adapter_used"] is None
 
 
 def test_sandbox_copies_fixtures_and_restores_working_directory(

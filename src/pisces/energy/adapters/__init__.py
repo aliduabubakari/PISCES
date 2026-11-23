@@ -29,7 +29,13 @@ def execute_native_workload(
     logical_date=None,
     run_index: int = 0,
     fixture_registry=None,
+    qualified_oci_target=None,
 ) -> Dict[str, Any]:
+    if qualified_oci_target == orchestrator and orchestrator in {"prefect", "dagster"}:
+        from .qualified import execute_qualified
+
+        return execute_qualified(target=orchestrator, workflow_file=workflow_file, max_tasks=max_tasks,
+                                 safety_policy=safety_policy or NativeSafetyPolicy())
     adapter = get_native_adapter(orchestrator)
     kwargs = {
         "workflow_file": workflow_file,

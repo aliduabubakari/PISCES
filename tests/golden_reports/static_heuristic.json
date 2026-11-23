@@ -28,11 +28,14 @@
     "enabled": true,
     "mode_requested": "heuristic"
   },
-  "report_schema_version": "1.2.0",
+  "report_schema_version": "1.4.0",
   "tool": "pisces-unified",
   "workflow": {
     "name": "plain_workflow",
     "orchestrator": "unknown",
-    "runtime_supported": false
+    "orchestrator_requested": "auto",
+    "orchestrator_detected": "unknown",
+    "runtime_supported": false,
+    "target_validation": "not_evaluated"
   }
 }

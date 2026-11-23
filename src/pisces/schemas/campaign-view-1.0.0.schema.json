@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CampaignView", "type": "object", "additionalProperties": false,
+  "required": ["view_type", "view_schema_version", "report_id", "report_kind", "identity", "admission", "status", "sessions", "inventory", "warnings"],
+  "properties": {
+    "view_type": {"const": "campaign"}, "view_schema_version": {"const": "1.0.0"},
+    "report_id": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "report_kind": {"enum": ["load_sweep", "scaling_sessions", "suite_summary"]},
+    "identity": {"type": "object", "additionalProperties": false, "required": ["name", "engine", "case", "evidence_kind"], "properties": {
+      "name": {"type": "string"}, "engine": {"type": "string"}, "case": {"type": "null"}, "evidence_kind": {"type": "string"}
+    }},
+    "admission": {"type": "object", "additionalProperties": false, "required": ["status", "reason"], "properties": {
+      "status": {"enum": ["campaign_inventory", "summary_inventory"]}, "reason": {"type": ["string", "null"]}
+    }},
+    "status": {"type": "string"},
+    "sessions": {"type": "array", "maxItems": 32, "items": {"$ref": "#/$defs/session"}},
+    "inventory": {"type": "array", "maxItems": 1000, "items": {"$ref": "#/$defs/inventory"}},
+    "warnings": {"type": "array", "items": {"type": "string"}}
+  },
+  "$defs": {
+    "session": {"type": "object", "additionalProperties": false, "required": ["id", "label", "pipeline", "engine", "environment", "profile_id", "started_at", "planned_repetitions", "metrics"], "properties": {
+      "id": {"type": "string"}, "label": {"type": "string"}, "pipeline": {"type": "string"}, "engine": {"type": "string"}, "environment": {"type": "string"},
+      "profile_id": {"type": ["string", "null"]}, "started_at": {"type": ["string", "null"]}, "planned_repetitions": {"type": ["integer", "null"], "minimum": 1},
+      "metrics": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/metric"}}
+    }},
+    "metric": {"type": "object", "additionalProperties": false, "required": ["id", "label", "unit", "raw_unit", "scope", "definition", "source", "points", "fit"], "properties": {
+      "id": {"type": "string"}, "label": {"type": "string"}, "unit": {"type": "string"}, "raw_unit": {"type": "string"}, "scope": {"type": "string"}, "definition": {"type": "string"}, "source": {"type": "string"},
+      "points": {"type": "array", "minItems": 1, "maxItems": 64, "items": {"$ref": "#/$defs/point"}},
+      "fit": {"type": "object", "additionalProperties": false, "required": ["status", "intercept", "slope_per_100k_rows", "r_squared", "reason", "pointer"], "properties": {
+        "status": {"enum": ["reported_descriptive", "not_available"]}, "intercept": {"type": ["number", "null"]}, "slope_per_100k_rows": {"type": ["number", "null"]}, "r_squared": {"type": ["number", "null"]},
+        "reason": {"type": ["string", "null"]}, "pointer": {"type": ["string", "null"]}
+      }}
+    }},
+    "point": {"type": "object", "additionalProperties": false, "required": ["rows", "median", "raw_median", "mad", "coverage", "attempted", "verified", "planned", "fingerprints_match", "missing_reason", "pointer", "fitted"], "properties": {
+      "rows": {"type": "integer", "minimum": 1}, "median": {"type": ["number", "null"], "minimum": 0}, "raw_median": {"type": ["number", "null"], "minimum": 0}, "mad": {"type": ["number", "null"], "minimum": 0},
+      "coverage": {"type": ["number", "null"], "minimum": 0, "maximum": 1}, "attempted": {"type": ["integer", "null"], "minimum": 0}, "verified": {"type": ["integer", "null"], "minimum": 0}, "planned": {"type": ["integer", "null"], "minimum": 1}, "fingerprints_match": {"type": ["boolean", "null"]},
+      "missing_reason": {"type": ["string", "null"]}, "pointer": {"type": ["string", "null"]}, "fitted": {"type": ["number", "null"]}
+    }},
+    "inventory": {"type": "object", "additionalProperties": false, "required": ["pipeline", "case", "planned", "attempted", "expected_behavior_matched", "verified_outputs", "pointer"], "properties": {
+      "pipeline": {"type": "string"}, "case": {"type": "string"}, "planned": {"type": "integer", "minimum": 1}, "attempted": {"type": "integer", "minimum": 0}, "expected_behavior_matched": {"type": "integer", "minimum": 0}, "verified_outputs": {"type": "integer", "minimum": 0}, "pointer": {"type": "string"}
+    }}
+  }
+}

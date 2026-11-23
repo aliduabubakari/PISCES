@@ -1,0 +1,9 @@
+    from airflow.sdk import DAG
+    from airflow.providers.standard.operators.python import PythonOperator
+
+    with DAG(dag_id="pisces_" + PIPELINE + "_" + VARIANT, schedule=None, catchup=False,
+             start_date=datetime(2024, 1, 1, tzinfo=timezone.utc)) as dag:
+        normalize_task = PythonOperator(task_id="normalize", python_callable=normalize, retries=0)
+        transform_task = PythonOperator(task_id="transform", python_callable=transform, retries=0)
+        write_task = PythonOperator(task_id="write_outputs", python_callable=write_outputs, retries=0)
+        normalize_task >> transform_task >> write_task

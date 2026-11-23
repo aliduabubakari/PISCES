@@ -1,0 +1,22 @@
+server {
+    listen 8080;
+    server_name _;
+    root /usr/share/nginx/html;
+    client_max_body_size 8m;
+    add_header X-Content-Type-Options nosniff always;
+    add_header Referrer-Policy no-referrer always;
+    add_header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; object-src 'none'" always;
+    location = /healthz { return 200 'ok'; }
+    location /api/ {
+        resolver 127.0.0.11 valid=10s;
+        set $api_upstream ${PISCES_API_UPSTREAM};
+        proxy_pass http://$api_upstream;
+        proxy_set_header Host $http_host;
+        proxy_set_header Authorization $http_authorization;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 20s;
+        proxy_buffering off;
+    }
+    location /assets/ { add_header Cache-Control 'public, max-age=31536000, immutable'; }
+    location / { try_files $uri $uri/ /index.html; }
+}

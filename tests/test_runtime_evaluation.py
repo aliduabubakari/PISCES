@@ -49,7 +49,7 @@ def test_mode_precedence_auto_uses_fuzz_fill_without_data_or_llm(tmp_path: Path)
 
     res = evaluate_energy(req).to_dict()
     attempted = res["attempted_modes"]
-    # auto cascade prefers sample if provided, otherwise fuzz_fill → zero_fill → synthetic → heuristic.
+    # Auto stays local: sample, fuzz_fill, zero_fill, heuristic.
     assert attempted[0]["mode"] == "sample"
     assert attempted[0]["status"] == "skipped"
     assert attempted[1]["mode"] == "fuzz_fill"
@@ -242,17 +242,17 @@ def test_synthetic_mode_runtime_for_supported_orchestrators(tmp_path: Path, monk
     assert isinstance(res["runtime_measurement"], dict)
     assert res["runtime_measurement"].get("status") == "ok"
     assert res["runtime_measurement"].get("execution_adapter_requested") == "surrogate_benchmark"
-    assert res["runtime_measurement"].get("execution_adapter_used") in {"surrogate_benchmark", "native"}
-    assert res["runtime_measurement"].get("energy_profile", {}).get("measurement_scope") == "bounded_execution_block"
+    assert res["runtime_measurement"]["execution_adapter_used"] == "surrogate_benchmark"
     assert res["evidence"]["measurement_kind"] == "surrogate_benchmark"
     assert res["evidence"]["data_source"] == "synthetic"
     assert res["synthetic_info"]["signature_hash"]
-    operational = res["runtime_measurement"]["operational_metrics"]
-    assert operational["evidence_role"] == "primary"
+    diagnostics = res["runtime_measurement"]["attempt_diagnostics"]
+    operational = diagnostics["operational_metrics"]
+    assert operational["evidence_role"] == "diagnostic"
     assert operational["wall_clock_s"] >= 0
     assert operational["process_cpu_s"] >= 0
     assert operational["peak_rss_mb"] is not None
-    assert res["runtime_measurement"]["modeled_energy"]["evidence_role"] == "secondary"
+    assert diagnostics["modeled_energy"]["evidence_role"] == "secondary"
     assert res["runtime_measurement"]["eligible_for_resource_comparison"] is False
 
 

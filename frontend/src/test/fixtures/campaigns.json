@@ -1,0 +1,3290 @@
+[
+  {
+    "filename": "saved-scaling-sessions.json",
+    "report": {
+      "schema_version": "1.0",
+      "status": "descriptive_only",
+      "reasons": [],
+      "oci_profile": {
+        "image_id": "sha256:c3a0884681181256c1fb28216ee2770d179480fb8c3ad0e13fff54fcee1edad1",
+        "image_architecture": "arm64",
+        "engine_version": "29.9.3",
+        "kernel_version": "7.0.14-linuxkit",
+        "engine_platform": "Docker Desktop",
+        "cgroup_version": "2",
+        "environment_class": "docker_desktop_vm",
+        "limits": {
+          "cpu_cores": 2,
+          "memory_bytes": 2147483648,
+          "pids": 128,
+          "scratch_bytes": 268435456
+        },
+        "isolation": {
+          "network": "none",
+          "user": "50000:50000",
+          "root_filesystem": "read_only",
+          "input_mount": "read_only",
+          "capabilities": "none",
+          "no_new_privileges": true
+        }
+      },
+      "sessions": [
+        {
+          "manifest": {
+            "schema_version": "1.1",
+            "started_at_utc": "2026-11-14T21:12:31.961337+00:00",
+            "oci_profile": {
+              "image_id": "sha256:c3a0884681181256c1fb28216ee2770d179480fb8c3ad0e13fff54fcee1edad1",
+              "image_architecture": "arm64",
+              "engine_version": "29.9.3",
+              "kernel_version": "7.0.14-linuxkit",
+              "engine_platform": "Docker Desktop",
+              "cgroup_version": "2",
+              "environment_class": "docker_desktop_vm",
+              "limits": {
+                "cpu_cores": 2,
+                "memory_bytes": 2147483648,
+                "pids": 128,
+                "scratch_bytes": 268435456
+              },
+              "isolation": {
+                "network": "none",
+                "user": "50000:50000",
+                "root_filesystem": "read_only",
+                "input_mount": "read_only",
+                "capabilities": "none",
+                "no_new_privileges": true
+              }
+            },
+            "conformance_report_sha256": "14d68d5ede997997b3f92eff3fad705ee982b050b8a086325bcb58b77bf6c203",
+            "controller_platform": "macOS-15.6.1-arm64-arm-64bit",
+            "repetitions": 3,
+            "metrics": [
+              "task_wall_s",
+              "task_thread_cpu_s",
+              "execution_wall_s",
+              "execution_process_cpu_s",
+              "verification_wall_s",
+              "worker_wall_s",
+              "worker_cpu_s",
+              "cgroup_lifetime_peak_bytes"
+            ],
+            "loads_are_total_rows": true,
+            "sources": [
+              "bom",
+              "ecmwf",
+              "jma",
+              "metoffice",
+              "noaa"
+            ],
+            "seed": 1729,
+            "round_order": [
+              [
+                10000,
+                100000,
+                500000,
+                1000000
+              ],
+              [
+                10000,
+                1000000,
+                100000,
+                500000
+              ],
+              [
+                500000,
+                10000,
+                1000000,
+                100000
+              ]
+            ],
+            "timeout_s": 90,
+            "cache_policy": "fresh_containers_and_database_os_cache_uncontrolled",
+            "task_timing_source": "trusted_benchmark_task_instrumentation_v1",
+            "workloads": {
+              "10000": {
+                "status": "validated",
+                "schema_version": "2.0",
+                "contract_id": "climate-fusion-2000",
+                "binding_id": "baseline",
+                "contract_sha256": "24e466475af09522a6cdaf8b6ddf4b7e5d67f2893dbe04c041c42d880d6958aa",
+                "binding_sha256": "14d3790e3ed984e219058a0d34d894b5e245ef8699bf8aeda6c7d2709ae7af4b",
+                "artifact_sha256": "d0c5559f7105f60978b2929a31843f6d803dc6d6f354f5ff93fd36ca4a51795e",
+                "fixture_sha256": {
+                  "bom": "c9c9441faae93583603c4071c4c764ce858a49c67fbd9e5b7fb9cd0414fc5f74",
+                  "ecmwf": "69c134f44e185b579fb32eafd5f719417d9aeea036e8b28d0edaaab06c69670c",
+                  "jma": "163e0b8c3652a4e7c1630a42a4947891a1977a059206e7876dfc89ffa4d6a653",
+                  "metoffice": "1a6529191e111cee6175e483ca68afceeafda5cdc735ea3dc122712c877460fd",
+                  "noaa": "3e83ea56f0eb72c1c02f90421ee2df52e9ec065acec67d85f60999c8c1010837"
+                },
+                "reference_sha256": {
+                  "fusion": "3518f34bdc366ffc7e2d3dd588c13df43fa5218e339faf09eb1f0ec28d8acea9"
+                },
+                "functional_unit": "valid_batch",
+                "target": "airflow",
+                "route": null
+              },
+              "100000": {
+                "status": "validated",
+                "schema_version": "2.0",
+                "contract_id": "climate-fusion-20000",
+                "binding_id": "baseline",
+                "contract_sha256": "f7a57612632c8f162cf4ae959565b42a0567f9bb30f15444c1263e2a81c03ecd",
+                "binding_sha256": "789e248c017b09237d955a06ddf9941989bc2ed52514de5a9611d9f5f306492b",
+                "artifact_sha256": "d0c5559f7105f60978b2929a31843f6d803dc6d6f354f5ff93fd36ca4a51795e",
+                "fixture_sha256": {
+                  "bom": "645682c2ac3ce983e32ceed37008e3e9d6d40acddf0032ae4d77f81d46a49327",
+                  "ecmwf": "5ec2690cdd454b534f7cd6c04291a0f122aadc2542acbd9bf6d04e508ee4f3aa",
+                  "jma": "fd52148492390bbd21b54199bb2fc6a8c501773cb81302235204d66464756f04",
+                  "metoffice": "536ddff94487edaedfcd0a1df7d33c4195fa22a7db078a70a66ac39ae3dda6aa",
+                  "noaa": "e9433f149206295bdb895509edf46f71023c16108b644954ec4caeb37d940f44"
+                },
+                "reference_sha256": {
+                  "fusion": "13ae1bf179a6a66e33d1e2c84c033b20a886305653ac6e329d92fb99b97b37bb"
+                },
+                "functional_unit": "valid_batch",
+                "target": "airflow",
+                "route": null
+              },
+              "500000": {
+                "status": "validated",
+                "schema_version": "2.0",
+                "contract_id": "climate-fusion-100000",
+                "binding_id": "baseline",
+                "contract_sha256": "7f7b1c37d312449fdad259e5d868823697518f6742577d3556bd7f70588a5b09",
+                "binding_sha256": "71a944d4c3e8dde91473e0f63d9b682c702b1f347a0c533bcc9e09ef00735f3e",
+                "artifact_sha256": "d0c5559f7105f60978b2929a31843f6d803dc6d6f354f5ff93fd36ca4a51795e",
+                "fixture_sha256": {
+                  "bom": "0fa64725292941d1d2db26f08505b85dd0d06f94ebefe78c30711ddcb165534a",
+                  "ecmwf": "525794b8205d2d16091ca8c94249e2a32088b8f60d29d53d5a6619eb041d9805",
+                  "jma": "b6c5e0b55c67281586a9be629b95f5204646edd0e3ee088e6bb2de3eadc06ec6",
+                  "metoffice": "fb8b1f8d06226b48ac42b6a1353ffe7e99c5f1ba19003edba840aa5671620112",
+                  "noaa": "b9309543486e6e70165ef118ae694f65152283fb838f9acb20d94fe31fff8ec4"
+                },
+                "reference_sha256": {
+                  "fusion": "b48adb1afefc862a067da653cb755b78f99cc48698edd4a583a660678e6e0908"
+                },
+                "functional_unit": "valid_batch",
+                "target": "airflow",
+                "route": null
+              },
+              "1000000": {
+                "status": "validated",
+                "schema_version": "2.0",
+                "contract_id": "climate-fusion-200000",
+                "binding_id": "baseline",
+                "contract_sha256": "0eb3abf1e0873f8600c6a5bcfa89121ab3561c2403d6e45627a809ffe7dd66b9",
+                "binding_sha256": "4fb1c026ba18f081b47e05ff513104ccf64f10ef0f3dd6965135c9115f26fd01",
+                "artifact_sha256": "d0c5559f7105f60978b2929a31843f6d803dc6d6f354f5ff93fd36ca4a51795e",
+                "fixture_sha256": {
+                  "bom": "f7d4726f4eca26532a77536e35d8b9459b2b7dd2624e9bc63943677a4300ffe3",
+                  "ecmwf": "ede3bebcce03df50115bfd1a1374cfec62f0988561336f10ec5588f31d8b7491",
+                  "jma": "5076fb9f339e63cbc5b566691a03a31144a673b4d9b55516c23cdb1228bd5b4c",
+                  "metoffice": "41ea11e35703fc2f13398525b27bec42cf847bbf43faea0ceb4799a2e1ed870c",
+                  "noaa": "a2a0da136fbb8a8b46353034d33366785b0f2ec145f51ae8600662b04aa1eb46"
+                },
+                "reference_sha256": {
+                  "fusion": "b132f7970de780b305f5e4a7287a0db09beda738edb4d64fe914f21a5d77175d"
+                },
+                "functional_unit": "valid_batch",
+                "target": "airflow",
+                "route": null
+              }
+            }
+          },
+          "missing_attempt_files": [],
+          "last_attempt_started_at_utc": "2026-11-14T21:14:33.029131+00:00",
+          "fingerprints_by_load": {
+            "10000": [
+              "88ef46fbbb3ea77e7b9f0b6d1069ef262f873d04d7bdb1c569cd8d36ea2d4536"
+            ],
+            "100000": [
+              "bf63f27e1b623944d3c109a2172f241447c7a897ded968b00c84802bf5d42b66"
+            ],
+            "500000": [
+              "44510f29fe5b785b4a7f03cf0a50696563331dfd84b5ce61be2e83d0dc379958"
+            ],
+            "1000000": [
+              "1e4c9fec3ff04b11827f3dd8820d3f27f2d0db91c2dd9bbbd13d9099ab16d4a4"
+            ]
+          },
+          "summary": {
+            "status": "descriptive_only",
+            "loads": {
+              "10000": {
+                "attempted": 3,
+                "verified": 3,
+                "fingerprints_match": true,
+                "metrics": {
+                  "task_wall_s": {
+                    "coverage": 1.0,
+                    "median": 0.021051959,
+                    "mad": 0.0002622499999999986
+                  },
+                  "task_thread_cpu_s": {
+                    "coverage": 1.0,
+                    "median": 0.019648042,
+                    "mad": 1.8626000000000753e-05
+                  },
+                  "execution_wall_s": {
+                    "coverage": 1.0,
+                    "median": 3.593467043,
+                    "mad": 0.15299216699999985
+                  },
+                  "execution_process_cpu_s": {
+                    "coverage": 1.0,
+                    "median": 3.591237455,
+                    "mad": 0.1537318980000002
+                  },
+                  "verification_wall_s": {
+                    "coverage": 1.0,
+                    "median": 0.069888166,
+                    "mad": 4.875000000001406e-06
+                  },
+                  "worker_wall_s": {
+                    "coverage": 1.0,
+                    "median": 7.048517087,
+                    "mad": 0.34137708300000025
+                  },
+                  "worker_cpu_s": {
+                    "coverage": 1.0,
+                    "median": 6.570108,
+                    "mad": 0.11008800000000019
+                  },
+                  "cgroup_lifetime_peak_bytes": {
+                    "coverage": 1.0,
+                    "median": 243011584,
+                    "mad": 311296
+                  }
+                }
+              },
+              "100000": {
+                "attempted": 3,
+                "verified": 3,
+                "fingerprints_match": true,
+                "metrics": {
+                  "task_wall_s": {
+                    "coverage": 1.0,
+                    "median": 0.184756875,
+                    "mad": 0.005276208999999976
+                  },
+                  "task_thread_cpu_s": {
+                    "coverage": 1.0,
+                    "median": 0.18204888,
+                    "mad": 0.005623220999999984
+                  },
+                  "execution_wall_s": {
+                    "coverage": 1.0,
+                    "median": 3.567744919,
+                    "mad": 0.04415083399999986
+                  },
+                  "execution_process_cpu_s": {
+                    "coverage": 1.0,
+                    "median": 3.562842621,
+                    "mad": 0.043488804999999964
+                  },
+                  "verification_wall_s": {
+                    "coverage": 1.0,
+                    "median": 0.71635425,
+                    "mad": 0.010894457999999996
+                  },
+                  "worker_wall_s": {
+                    "coverage": 1.0,
+                    "median": 7.036064587,
+                    "mad": 0.021980250000000368
+                  },
+                  "worker_cpu_s": {
+                    "coverage": 1.0,
+                    "median": 7.025955,
+                    "mad": 0.02039999999999953
+                  },
+                  "cgroup_lifetime_peak_bytes": {
+                    "coverage": 1.0,
+                    "median": 246996992,
+                    "mad": 45056
+                  }
+                }
+              },
+              "500000": {
+                "attempted": 3,
+                "verified": 3,
+                "fingerprints_match": true,
+                "metrics": {
+                  "task_wall_s": {
+                    "coverage": 1.0,
+                    "median": 0.889536459,
+                    "mad": 0.0015395419999999493
+                  },
+                  "task_thread_cpu_s": {
+                    "coverage": 1.0,
+                    "median": 0.880584207,
+                    "mad": 0.000114084999999986
+                  },
+                  "execution_wall_s": {
+                    "coverage": 1.0,
+                    "median": 4.217485418,
+                    "mad": 0.03509474999999984
+                  },
+                  "execution_process_cpu_s": {
+                    "coverage": 1.0,
+                    "median": 4.209722937,
+                    "mad": 0.03628266100000044
+                  },
+                  "verification_wall_s": {
+                    "coverage": 1.0,
+                    "median": 3.528915918,
+                    "mad": 0.03064374900000022
+                  },
+                  "worker_wall_s": {
+                    "coverage": 1.0,
+                    "median": 10.779807129,
+                    "mad": 0.17571399899999918
+                  },
+                  "worker_cpu_s": {
+                    "coverage": 1.0,
+                    "median": 10.747479,
+                    "mad": 0.17116099999999967
+                  },
+                  "cgroup_lifetime_peak_bytes": {
+                    "coverage": 1.0,
+                    "median": 268267520,
+                    "mad": 495616
+                  }
+                }
+              },
+              "1000000": {
+                "attempted": 3,
+                "verified": 3,
+                "fingerprints_match": true,
+                "metrics": {
+                  "task_wall_s": {
+                    "coverage": 1.0,
+                    "median": 1.821746542,
+                    "mad": 0.05958458200000005
+                  },
+                  "task_thread_cpu_s": {
+                    "coverage": 1.0,
+                    "median": 1.805105871,
+                    "mad": 0.05847129299999998
+                  },
+                  "execution_wall_s": {
+                    "coverage": 1.0,
+                    "median": 5.144970293,
+                    "mad": 0.06525549900000005
+                  },
+                  "execution_process_cpu_s": {
+                    "coverage": 1.0,
+                    "median": 5.128175983,
+                    "mad": 0.06394666200000021
+                  },
+                  "verification_wall_s": {
+                    "coverage": 1.0,
+                    "median": 7.340236879,
+                    "mad": 0.0382028339999998
+                  },
+                  "worker_wall_s": {
+                    "coverage": 1.0,
+                    "median": 15.803666423,
+                    "mad": 0.34880803999999976
+                  },
+                  "worker_cpu_s": {
+                    "coverage": 1.0,
+                    "median": 15.748723,
+                    "mad": 0.34422900000000034
+                  },
+                  "cgroup_lifetime_peak_bytes": {
+                    "coverage": 1.0,
+                    "median": 292470784,
+                    "mad": 675840
+                  }
+                }
+              }
+            },
+            "time_fits_descriptive_only": {
+              "task_wall_s": {
+                "intercept_s": -0.0013667255836294911,
+                "slope_s_per_100k_rows": 0.18152538741208185,
+                "r_squared": 0.9998112301006591,
+                "residuals_s": {
+                  "10000": 0.004266145842421302,
+                  "100000": 0.004598213171547627,
+                  "500000": -0.01672375247677982,
+                  "1000000": 0.00785939346281106
+                },
+                "monotone_medians": true
+              },
+              "task_thread_cpu_s": {
+                "intercept_s": -0.002581621288731073,
+                "slope_s_per_100k_rows": 0.1799822040468897,
+                "r_squared": 0.9998074851884927,
+                "residuals_s": {
+                  "10000": 0.004231442884042105,
+                  "100000": 0.004648297241841376,
+                  "500000": -0.01674519194571744,
+                  "1000000": 0.007865451819834224
+                },
+                "monotone_medians": true
+              },
+              "execution_wall_s": {
+                "intercept_s": 3.476181003216926,
+                "slope_s_per_100k_rows": 0.16266730808275132,
+                "r_squared": 0.9864643600327314,
+                "residuals_s": {
+                  "10000": 0.10101930897479905,
+                  "100000": -0.0711033922996771,
+                  "500000": -0.07203212563068284,
+                  "1000000": 0.04211620895556045
+                },
+                "monotone_medians": false
+              },
+              "execution_process_cpu_s": {
+                "intercept_s": 3.473804619915084,
+                "slope_s_per_100k_rows": 0.16128947306457544,
+                "r_squared": 0.9862631562400478,
+                "residuals_s": {
+                  "10000": 0.10130388777845845,
+                  "100000": -0.07225147197965942,
+                  "500000": -0.0705290482379608,
+                  "1000000": 0.041476632439161776
+                },
+                "monotone_medians": false
+              },
+              "verification_wall_s": {
+                "intercept_s": -0.035965124780990454,
+                "slope_s_per_100k_rows": 0.7328730255977617,
+                "r_squared": 0.9995868029478617,
+                "residuals_s": {
+                  "10000": 0.03256598822121429,
+                  "100000": 0.01944634918322874,
+                  "500000": -0.0994840852078176,
+                  "1000000": 0.04747174780337371
+                },
+                "monotone_medians": true
+              },
+              "worker_wall_s": {
+                "intercept_s": 6.48526781309476,
+                "slope_s_per_100k_rows": 0.9147195014671404,
+                "r_squared": 0.9910557202815912,
+                "residuals_s": {
+                  "10000": 0.4717773237585261,
+                  "100000": -0.36392272756190014,
+                  "500000": -0.27905819143046173,
+                  "1000000": 0.17120359523383577
+                },
+                "monotone_medians": false
+              },
+              "worker_cpu_s": {
+                "intercept_s": 6.2394890363517534,
+                "slope_s_per_100k_rows": 0.9400191835150922,
+                "r_squared": 0.9976323044277261,
+                "residuals_s": {
+                  "10000": 0.23661704529673777,
+                  "100000": -0.1535532198668461,
+                  "500000": -0.1921059539272143,
+                  "1000000": 0.10904212849732353
+                },
+                "monotone_medians": true
+              }
+            },
+            "memory_note": "Container lifetime high-water; collected here, evaluated separately by memory_check"
+          }
+        },
+        {
+          "manifest": {
+            "schema_version": "1.1",
+            "started_at_utc": "2026-11-14T21:15:13.968138+00:00",
+            "oci_profile": {
+              "image_id": "sha256:c3a0884681181256c1fb28216ee2770d179480fb8c3ad0e13fff54fcee1edad1",
+              "image_architecture": "arm64",
+              "engine_version": "29.9.3",
+              "kernel_version": "7.0.14-linuxkit",
+              "engine_platform": "Docker Desktop",
+              "cgroup_version": "2",
+              "environment_class": "docker_desktop_vm",
+              "limits": {
+                "cpu_cores": 2,
+                "memory_bytes": 2147483648,
+                "pids": 128,
+                "scratch_bytes": 268435456
+              },
+              "isolation": {
+                "network": "none",
+                "user": "50000:50000",
+                "root_filesystem": "read_only",
+                "input_mount": "read_only",
+                "capabilities": "none",
+                "no_new_privileges": true
+              }
+            },
+            "conformance_report_sha256": "14d68d5ede997997b3f92eff3fad705ee982b050b8a086325bcb58b77bf6c203",
+            "controller_platform": "macOS-15.6.1-arm64-arm-64bit",
+            "repetitions": 3,
+            "metrics": [
+              "task_wall_s",
+              "task_thread_cpu_s",
+              "execution_wall_s",
+              "execution_process_cpu_s",
+              "verification_wall_s",
+              "worker_wall_s",
+              "worker_cpu_s",
+              "cgroup_lifetime_peak_bytes"
+            ],
+            "loads_are_total_rows": true,
+            "sources": [
+              "bom",
+              "ecmwf",
+              "jma",
+              "metoffice",
+              "noaa"
+            ],
+            "seed": 1730,
+            "round_order": [
+              [
+                100000,
+                1000000,
+                10000,
+                500000
+              ],
+              [
+                10000,
+                1000000,
+                500000,
+                100000
+              ],
+              [
+                100000,
+                1000000,
+                10000,
+                500000
+              ]
+            ],
+            "timeout_s": 90,
+            "cache_policy": "fresh_containers_and_database_os_cache_uncontrolled",
+            "task_timing_source": "trusted_benchmark_task_instrumentation_v1",
+            "workloads": {
+              "10000": {
+                "status": "validated",
+                "schema_version": "2.0",
+                "contract_id": "climate-fusion-2000",
+                "binding_id": "baseline",
+                "contract_sha256": "24e466475af09522a6cdaf8b6ddf4b7e5d67f2893dbe04c041c42d880d6958aa",
+                "binding_sha256": "14d3790e3ed984e219058a0d34d894b5e245ef8699bf8aeda6c7d2709ae7af4b",
+                "artifact_sha256": "d0c5559f7105f60978b2929a31843f6d803dc6d6f354f5ff93fd36ca4a51795e",
+                "fixture_sha256": {
+                  "bom": "c9c9441faae93583603c4071c4c764ce858a49c67fbd9e5b7fb9cd0414fc5f74",
+                  "ecmwf": "69c134f44e185b579fb32eafd5f719417d9aeea036e8b28d0edaaab06c69670c",
+                  "jma": "163e0b8c3652a4e7c1630a42a4947891a1977a059206e7876dfc89ffa4d6a653",
+                  "metoffice": "1a6529191e111cee6175e483ca68afceeafda5cdc735ea3dc122712c877460fd",
+                  "noaa": "3e83ea56f0eb72c1c02f90421ee2df52e9ec065acec67d85f60999c8c1010837"
+                },
+                "reference_sha256": {
+                  "fusion": "3518f34bdc366ffc7e2d3dd588c13df43fa5218e339faf09eb1f0ec28d8acea9"
+                },
+                "functional_unit": "valid_batch",
+                "target": "airflow",
+                "route": null
+              },
+              "100000": {
+                "status": "validated",
+                "schema_version": "2.0",
+                "contract_id": "climate-fusion-20000",
+                "binding_id": "baseline",
+                "contract_sha256": "f7a57612632c8f162cf4ae959565b42a0567f9bb30f15444c1263e2a81c03ecd",
+                "binding_sha256": "789e248c017b09237d955a06ddf9941989bc2ed52514de5a9611d9f5f306492b",
+                "artifact_sha256": "d0c5559f7105f60978b2929a31843f6d803dc6d6f354f5ff93fd36ca4a51795e",
+                "fixture_sha256": {
+                  "bom": "645682c2ac3ce983e32ceed37008e3e9d6d40acddf0032ae4d77f81d46a49327",
+                  "ecmwf": "5ec2690cdd454b534f7cd6c04291a0f122aadc2542acbd9bf6d04e508ee4f3aa",
+                  "jma": "fd52148492390bbd21b54199bb2fc6a8c501773cb81302235204d66464756f04",
+                  "metoffice": "536ddff94487edaedfcd0a1df7d33c4195fa22a7db078a70a66ac39ae3dda6aa",
+                  "noaa": "e9433f149206295bdb895509edf46f71023c16108b644954ec4caeb37d940f44"
+                },
+                "reference_sha256": {
+                  "fusion": "13ae1bf179a6a66e33d1e2c84c033b20a886305653ac6e329d92fb99b97b37bb"
+                },
+                "functional_unit": "valid_batch",
+                "target": "airflow",
+                "route": null
+              },
+              "500000": {
+                "status": "validated",
+                "schema_version": "2.0",
+                "contract_id": "climate-fusion-100000",
+                "binding_id": "baseline",
+                "contract_sha256": "7f7b1c37d312449fdad259e5d868823697518f6742577d3556bd7f70588a5b09",
+                "binding_sha256": "71a944d4c3e8dde91473e0f63d9b682c702b1f347a0c533bcc9e09ef00735f3e",
+                "artifact_sha256": "d0c5559f7105f60978b2929a31843f6d803dc6d6f354f5ff93fd36ca4a51795e",
+                "fixture_sha256": {
+                  "bom": "0fa64725292941d1d2db26f08505b85dd0d06f94ebefe78c30711ddcb165534a",
+                  "ecmwf": "525794b8205d2d16091ca8c94249e2a32088b8f60d29d53d5a6619eb041d9805",
+                  "jma": "b6c5e0b55c67281586a9be629b95f5204646edd0e3ee088e6bb2de3eadc06ec6",
+                  "metoffice": "fb8b1f8d06226b48ac42b6a1353ffe7e99c5f1ba19003edba840aa5671620112",
+                  "noaa": "b9309543486e6e70165ef118ae694f65152283fb838f9acb20d94fe31fff8ec4"
+                },
+                "reference_sha256": {
+                  "fusion": "b48adb1afefc862a067da653cb755b78f99cc48698edd4a583a660678e6e0908"
+                },
+                "functional_unit": "valid_batch",
+                "target": "airflow",
+                "route": null
+              },
+              "1000000": {
+                "status": "validated",
+                "schema_version": "2.0",
+                "contract_id": "climate-fusion-200000",
+                "binding_id": "baseline",
+                "contract_sha256": "0eb3abf1e0873f8600c6a5bcfa89121ab3561c2403d6e45627a809ffe7dd66b9",
+                "binding_sha256": "4fb1c026ba18f081b47e05ff513104ccf64f10ef0f3dd6965135c9115f26fd01",
+                "artifact_sha256": "d0c5559f7105f60978b2929a31843f6d803dc6d6f354f5ff93fd36ca4a51795e",
+                "fixture_sha256": {
+                  "bom": "f7d4726f4eca26532a77536e35d8b9459b2b7dd2624e9bc63943677a4300ffe3",
+                  "ecmwf": "ede3bebcce03df50115bfd1a1374cfec62f0988561336f10ec5588f31d8b7491",
+                  "jma": "5076fb9f339e63cbc5b566691a03a31144a673b4d9b55516c23cdb1228bd5b4c",
+                  "metoffice": "41ea11e35703fc2f13398525b27bec42cf847bbf43faea0ceb4799a2e1ed870c",
+                  "noaa": "a2a0da136fbb8a8b46353034d33366785b0f2ec145f51ae8600662b04aa1eb46"
+                },
+                "reference_sha256": {
+                  "fusion": "b132f7970de780b305f5e4a7287a0db09beda738edb4d64fe914f21a5d77175d"
+                },
+                "functional_unit": "valid_batch",
+                "target": "airflow",
+                "route": null
+              }
+            }
+          },
+          "missing_attempt_files": [],
+          "last_attempt_started_at_utc": "2026-11-14T21:17:10.768586+00:00",
+          "fingerprints_by_load": {
+            "10000": [
+              "88ef46fbbb3ea77e7b9f0b6d1069ef262f873d04d7bdb1c569cd8d36ea2d4536"
+            ],
+            "100000": [
+              "bf63f27e1b623944d3c109a2172f241447c7a897ded968b00c84802bf5d42b66"
+            ],
+            "500000": [
+              "44510f29fe5b785b4a7f03cf0a50696563331dfd84b5ce61be2e83d0dc379958"
+            ],
+            "1000000": [
+              "1e4c9fec3ff04b11827f3dd8820d3f27f2d0db91c2dd9bbbd13d9099ab16d4a4"
+            ]
+          },
+          "summary": {
+            "status": "descriptive_only",
+            "loads": {
+              "10000": {
+                "attempted": 3,
+                "verified": 3,
+                "fingerprints_match": true,
+                "metrics": {
+                  "task_wall_s": {
+                    "coverage": 1.0,
+                    "median": 0.019834041,
+                    "mad": 0.0005164570000000014
+                  },
+                  "task_thread_cpu_s": {
+                    "coverage": 1.0,
+                    "median": 0.018459331,
+                    "mad": 0.00044025099999999914
+                  },
+                  "execution_wall_s": {
+                    "coverage": 1.0,
+                    "median": 3.334219169,
+                    "mad": 0.027277041999999696
+                  },
+                  "execution_process_cpu_s": {
+                    "coverage": 1.0,
+                    "median": 3.332657455,
+                    "mad": 0.02733881500000024
+                  },
+                  "verification_wall_s": {
+                    "coverage": 1.0,
+                    "median": 0.071623667,
+                    "mad": 0.0003468749999999965
+                  },
+                  "worker_wall_s": {
+                    "coverage": 1.0,
+                    "median": 6.288577835,
+                    "mad": 0.04467079099999971
+                  },
+                  "worker_cpu_s": {
+                    "coverage": 1.0,
+                    "median": 6.280424,
+                    "mad": 0.045423000000000435
+                  },
+                  "cgroup_lifetime_peak_bytes": {
+                    "coverage": 1.0,
+                    "median": 242835456,
+                    "mad": 114688
+                  }
+                }
+              },
+              "100000": {
+                "attempted": 3,
+                "verified": 3,
+                "fingerprints_match": true,
+                "metrics": {
+                  "task_wall_s": {
+                    "coverage": 1.0,
+                    "median": 0.182318292,
+                    "mad": 0.0007175829999999939
+                  },
+                  "task_thread_cpu_s": {
+                    "coverage": 1.0,
+                    "median": 0.179603415,
+                    "mad": 0.00020475000000000354
+                  },
+                  "execution_wall_s": {
+                    "coverage": 1.0,
+                    "median": 3.846172126,
+                    "mad": 0.269334626
+                  },
+                  "execution_process_cpu_s": {
+                    "coverage": 1.0,
+                    "median": 3.841686821,
+                    "mad": 0.2702798739999994
+                  },
+                  "verification_wall_s": {
+                    "coverage": 1.0,
+                    "median": 0.685800542,
+                    "mad": 0.0057471669999999975
+                  },
+                  "worker_wall_s": {
+                    "coverage": 1.0,
+                    "median": 7.350178129,
+                    "mad": 0.20024887499999977
+                  },
+                  "worker_cpu_s": {
+                    "coverage": 1.0,
+                    "median": 7.340012,
+                    "mad": 0.19928599999999985
+                  },
+                  "cgroup_lifetime_peak_bytes": {
+                    "coverage": 1.0,
+                    "median": 248856576,
+                    "mad": 180224
+                  }
+                }
+              },
+              "500000": {
+                "attempted": 3,
+                "verified": 3,
+                "fingerprints_match": true,
+                "metrics": {
+                  "task_wall_s": {
+                    "coverage": 1.0,
+                    "median": 0.942996209,
+                    "mad": 0.041403458000000004
+                  },
+                  "task_thread_cpu_s": {
+                    "coverage": 1.0,
+                    "median": 0.934565578,
+                    "mad": 0.032928873000000025
+                  },
+                  "execution_wall_s": {
+                    "coverage": 1.0,
+                    "median": 4.420674044,
+                    "mad": 0.15887125099999988
+                  },
+                  "execution_process_cpu_s": {
+                    "coverage": 1.0,
+                    "median": 4.411962689,
+                    "mad": 0.1587339960000005
+                  },
+                  "verification_wall_s": {
+                    "coverage": 1.0,
+                    "median": 3.72556671,
+                    "mad": 0.07952391699999994
+                  },
+                  "worker_wall_s": {
+                    "coverage": 1.0,
+                    "median": 11.180546297,
+                    "mad": 0.2706678769999993
+                  },
+                  "worker_cpu_s": {
+                    "coverage": 1.0,
+                    "median": 11.151151,
+                    "mad": 0.2687020000000011
+                  },
+                  "cgroup_lifetime_peak_bytes": {
+                    "coverage": 1.0,
+                    "median": 268136448,
+                    "mad": 323584
+                  }
+                }
+              },
+              "1000000": {
+                "attempted": 3,
+                "verified": 3,
+                "fingerprints_match": true,
+                "metrics": {
+                  "task_wall_s": {
+                    "coverage": 1.0,
+                    "median": 1.876419792,
+                    "mad": 0.022623083999999904
+                  },
+                  "task_thread_cpu_s": {
+                    "coverage": 1.0,
+                    "median": 1.861227907,
+                    "mad": 0.019055425000000126
+                  },
+                  "execution_wall_s": {
+                    "coverage": 1.0,
+                    "median": 5.231235294,
+                    "mad": 0.07453837499999949
+                  },
+                  "execution_process_cpu_s": {
+                    "coverage": 1.0,
+                    "median": 5.216197846,
+                    "mad": 0.07118121799999955
+                  },
+                  "verification_wall_s": {
+                    "coverage": 1.0,
+                    "median": 7.401512628,
+                    "mad": 0.05794879100000028
+                  },
+                  "worker_wall_s": {
+                    "coverage": 1.0,
+                    "median": 15.750690924,
+                    "mad": 0.0006728329999994287
+                  },
+                  "worker_cpu_s": {
+                    "coverage": 1.0,
+                    "median": 15.695261,
+                    "mad": 0.0035399999999992104
+                  },
+                  "cgroup_lifetime_peak_bytes": {
+                    "coverage": 1.0,
+                    "median": 292401152,
+                    "mad": 110592
+                  }
+                }
+              }
+            },
+            "time_fits_descriptive_only": {
+              "task_wall_s": {
+                "intercept_s": -0.0009566347113101337,
+                "slope_s_per_100k_rows": 0.1879127250214435,
+                "r_squared": 0.9999778669626601,
+                "residuals_s": {
+                  "10000": 0.0019994032091657857,
+                  "100000": -0.004637798310133362,
+                  "500000": 0.004389218604092693,
+                  "1000000": -0.001750823503124721
+                },
+                "monotone_medians": true
+              },
+              "task_thread_cpu_s": {
+                "intercept_s": -0.0022698725323693214,
+                "slope_s_per_100k_rows": 0.1865177466540048,
+                "r_squared": 0.9999780487631739,
+                "residuals_s": {
+                  "10000": 0.0020774288669688397,
+                  "100000": -0.004644459121635497,
+                  "500000": 0.004246717262345268,
+                  "1000000": -0.0016796870076787318
+                },
+                "monotone_medians": true
+              },
+              "execution_wall_s": {
+                "intercept_s": 3.494888681116039,
+                "slope_s_per_100k_rows": 0.17718918686558027,
+                "r_squared": 0.9672907715915168,
+                "residuals_s": {
+                  "10000": -0.17838843080259714,
+                  "100000": 0.17409425801838063,
+                  "500000": 0.03983942855605971,
+                  "1000000": -0.035545255771841866
+                },
+                "monotone_medians": true
+              },
+              "execution_process_cpu_s": {
+                "intercept_s": 3.4926113844012576,
+                "slope_s_per_100k_rows": 0.1759043026953396,
+                "r_squared": 0.9671371780426099,
+                "residuals_s": {
+                  "10000": -0.17754435967079152,
+                  "100000": 0.173171133903403,
+                  "500000": 0.03982979112204443,
+                  "1000000": -0.03545656535465369
+                },
+                "monotone_medians": true
+              },
+              "verification_wall_s": {
+                "intercept_s": -0.021002590105787977,
+                "slope_s_per_100k_rows": 0.7433859569828044,
+                "r_squared": 0.9999207759938575,
+                "residuals_s": {
+                  "10000": 0.01828766140750754,
+                  "100000": -0.03658282487701647,
+                  "500000": 0.029639515191765664,
+                  "1000000": -0.011344351722256896
+                },
+                "monotone_medians": true
+              },
+              "worker_wall_s": {
+                "intercept_s": 6.322211932271781,
+                "slope_s_per_100k_rows": 0.9491394693113591,
+                "r_squared": 0.9992862565804363,
+                "residuals_s": {
+                  "10000": -0.1285480442029172,
+                  "100000": 0.07882672741685948,
+                  "500000": 0.11263701817142291,
+                  "1000000": -0.06291570138536962
+                },
+                "monotone_medians": true
+              },
+              "worker_cpu_s": {
+                "intercept_s": 6.315962766572723,
+                "slope_s_per_100k_rows": 0.9442855238328637,
+                "r_squared": 0.9992633356215509,
+                "residuals_s": {
+                  "10000": -0.12996731895600977,
+                  "100000": 0.07976370959441237,
+                  "500000": 0.11376061426295969,
+                  "1000000": -0.06355700490136051
+                },
+                "monotone_medians": true
+              }
+            },
+            "memory_note": "Container lifetime high-water; collected here, evaluated separately by memory_check"
+          }
+        }
+      ],
+      "slope_spread_s_per_100k_rows": {
+        "task_wall_s": {
+          "session_values": [
+            0.18152538741208185,
+            0.1879127250214435
+          ],
+          "span": 0.006387337609361637,
+          "span_fraction_of_median": null
+        },
+        "task_thread_cpu_s": {
+          "session_values": [
+            0.1799822040468897,
+            0.1865177466540048
+          ],
+          "span": 0.0065355426071151135,
+          "span_fraction_of_median": null
+        },
+        "execution_wall_s": {
+          "session_values": [
+            0.16266730808275132,
+            0.17718918686558027
+          ],
+          "span": 0.014521878782828956,
+          "span_fraction_of_median": null
+        },
+        "execution_process_cpu_s": {
+          "session_values": [
+            0.16128947306457544,
+            0.1759043026953396
+          ],
+          "span": 0.014614829630764159,
+          "span_fraction_of_median": null
+        },
+        "verification_wall_s": {
+          "session_values": [
+            0.7328730255977617,
+            0.7433859569828044
+          ],
+          "span": 0.010512931385042723,
+          "span_fraction_of_median": null
+        },
+        "worker_wall_s": {
+          "session_values": [
+            0.9147195014671404,
+            0.9491394693113591
+          ],
+          "span": 0.034419967844218635,
+          "span_fraction_of_median": null
+        },
+        "worker_cpu_s": {
+          "session_values": [
+            0.9400191835150922,
+            0.9442855238328637
+          ],
+          "span": 0.004266340317771511,
+          "span_fraction_of_median": null
+        }
+      },
+      "load_median_spread": {
+        "10000": {
+          "task_wall_s": {
+            "session_values": [
+              0.021051959,
+              0.019834041
+            ],
+            "span": 0.0012179179999999984,
+            "span_fraction_of_median": 0.05957628528102521
+          },
+          "task_thread_cpu_s": {
+            "session_values": [
+              0.019648042,
+              0.018459331
+            ],
+            "span": 0.001188711000000002,
+            "span_fraction_of_median": 0.06238745452225227
+          },
+          "execution_wall_s": {
+            "session_values": [
+              3.593467043,
+              3.334219169
+            ],
+            "span": 0.25924787400000016,
+            "span_fraction_of_median": 0.07484400016586669
+          },
+          "execution_process_cpu_s": {
+            "session_values": [
+              3.591237455,
+              3.332657455
+            ],
+            "span": 0.2585799999999998,
+            "span_fraction_of_median": 0.07469206374768615
+          },
+          "verification_wall_s": {
+            "session_values": [
+              0.069888166,
+              0.071623667
+            ],
+            "span": 0.0017355010000000004,
+            "span_fraction_of_median": 0.02452799830527247
+          },
+          "worker_wall_s": {
+            "session_values": [
+              7.048517087,
+              6.288577835
+            ],
+            "span": 0.7599392519999997,
+            "span_fraction_of_median": 0.11395873785774047
+          },
+          "worker_cpu_s": {
+            "session_values": [
+              6.570108,
+              6.280424
+            ],
+            "span": 0.2896840000000003,
+            "span_fraction_of_median": 0.0450851373312794
+          },
+          "cgroup_lifetime_peak_bytes": {
+            "session_values": [
+              243011584,
+              242835456
+            ],
+            "span": 176128,
+            "span_fraction_of_median": 0.0007250347763773554
+          }
+        },
+        "100000": {
+          "task_wall_s": {
+            "session_values": [
+              0.184756875,
+              0.182318292
+            ],
+            "span": 0.002438582999999994,
+            "span_fraction_of_median": 0.013286559371094664
+          },
+          "task_thread_cpu_s": {
+            "session_values": [
+              0.18204888,
+              0.179603415
+            ],
+            "span": 0.0024454650000000078,
+            "span_fraction_of_median": 0.013523846157260017
+          },
+          "execution_wall_s": {
+            "session_values": [
+              3.567744919,
+              3.846172126
+            ],
+            "span": 0.278427207,
+            "span_fraction_of_median": 0.0751093397215102
+          },
+          "execution_process_cpu_s": {
+            "session_values": [
+              3.562842621,
+              3.841686821
+            ],
+            "span": 0.2788442,
+            "span_fraction_of_median": 0.07531719663867871
+          },
+          "verification_wall_s": {
+            "session_values": [
+              0.71635425,
+              0.685800542
+            ],
+            "span": 0.030553708000000013,
+            "span_fraction_of_median": 0.04358107703132967
+          },
+          "worker_wall_s": {
+            "session_values": [
+              7.036064587,
+              7.350178129
+            ],
+            "span": 0.3141135419999994,
+            "span_fraction_of_median": 0.043668600370637516
+          },
+          "worker_cpu_s": {
+            "session_values": [
+              7.025955,
+              7.340012
+            ],
+            "span": 0.31405700000000003,
+            "span_fraction_of_median": 0.043722361327991364
+          },
+          "cgroup_lifetime_peak_bytes": {
+            "session_values": [
+              246996992,
+              248856576
+            ],
+            "span": 1859584,
+            "span_fraction_of_median": 0.007500536932709941
+          }
+        },
+        "500000": {
+          "task_wall_s": {
+            "session_values": [
+              0.889536459,
+              0.942996209
+            ],
+            "span": 0.05345975000000003,
+            "span_fraction_of_median": 0.05834520817393693
+          },
+          "task_thread_cpu_s": {
+            "session_values": [
+              0.880584207,
+              0.934565578
+            ],
+            "span": 0.053981371,
+            "span_fraction_of_median": 0.059478695858700165
+          },
+          "execution_wall_s": {
+            "session_values": [
+              4.217485418,
+              4.420674044
+            ],
+            "span": 0.2031886260000002,
+            "span_fraction_of_median": 0.047044425816366156
+          },
+          "execution_process_cpu_s": {
+            "session_values": [
+              4.209722937,
+              4.411962689
+            ],
+            "span": 0.20223975199999966,
+            "span_fraction_of_median": 0.04691420234347562
+          },
+          "verification_wall_s": {
+            "session_values": [
+              3.528915918,
+              3.72556671
+            ],
+            "span": 0.1966507919999998,
+            "span_fraction_of_median": 0.05421497357812676
+          },
+          "worker_wall_s": {
+            "session_values": [
+              10.779807129,
+              11.180546297
+            ],
+            "span": 0.4007391679999994,
+            "span_fraction_of_median": 0.036496604606148425
+          },
+          "worker_cpu_s": {
+            "session_values": [
+              10.747479,
+              11.151151
+            ],
+            "span": 0.40367200000000025,
+            "span_fraction_of_median": 0.03686732914342132
+          },
+          "cgroup_lifetime_peak_bytes": {
+            "session_values": [
+              268267520,
+              268136448
+            ],
+            "span": 131072,
+            "span_fraction_of_median": 0.0004887063027840987
+          }
+        },
+        "1000000": {
+          "task_wall_s": {
+            "session_values": [
+              1.821746542,
+              1.876419792
+            ],
+            "span": 0.05467325000000001,
+            "span_fraction_of_median": 0.029567761459157776
+          },
+          "task_thread_cpu_s": {
+            "session_values": [
+              1.805105871,
+              1.861227907
+            ],
+            "span": 0.056122035999999875,
+            "span_fraction_of_median": 0.030614799087176764
+          },
+          "execution_wall_s": {
+            "session_values": [
+              5.144970293,
+              5.231235294
+            ],
+            "span": 0.08626500100000012,
+            "span_fraction_of_median": 0.016627465652391975
+          },
+          "execution_process_cpu_s": {
+            "session_values": [
+              5.128175983,
+              5.216197846
+            ],
+            "span": 0.08802186299999981,
+            "span_fraction_of_median": 0.017018306657331807
+          },
+          "verification_wall_s": {
+            "session_values": [
+              7.340236879,
+              7.401512628
+            ],
+            "span": 0.06127574899999999,
+            "span_fraction_of_median": 0.008313226184029745
+          },
+          "worker_wall_s": {
+            "session_values": [
+              15.803666423,
+              15.750690924
+            ],
+            "span": 0.05297549899999865,
+            "span_fraction_of_median": 0.0033577295469803155
+          },
+          "worker_cpu_s": {
+            "session_values": [
+              15.748723,
+              15.695261
+            ],
+            "span": 0.053461999999999676,
+            "span_fraction_of_median": 0.0034004596872966018
+          },
+          "cgroup_lifetime_peak_bytes": {
+            "session_values": [
+              292470784,
+              292401152
+            ],
+            "span": 69632,
+            "span_fraction_of_median": 0.00023811024504345513
+          }
+        }
+      },
+      "limitations": "No pooled fit or accuracy claim. Host identity and session separation beyond recorded timestamps are operator-controlled."
+    },
+    "view": {
+      "view_type": "campaign",
+      "view_schema_version": "1.0.0",
+      "report_id": "4cc69f88c470124f4dfd2f201c4833476ebe23cc7e1f15ac5d59ea670d58f218",
+      "report_kind": "scaling_sessions",
+      "identity": {
+        "name": "Scaling sessions",
+        "engine": "airflow",
+        "case": null,
+        "evidence_kind": "reported_campaign_summary"
+      },
+      "admission": {
+        "status": "campaign_inventory",
+        "reason": null
+      },
+      "status": "descriptive_only",
+      "sessions": [
+        {
+          "id": "session-1",
+          "label": "Session 1",
+          "pipeline": "Climate Fusion",
+          "engine": "airflow",
+          "environment": "docker_desktop_vm",
+          "profile_id": "b9e54890472e9eb928fc7c95c8658e6d5209c0abd972c4095a4537e7598609a3",
+          "started_at": "2026-11-14T21:12:31.961337+00:00",
+          "planned_repetitions": 3,
+          "metrics": [
+            {
+              "id": "task_wall_s",
+              "label": "Task body wall time",
+              "unit": "s",
+              "raw_unit": "s",
+              "scope": "task_callable_body",
+              "definition": "Opt-in trusted task-callable wall interval. Not independent instrumentation of arbitrary code.",
+              "source": "trusted_benchmark_task_instrumentation_v1",
+              "points": [
+                {
+                  "rows": 10000,
+                  "median": 0.021051959,
+                  "raw_median": 0.021051959,
+                  "mad": 0.0002622499999999986,
+                  "coverage": 1.0,
+                  "attempted": 3,
+                  "verified": 3,
+                  "planned": 3,
+                  "fingerprints_match": true,
+                  "missing_reason": null,
+                  "pointer": "/sessions/0/summary/loads/10000/metrics/task_wall_s/median",
+                  "fitted": 0.016785813157578693
+                },
+                {
+                  "rows": 100000,
+                  "median": 0.184756875,
+                  "raw_median": 0.184756875,
+                  "mad": 0.005276208999999976,
+                  "coverage": 1.0,
+                  "attempted": 3,
+                  "verified": 3,
+                  "planned": 3,
+                  "fingerprints_match": true,
+                  "missing_reason": null,
+                  "pointer": "/sessions/0/summary/loads/100000/metrics/task_wall_s/median",
+                  "fitted": 0.18015866182845233
+                },
+                {
+                  "rows": 500000,
+                  "median": 0.889536459,
+                  "raw_median": 0.889536459,
+                  "mad": 0.0015395419999999493,
+                  "coverage": 1.0,
+                  "attempted": 3,
+                  "verified": 3,
+                  "planned": 3,
+                  "fingerprints_match": true,
+                  "missing_reason": null,
+                  "pointer": "/sessions/0/summary/loads/500000/metrics/task_wall_s/median",
+                  "fitted": 0.9062602114767797
+                },
+                {
+                  "rows": 1000000,
+                  "median": 1.821746542,
+                  "raw_median": 1.821746542,
+                  "mad": 0.05958458200000005,
+                  "coverage": 1.0,
+                  "attempted": 3,
+                  "verified": 3,
+                  "planned": 3,
+                  "fingerprints_match": true,
+                  "missing_reason": null,
+                  "pointer": "/sessions/0/summary/loads/1000000/metrics/task_wall_s/median",
+                  "fitted": 1.813887148537189
+                }
+              ],
+              "fit": {
+                "status": "reported_descriptive",
+                "intercept": -0.0013667255836294911,
+                "slope_per_100k_rows": 0.18152538741208185,
+                "r_squared": 0.9998112301006591,
+                "reason": null,
+                "pointer": "/sessions/0/summary/time_fits_descriptive_only/task_wall_s"
+              }
+            },
+            {
+              "id": "task_thread_cpu_s",
+              "label": "Task thread CPU",
+              "unit": "CPU-s",
+              "raw_unit": "s",
+              "scope": "task_callable_body",
+              "definition": "Current-thread CPU time in the instrumented task; excludes child processes and background threads.",
+              "source": "time.thread_time_ns",
+              "points": [
+                {
+                  "rows": 10000,
+                  "median": 0.019648042,
+                  "raw_median": 0.019648042,
+                  "mad": 1.8626000000000753e-05,
+                  "coverage": 1.0,
+                  "attempted": 3,
+                  "verified": 3,
+                  "planned": 3,
+                  "fingerprints_match": true,
+                  "missing_reason": null,
+                  "pointer": "/sessions/0/summary/loads/10000/metrics/task_thread_cpu_s/median",
+                  "fitted": 0.015416599115957896
+                },
+                {
+                  "rows": 100000,
+                  "median": 0.18204888,
+                  "raw_median": 0.18204888,
+                  "mad": 0.005623220999999984,
+                  "coverage": 1.0,
+                  "attempted": 3,
+                  "verified": 3,
+                  "planned": 3,
+                  "fingerprints_match": true,
+                  "missing_reason": null,
+                  "pointer": "/sessions/0/summary/loads/100000/metrics/task_thread_cpu_s/median",
+                  "fitted": 0.17740058275815865
+                },
+                {
+                  "rows": 500000,
+                  "median": 0.880584207,
+                  "raw_median": 0.880584207,
+                  "mad": 0.000114084999999986,
+                  "coverage": 1.0,
+                  "attempted": 3,
+                  "verified": 3,
+                  "planned": 3,
+                  "fingerprints_match": true,
+                  "missing_reason": null,
+                  "pointer": "/sessions/0/summary/loads/500000/metrics/task_thread_cpu_s/median",
+                  "fitted": 0.8973293989457174
+                },
+                {
+                  "rows": 1000000,
+                  "median": 1.805105871,
+                  "raw_median": 1.805105871,
+                  "mad": 0.05847129299999998,
+                  "coverage": 1.0,
+                  "attempted": 3,
+                  "verified": 3,
+                  "planned": 3,
+                  "fingerprints_match": true,
+                  "missing_reason": null,
+                  "pointer": "/sessions/0/summary/loads/1000000/metrics/task_thread_cpu_s/median",
+                  "fitted": 1.7972404191801659
+                }
+              ],
+              "fit": {
+                "status": "reported_descriptive",
+                "intercept": -0.002581621288731073,
+                "slope_per_100k_rows": 0.1799822040468897,
+                "r_squared": 0.9998074851884927,
+                "reason": null,
+                "pointer": "/sessions/0/summary/time_fits_descriptive_only/task_thread_cpu_s"
+              }
+            },
+            {
+              "id": "execution_wall_s",
+              "label": "Execution block wall time",
+              "unit": "s",
+              "raw_unit": "s",
+              "scope": "bounded_execution_block",
+              "definition": "Elapsed monotonic time across the bounded execution block.",
+              "source": "time.perf_counter",
+              "points": [
+                {
+                  "rows": 10000,
+                  "median": 3.593467043,
+                  "raw_median": 3.593467043,
+                  "mad": 0.15299216699999985,
+                  "coverage": 1.0,
+                  "attempted": 3,
+                  "verified": 3,
+                  "planned": 3,
+                  "fingerprints_match": true,
+                  "missing_reason": null,
+                  "pointer": "/sessions/0/summary/loads/10000/metrics/execution_wall_s/median",
+                  "fitted": 3.492447734025201
+                },
+                {
+                  "rows": 100000,
+                  "median": 3.567744919,
+                  "raw_median": 3.567744919,
+                  "mad": 0.04415083399999986,
+                  "coverage": 1.0,
+                  "attempted": 3,
+                  "verified": 3,
+                  "planned": 3,
+                  "fingerprints_match": true,
+                  "missing_reason": null,
+                  "pointer": "/sessions/0/summary/loads/100000/metrics/execution_wall_s/median",
+                  "fitted": 3.638848311299677
+                },
+                {
+                  "rows": 500000,
+                  "median": 4.217485418,
+                  "raw_median": 4.217485418,
+                  "mad": 0.03509474999999984,
+                  "coverage": 1.0,
+                  "attempted": 3,
+                  "verified": 3,
+                  "planned": 3,
+                  "fingerprints_match": true,
+                  "missing_reason": null,
+                  "pointer": "/sessions/0/summary/loads/500000/metrics/execution_wall_s/median",
+                  "fitted": 4.289517543630683
+                },
+                {
+                  "rows": 1000000,
+                  "median": 5.144970293,
+                  "raw_median": 5.144970293,
+                  "mad": 0.06525549900000005,
+                  "coverage": 1.0,
+                  "attempted": 3,
+                  "verified": 3,
+                  "planned": 3,
+                  "fingerprints_match": true,
+                  "missing_reason": null,
+                  "pointer": "/sessions/0/summary/loads/1000000/metrics/execution_wall_s/median",
+                  "fitted": 5.102854084044439
+                }
+              ],
+              "fit": {
+                "status": "reported_descriptive",
+                "intercept": 3.476181003216926,
+                "slope_per_100k_rows": 0.16266730808275132,
+                "r_squared": 0.9864643600327314,
+                "reason": null,
+                "pointer": "/sessions/0/summary/time_fits_descriptive_only/execution_wall_s"
+              }
+            },
+            {
+              "id": "execution_process_cpu_s",
+              "label": "Execution process CPU",
+              "unit": "CPU-s",
+              "raw_unit": "s",
+              "scope": "bounded_execution_block",
+              "definition": "Runner process CPU time, excluding descendant process CPU.",
+              "source": "time.process_time",
+              "points": [
+                {
+                  "rows": 10000,
+                  "median": 3.591237455,
+                  "raw_median": 3.591237455,
+                  "mad": 0.1537318980000002,
+                  "coverage": 1.0,
+                  "attempted": 3,
+                  "verified": 3,
+                  "planned": 3,
+                  "fingerprints_match": true,
+                  "missing_reason": null,
+                  "pointer": "/sessions/0/summary/loads/10000/metrics/execution_process_cpu_s/median",
+                  "fitted": 3.4899335672215415
+                },
+                {
+                  "rows": 100000,
+                  "median": 3.562842621,
+                  "raw_median": 3.562842621,
+                  "mad": 0.043488804999999964,
+                  "coverage": 1.0,
+                  "attempted": 3,
+                  "verified": 3,
+                  "planned": 3,
+                  "fingerprints_match": true,
+                  "missing_reason": null,
+                  "pointer": "/sessions/0/summary/loads/100000/metrics/execution_process_cpu_s/median",
+                  "fitted": 3.6350940929796596
+                },
+                {
+                  "rows": 500000,
+                  "median": 4.209722937,
+                  "raw_median": 4.209722937,
+                  "mad": 0.03628266100000044,
+                  "coverage": 1.0,
+                  "attempted": 3,
+                  "verified": 3,
+                  "planned": 3,
+                  "fingerprints_match": true,
+                  "missing_reason": null,
+                  "pointer": "/sessions/0/summary/loads/500000/metrics/execution_process_cpu_s/median",
+                  "fitted": 4.280251985237961
+                },
+                {
+                  "rows": 1000000,
+                  "median": 5.128175983,
+                  "raw_median": 5.128175983,
+                  "mad": 0.06394666200000021,
+                  "coverage": 1.0,
+                  "attempted": 3,
+                  "verified": 3,
+                  "planned": 3,
+                  "fingerprints_match": true,
+                  "missing_reason": null,
+                  "pointer": "/sessions/0/summary/loads/1000000/metrics/execution_process_cpu_s/median",
+                  "fitted": 5.086699350560838
+                }
+              ],
+              "fit": {
+                "status": "reported_descriptive",
+                "intercept": 3.473804619915084,
+                "slope_per_100k_rows": 0.16128947306457544,
+                "r_squared": 0.9862631562400478,
+                "reason": null,
+                "pointer": "/sessions/0/summary/time_fits_descriptive_only/execution_process_cpu_s"
+              }
+            },
+            {
+              "id": "verification_wall_s",
+              "label": "Output verification wall time",
+              "unit": "s",
+              "raw_unit": "s",
+              "scope": "output_verification",
+              "definition": "Elapsed time for output verification, not pipeline-only runtime.",
+              "source": "time.perf_counter_ns",
+              "points": [
+                {
+                  "rows": 10000,
+                  "median": 0.069888166,
+                  "raw_median": 0.069888166,
+                  "mad": 4.875000000001406e-06,
+                  "coverage": 1.0,
+                  "attempted": 3,
+                  "verified": 3,
+                  "planned": 3,
+                  "fingerprints_match": true,
+                  "missing_reason": null,
+                  "pointer": "/sessions/0/summary/loads/10000/metrics/verification_wall_s/median",
+                  "fitted": 0.037322177778785715
+                },
+                {
+                  "rows": 100000,
+                  "median": 0.71635425,
+                  "raw_median": 0.71635425,
+                  "mad": 0.010894457999999996,
+                  "coverage": 1.0,
+                  "attempted": 3,
+                  "verified": 3,
+                  "planned": 3,
+                  "fingerprints_match": true,
+                  "missing_reason": null,
+                  "pointer": "/sessions/0/summary/loads/100000/metrics/verification_wall_s/median",
+                  "fitted": 0.6969079008167712
+                },
+                {
+                  "rows": 500000,
+                  "median": 3.528915918,
+                  "raw_median": 3.528915918,
+                  "mad": 0.03064374900000022,
+                  "coverage": 1.0,
+                  "attempted": 3,
+                  "verified": 3,
+                  "planned": 3,
+                  "fingerprints_match": true,
+                  "missing_reason": null,
+                  "pointer": "/sessions/0/summary/loads/500000/metrics/verification_wall_s/median",
+                  "fitted": 3.628400003207818
+                },
+                {
+                  "rows": 1000000,
+                  "median": 7.340236879,
+                  "raw_median": 7.340236879,
+                  "mad": 0.0382028339999998,
+                  "coverage": 1.0,
+                  "attempted": 3,
+                  "verified": 3,
+                  "planned": 3,
+                  "fingerprints_match": true,
+                  "missing_reason": null,
+                  "pointer": "/sessions/0/summary/loads/1000000/metrics/verification_wall_s/median",
+                  "fitted": 7.292765131196626
+                }
+              ],
+              "fit": {
+                "status": "reported_descriptive",
+                "intercept": -0.035965124780990454,
+                "slope_per_100k_rows": 0.7328730255977617,
+                "r_squared": 0.9995868029478617,
+                "reason": null,
+                "pointer": "/sessions/0/summary/time_fits_descriptive_only/verification_wall_s"
+              }
+            },
+            {
+              "id": "worker_wall_s",
+              "label": "Worker wall time",
+              "unit": "s",
+              "raw_unit": "s",
+              "scope": "container_worker_window",
+              "definition": "Elapsed monotonic time across the container worker window.",
+              "source": "time.perf_counter_ns",
+              "points": [
+                {
+                  "rows": 10000,
+                  "median": 7.048517087,
+                  "raw_median": 7.048517087,
+                  "mad": 0.34137708300000025,
+                  "coverage": 1.0,
+                  "attempted": 3,
+                  "verified": 3,
+                  "planned": 3,
+                  "fingerprints_match": true,
+                  "missing_reason": null,
+                  "pointer": "/sessions/0/summary/loads/10000/metrics/worker_wall_s/median",
+                  "fitted": 6.5767397632414735
+                },
+                {
+                  "rows": 100000,
+                  "median": 7.036064587,
+                  "raw_median": 7.036064587,
+                  "mad": 0.021980250000000368,
+                  "coverage": 1.0,
+                  "attempted": 3,
+                  "verified": 3,
+                  "planned": 3,
+                  "fingerprints_match": true,
+                  "missing_reason": null,
+                  "pointer": "/sessions/0/summary/loads/100000/metrics/worker_wall_s/median",
+                  "fitted": 7.3999873145619
+                },
+                {
+                  "rows": 500000,
+                  "median": 10.779807129,
+                  "raw_median": 10.779807129,
+                  "mad": 0.17571399899999918,
+                  "coverage": 1.0,
+                  "attempted": 3,
+                  "verified": 3,
+                  "planned": 3,
+                  "fingerprints_match": true,
+                  "missing_reason": null,
+                  "pointer": "/sessions/0/summary/loads/500000/metrics/worker_wall_s/median",
+                  "fitted": 11.058865320430462
+                },
+                {
+                  "rows": 1000000,
+                  "median": 15.803666423,
+                  "raw_median": 15.803666423,
+                  "mad": 0.34880803999999976,
+                  "coverage": 1.0,
+                  "attempted": 3,
+                  "verified": 3,
+                  "planned": 3,
+                  "fingerprints_match": true,
+                  "missing_reason": null,
+                  "pointer": "/sessions/0/summary/loads/1000000/metrics/worker_wall_s/median",
+                  "fitted": 15.632462827766163
+                }
+              ],
+              "fit": {
+                "status": "reported_descriptive",
+                "intercept": 6.48526781309476,
+                "slope_per_100k_rows": 0.9147195014671404,
+                "r_squared": 0.9910557202815912,
+                "reason": null,
+                "pointer": "/sessions/0/summary/time_fits_descriptive_only/worker_wall_s"
+              }
+            },
+            {
+              "id": "worker_cpu_s",
+              "label": "Worker cgroup CPU",
+              "unit": "CPU-s",
+              "raw_unit": "s",
+              "scope": "container_worker_window",
+              "definition": "Accumulated CPU time, not elapsed time or electricity.",
+              "source": "cgroup v2 cpu.stat:usage_usec",
+              "points": [
+                {
+                  "rows": 10000,
+                  "median": 6.570108,
+                  "raw_median": 6.570108,
+                  "mad": 0.11008800000000019,
+                  "coverage": 1.0,
+                  "attempted": 3,
+                  "verified": 3,
+                  "planned": 3,
+                  "fingerprints_match": true,
+                  "missing_reason": null,
+                  "pointer": "/sessions/0/summary/loads/10000/metrics/worker_cpu_s/median",
+                  "fitted": 6.3334909547032625
+                },
+                {
+                  "rows": 100000,
+                  "median": 7.025955,
+                  "raw_median": 7.025955,
+                  "mad": 0.02039999999999953,
+                  "coverage": 1.0,
+                  "attempted": 3,
+                  "verified": 3,
+                  "planned": 3,
+                  "fingerprints_match": true,
+                  "missing_reason": null,
+                  "pointer": "/sessions/0/summary/loads/100000/metrics/worker_cpu_s/median",
+                  "fitted": 7.179508219866846
+                },
+                {
+                  "rows": 500000,
+                  "median": 10.747479,
+                  "raw_median": 10.747479,
+                  "mad": 0.17116099999999967,
+                  "coverage": 1.0,
+                  "attempted": 3,
+                  "verified": 3,
+                  "planned": 3,
+                  "fingerprints_match": true,
+                  "missing_reason": null,
+                  "pointer": "/sessions/0/summary/loads/500000/metrics/worker_cpu_s/median",
+                  "fitted": 10.939584953927213
+                },
+                {
+                  "rows": 1000000,
+                  "median": 15.748723,
+                  "raw_median": 15.748723,
+                  "mad": 0.34422900000000034,
+                  "coverage": 1.0,
+                  "attempted": 3,
+                  "verified": 3,
+                  "planned": 3,
+                  "fingerprints_match": true,
+                  "missing_reason": null,
+                  "pointer": "/sessions/0/summary/loads/1000000/metrics/worker_cpu_s/median",
+                  "fitted": 15.639680871502673
+                }
+              ],
+              "fit": {
+                "status": "reported_descriptive",
+                "intercept": 6.2394890363517534,
+                "slope_per_100k_rows": 0.9400191835150922,
+                "r_squared": 0.9976323044277261,
+                "reason": null,
+                "pointer": "/sessions/0/summary/time_fits_descriptive_only/worker_cpu_s"
+              }
+            },
+            {
+              "id": "cgroup_lifetime_peak_bytes",
+              "label": "Peak memory",
+              "unit": "MiB",
+              "raw_unit": "bytes",
+              "scope": "container_cgroup_lifetime_including_page_cache",
+              "definition": "Container lifetime high-water mark, not additive memory consumption.",
+              "source": "cgroup v2 memory.peak",
+              "points": [
+                {
+                  "rows": 10000,
+                  "median": 231.75390625,
+                  "raw_median": 243011584,
+                  "mad": 0.296875,
+                  "coverage": 1.0,
+                  "attempted": 3,
+                  "verified": 3,
+                  "planned": 3,
+                  "fingerprints_match": true,
+                  "missing_reason": null,
+                  "pointer": "/sessions/0/summary/loads/10000/metrics/cgroup_lifetime_peak_bytes/median",
+                  "fitted": null
+                },
+                {
+                  "rows": 100000,
+                  "median": 235.5546875,
+                  "raw_median": 246996992,
+                  "mad": 0.04296875,
+                  "coverage": 1.0,
+                  "attempted": 3,
+                  "verified": 3,
+                  "planned": 3,
+                  "fingerprints_match": true,
+                  "missing_reason": null,
+                  "pointer": "/sessions/0/summary/loads/100000/metrics/cgroup_lifetime_peak_bytes/median",
+                  "fitted": null
+                },
+                {
+                  "rows": 500000,
+                  "median": 255.83984375,
+                  "raw_median": 268267520,
+                  "mad": 0.47265625,
+                  "coverage": 1.0,
+                  "attempted": 3,
+                  "verified": 3,
+                  "planned": 3,
+                  "fingerprints_match": true,
+                  "missing_reason": null,
+                  "pointer": "/sessions/0/summary/loads/500000/metrics/cgroup_lifetime_peak_bytes/median",
+                  "fitted": null
+                },
+                {
+                  "rows": 1000000,
+                  "median": 278.921875,
+                  "raw_median": 292470784,
+                  "mad": 0.64453125,
+                  "coverage": 1.0,
+                  "attempted": 3,
+                  "verified": 3,
+                  "planned": 3,
+                  "fingerprints_match": true,
+                  "missing_reason": null,
+                  "pointer": "/sessions/0/summary/loads/1000000/metrics/cgroup_lifetime_peak_bytes/median",
+                  "fitted": null
+                }
+              ],
+              "fit": {
+                "status": "not_available",
+                "intercept": null,
+                "slope_per_100k_rows": null,
+                "r_squared": null,
+                "reason": "memory_high_water_not_fitted",
+                "pointer": null
+              }
+            }
+          ]
+        },
+        {
+          "id": "session-2",
+          "label": "Session 2",
+          "pipeline": "Climate Fusion",
+          "engine": "airflow",
+          "environment": "docker_desktop_vm",
+          "profile_id": "b9e54890472e9eb928fc7c95c8658e6d5209c0abd972c4095a4537e7598609a3",
+          "started_at": "2026-11-14T21:15:13.968138+00:00",
+          "planned_repetitions": 3,
+          "metrics": [
+            {
+              "id": "task_wall_s",
+              "label": "Task body wall time",
+              "unit": "s",
+              "raw_unit": "s",
+              "scope": "task_callable_body",
+              "definition": "Opt-in trusted task-callable wall interval. Not independent instrumentation of arbitrary code.",
+              "source": "trusted_benchmark_task_instrumentation_v1",
+              "points": [
+                {
+                  "rows": 10000,
+                  "median": 0.019834041,
+                  "raw_median": 0.019834041,
+                  "mad": 0.0005164570000000014,
+                  "coverage": 1.0,
+                  "attempted": 3,
+                  "verified": 3,
+                  "planned": 3,
+                  "fingerprints_match": true,
+                  "missing_reason": null,
+                  "pointer": "/sessions/1/summary/loads/10000/metrics/task_wall_s/median",
+                  "fitted": 0.017834637790834214
+                },
+                {
+                  "rows": 100000,
+                  "median": 0.182318292,
+                  "raw_median": 0.182318292,
+                  "mad": 0.0007175829999999939,
+                  "coverage": 1.0,
+                  "attempted": 3,
+                  "verified": 3,
+                  "planned": 3,
+                  "fingerprints_match": true,
+                  "missing_reason": null,
+                  "pointer": "/sessions/1/summary/loads/100000/metrics/task_wall_s/median",
+                  "fitted": 0.18695609031013335
+                },
+                {
+                  "rows": 500000,
+                  "median": 0.942996209,
+                  "raw_median": 0.942996209,
+                  "mad": 0.041403458000000004,
+                  "coverage": 1.0,
+                  "attempted": 3,
+                  "verified": 3,
+                  "planned": 3,
+                  "fingerprints_match": true,
+                  "missing_reason": null,
+                  "pointer": "/sessions/1/summary/loads/500000/metrics/task_wall_s/median",
+                  "fitted": 0.9386069903959072
+                },
+                {
+                  "rows": 1000000,
+                  "median": 1.876419792,
+                  "raw_median": 1.876419792,
+                  "mad": 0.022623083999999904,
+                  "coverage": 1.0,
+                  "attempted": 3,
+                  "verified": 3,
+                  "planned": 3,
+                  "fingerprints_match": true,
+                  "missing_reason": null,
+                  "pointer": "/sessions/1/summary/loads/1000000/metrics/task_wall_s/median",
+                  "fitted": 1.8781706155031246
+                }
+              ],
+              "fit": {
+                "status": "reported_descriptive",
+                "intercept": -0.0009566347113101337,
+                "slope_per_100k_rows": 0.1879127250214435,
+                "r_squared": 0.9999778669626601,
+                "reason": null,
+                "pointer": "/sessions/1/summary/time_fits_descriptive_only/task_wall_s"
+              }
+            },
+            {
+              "id": "task_thread_cpu_s",
+              "label": "Task thread CPU",
+              "unit": "CPU-s",
+              "raw_unit": "s",
+              "scope": "task_callable_body",
+              "definition": "Current-thread CPU time in the instrumented task; excludes child processes and background threads.",
+              "source": "time.thread_time_ns",
+              "points": [
+                {
+                  "rows": 10000,
+                  "median": 0.018459331,
+                  "raw_median": 0.018459331,
+                  "mad": 0.00044025099999999914,
+                  "coverage": 1.0,
+                  "attempted": 3,
+                  "verified": 3,
+                  "planned": 3,
+                  "fingerprints_match": true,
+                  "missing_reason": null,
+                  "pointer": "/sessions/1/summary/loads/10000/metrics/task_thread_cpu_s/median",
+                  "fitted": 0.01638190213303116
+                },
+                {
+                  "rows": 100000,
+                  "median": 0.179603415,
+                  "raw_median": 0.179603415,
+                  "mad": 0.00020475000000000354,
+                  "coverage": 1.0,
+                  "attempted": 3,
+                  "verified": 3,
+                  "planned": 3,
+                  "fingerprints_match": true,
+                  "missing_reason": null,
+                  "pointer": "/sessions/1/summary/loads/100000/metrics/task_thread_cpu_s/median",
+                  "fitted": 0.18424787412163549
+                },
+                {
+                  "rows": 500000,
+                  "median": 0.934565578,
+                  "raw_median": 0.934565578,
+                  "mad": 0.032928873000000025,
+                  "coverage": 1.0,
+                  "attempted": 3,
+                  "verified": 3,
+                  "planned": 3,
+                  "fingerprints_match": true,
+                  "missing_reason": null,
+                  "pointer": "/sessions/1/summary/loads/500000/metrics/task_thread_cpu_s/median",
+                  "fitted": 0.9303188607376548
+                },
+                {
+                  "rows": 1000000,
+                  "median": 1.861227907,
+                  "raw_median": 1.861227907,
+                  "mad": 0.019055425000000126,
+                  "coverage": 1.0,
+                  "attempted": 3,
+                  "verified": 3,
+                  "planned": 3,
+                  "fingerprints_match": true,
+                  "missing_reason": null,
+                  "pointer": "/sessions/1/summary/loads/1000000/metrics/task_thread_cpu_s/median",
+                  "fitted": 1.862907594007679
+                }
+              ],
+              "fit": {
+                "status": "reported_descriptive",
+                "intercept": -0.0022698725323693214,
+                "slope_per_100k_rows": 0.1865177466540048,
+                "r_squared": 0.9999780487631739,
+                "reason": null,
+                "pointer": "/sessions/1/summary/time_fits_descriptive_only/task_thread_cpu_s"
+              }
+            },
+            {
+              "id": "execution_wall_s",
+              "label": "Execution block wall time",
+              "unit": "s",
+              "raw_unit": "s",
+              "scope": "bounded_execution_block",
+              "definition": "Elapsed monotonic time across the bounded execution block.",
+              "source": "time.perf_counter",
+              "points": [
+                {
+                  "rows": 10000,
+                  "median": 3.334219169,
+                  "raw_median": 3.334219169,
+                  "mad": 0.027277041999999696,
+                  "coverage": 1.0,
+                  "attempted": 3,
+                  "verified": 3,
+                  "planned": 3,
+                  "fingerprints_match": true,
+                  "missing_reason": null,
+                  "pointer": "/sessions/1/summary/loads/10000/metrics/execution_wall_s/median",
+                  "fitted": 3.512607599802597
+                },
+                {
+                  "rows": 100000,
+                  "median": 3.846172126,
+                  "raw_median": 3.846172126,
+                  "mad": 0.269334626,
+                  "coverage": 1.0,
+                  "attempted": 3,
+                  "verified": 3,
+                  "planned": 3,
+                  "fingerprints_match": true,
+                  "missing_reason": null,
+                  "pointer": "/sessions/1/summary/loads/100000/metrics/execution_wall_s/median",
+                  "fitted": 3.6720778679816193
+                },
+                {
+                  "rows": 500000,
+                  "median": 4.420674044,
+                  "raw_median": 4.420674044,
+                  "mad": 0.15887125099999988,
+                  "coverage": 1.0,
+                  "attempted": 3,
+                  "verified": 3,
+                  "planned": 3,
+                  "fingerprints_match": true,
+                  "missing_reason": null,
+                  "pointer": "/sessions/1/summary/loads/500000/metrics/execution_wall_s/median",
+                  "fitted": 4.38083461544394
+                },
+                {
+                  "rows": 1000000,
+                  "median": 5.231235294,
+                  "raw_median": 5.231235294,
+                  "mad": 0.07453837499999949,
+                  "coverage": 1.0,
+                  "attempted": 3,
+                  "verified": 3,
+                  "planned": 3,
+                  "fingerprints_match": true,
+                  "missing_reason": null,
+                  "pointer": "/sessions/1/summary/loads/1000000/metrics/execution_wall_s/median",
+                  "fitted": 5.266780549771842
+                }
+              ],
+              "fit": {
+                "status": "reported_descriptive",
+                "intercept": 3.494888681116039,
+                "slope_per_100k_rows": 0.17718918686558027,
+                "r_squared": 0.9672907715915168,
+                "reason": null,
+                "pointer": "/sessions/1/summary/time_fits_descriptive_only/execution_wall_s"
+              }
+            },
+            {
+              "id": "execution_process_cpu_s",
+              "label": "Execution process CPU",
+              "unit": "CPU-s",
+              "raw_unit": "s",
+              "scope": "bounded_execution_block",
+              "definition": "Runner process CPU time, excluding descendant process CPU.",
+              "source": "time.process_time",
+              "points": [
+                {
+                  "rows": 10000,
+                  "median": 3.332657455,
+                  "raw_median": 3.332657455,
+                  "mad": 0.02733881500000024,
+                  "coverage": 1.0,
+                  "attempted": 3,
+                  "verified": 3,
+                  "planned": 3,
+                  "fingerprints_match": true,
+                  "missing_reason": null,
+                  "pointer": "/sessions/1/summary/loads/10000/metrics/execution_process_cpu_s/median",
+                  "fitted": 3.5102018146707916
+                },
+                {
+                  "rows": 100000,
+                  "median": 3.841686821,
+                  "raw_median": 3.841686821,
+                  "mad": 0.2702798739999994,
+                  "coverage": 1.0,
+                  "attempted": 3,
+                  "verified": 3,
+                  "planned": 3,
+                  "fingerprints_match": true,
+                  "missing_reason": null,
+                  "pointer": "/sessions/1/summary/loads/100000/metrics/execution_process_cpu_s/median",
+                  "fitted": 3.668515687096597
+                },
+                {
+                  "rows": 500000,
+                  "median": 4.411962689,
+                  "raw_median": 4.411962689,
+                  "mad": 0.1587339960000005,
+                  "coverage": 1.0,
+                  "attempted": 3,
+                  "verified": 3,
+                  "planned": 3,
+                  "fingerprints_match": true,
+                  "missing_reason": null,
+                  "pointer": "/sessions/1/summary/loads/500000/metrics/execution_process_cpu_s/median",
+                  "fitted": 4.372132897877956
+                },
+                {
+                  "rows": 1000000,
+                  "median": 5.216197846,
+                  "raw_median": 5.216197846,
+                  "mad": 0.07118121799999955,
+                  "coverage": 1.0,
+                  "attempted": 3,
+                  "verified": 3,
+                  "planned": 3,
+                  "fingerprints_match": true,
+                  "missing_reason": null,
+                  "pointer": "/sessions/1/summary/loads/1000000/metrics/execution_process_cpu_s/median",
+                  "fitted": 5.251654411354654
+                }
+              ],
+              "fit": {
+                "status": "reported_descriptive",
+                "intercept": 3.4926113844012576,
+                "slope_per_100k_rows": 0.1759043026953396,
+                "r_squared": 0.9671371780426099,
+                "reason": null,
+                "pointer": "/sessions/1/summary/time_fits_descriptive_only/execution_process_cpu_s"
+              }
+            },
+            {
+              "id": "verification_wall_s",
+              "label": "Output verification wall time",
+              "unit": "s",
+              "raw_unit": "s",
+              "scope": "output_verification",
+              "definition": "Elapsed time for output verification, not pipeline-only runtime.",
+              "source": "time.perf_counter_ns",
+              "points": [
+                {
+                  "rows": 10000,
+                  "median": 0.071623667,
+                  "raw_median": 0.071623667,
+                  "mad": 0.0003468749999999965,
+                  "coverage": 1.0,
+                  "attempted": 3,
+                  "verified": 3,
+                  "planned": 3,
+                  "fingerprints_match": true,
+                  "missing_reason": null,
+                  "pointer": "/sessions/1/summary/loads/10000/metrics/verification_wall_s/median",
+                  "fitted": 0.053336005592492464
+                },
+                {
+                  "rows": 100000,
+                  "median": 0.685800542,
+                  "raw_median": 0.685800542,
+                  "mad": 0.0057471669999999975,
+                  "coverage": 1.0,
+                  "attempted": 3,
+                  "verified": 3,
+                  "planned": 3,
+                  "fingerprints_match": true,
+                  "missing_reason": null,
+                  "pointer": "/sessions/1/summary/loads/100000/metrics/verification_wall_s/median",
+                  "fitted": 0.7223833668770163
+                },
+                {
+                  "rows": 500000,
+                  "median": 3.72556671,
+                  "raw_median": 3.72556671,
+                  "mad": 0.07952391699999994,
+                  "coverage": 1.0,
+                  "attempted": 3,
+                  "verified": 3,
+                  "planned": 3,
+                  "fingerprints_match": true,
+                  "missing_reason": null,
+                  "pointer": "/sessions/1/summary/loads/500000/metrics/verification_wall_s/median",
+                  "fitted": 3.695927194808234
+                },
+                {
+                  "rows": 1000000,
+                  "median": 7.401512628,
+                  "raw_median": 7.401512628,
+                  "mad": 0.05794879100000028,
+                  "coverage": 1.0,
+                  "attempted": 3,
+                  "verified": 3,
+                  "planned": 3,
+                  "fingerprints_match": true,
+                  "missing_reason": null,
+                  "pointer": "/sessions/1/summary/loads/1000000/metrics/verification_wall_s/median",
+                  "fitted": 7.412856979722257
+                }
+              ],
+              "fit": {
+                "status": "reported_descriptive",
+                "intercept": -0.021002590105787977,
+                "slope_per_100k_rows": 0.7433859569828044,
+                "r_squared": 0.9999207759938575,
+                "reason": null,
+                "pointer": "/sessions/1/summary/time_fits_descriptive_only/verification_wall_s"
+              }
+            },
+            {
+              "id": "worker_wall_s",
+              "label": "Worker wall time",
+              "unit": "s",
+              "raw_unit": "s",
+              "scope": "container_worker_window",
+              "definition": "Elapsed monotonic time across the container worker window.",
+              "source": "time.perf_counter_ns",
+              "points": [
+                {
+                  "rows": 10000,
+                  "median": 6.288577835,
+                  "raw_median": 6.288577835,
+                  "mad": 0.04467079099999971,
+                  "coverage": 1.0,
+                  "attempted": 3,
+                  "verified": 3,
+                  "planned": 3,
+                  "fingerprints_match": true,
+                  "missing_reason": null,
+                  "pointer": "/sessions/1/summary/loads/10000/metrics/worker_wall_s/median",
+                  "fitted": 6.417125879202917
+                },
+                {
+                  "rows": 100000,
+                  "median": 7.350178129,
+                  "raw_median": 7.350178129,
+                  "mad": 0.20024887499999977,
+                  "coverage": 1.0,
+                  "attempted": 3,
+                  "verified": 3,
+                  "planned": 3,
+                  "fingerprints_match": true,
+                  "missing_reason": null,
+                  "pointer": "/sessions/1/summary/loads/100000/metrics/worker_wall_s/median",
+                  "fitted": 7.27135140158314
+                },
+                {
+                  "rows": 500000,
+                  "median": 11.180546297,
+                  "raw_median": 11.180546297,
+                  "mad": 0.2706678769999993,
+                  "coverage": 1.0,
+                  "attempted": 3,
+                  "verified": 3,
+                  "planned": 3,
+                  "fingerprints_match": true,
+                  "missing_reason": null,
+                  "pointer": "/sessions/1/summary/loads/500000/metrics/worker_wall_s/median",
+                  "fitted": 11.067909278828576
+                },
+                {
+                  "rows": 1000000,
+                  "median": 15.750690924,
+                  "raw_median": 15.750690924,
+                  "mad": 0.0006728329999994287,
+                  "coverage": 1.0,
+                  "attempted": 3,
+                  "verified": 3,
+                  "planned": 3,
+                  "fingerprints_match": true,
+                  "missing_reason": null,
+                  "pointer": "/sessions/1/summary/loads/1000000/metrics/worker_wall_s/median",
+                  "fitted": 15.813606625385372
+                }
+              ],
+              "fit": {
+                "status": "reported_descriptive",
+                "intercept": 6.322211932271781,
+                "slope_per_100k_rows": 0.9491394693113591,
+                "r_squared": 0.9992862565804363,
+                "reason": null,
+                "pointer": "/sessions/1/summary/time_fits_descriptive_only/worker_wall_s"
+              }
+            },
+            {
+              "id": "worker_cpu_s",
+              "label": "Worker cgroup CPU",
+              "unit": "CPU-s",
+              "raw_unit": "s",
+              "scope": "container_worker_window",
+              "definition": "Accumulated CPU time, not elapsed time or electricity.",
+              "source": "cgroup v2 cpu.stat:usage_usec",
+              "points": [
+                {
+                  "rows": 10000,
+                  "median": 6.280424,
+                  "raw_median": 6.280424,
+                  "mad": 0.045423000000000435,
+                  "coverage": 1.0,
+                  "attempted": 3,
+                  "verified": 3,
+                  "planned": 3,
+                  "fingerprints_match": true,
+                  "missing_reason": null,
+                  "pointer": "/sessions/1/summary/loads/10000/metrics/worker_cpu_s/median",
+                  "fitted": 6.41039131895601
+                },
+                {
+                  "rows": 100000,
+                  "median": 7.340012,
+                  "raw_median": 7.340012,
+                  "mad": 0.19928599999999985,
+                  "coverage": 1.0,
+                  "attempted": 3,
+                  "verified": 3,
+                  "planned": 3,
+                  "fingerprints_match": true,
+                  "missing_reason": null,
+                  "pointer": "/sessions/1/summary/loads/100000/metrics/worker_cpu_s/median",
+                  "fitted": 7.260248290405587
+                },
+                {
+                  "rows": 500000,
+                  "median": 11.151151,
+                  "raw_median": 11.151151,
+                  "mad": 0.2687020000000011,
+                  "coverage": 1.0,
+                  "attempted": 3,
+                  "verified": 3,
+                  "planned": 3,
+                  "fingerprints_match": true,
+                  "missing_reason": null,
+                  "pointer": "/sessions/1/summary/loads/500000/metrics/worker_cpu_s/median",
+                  "fitted": 11.03739038573704
+                },
+                {
+                  "rows": 1000000,
+                  "median": 15.695261,
+                  "raw_median": 15.695261,
+                  "mad": 0.0035399999999992104,
+                  "coverage": 1.0,
+                  "attempted": 3,
+                  "verified": 3,
+                  "planned": 3,
+                  "fingerprints_match": true,
+                  "missing_reason": null,
+                  "pointer": "/sessions/1/summary/loads/1000000/metrics/worker_cpu_s/median",
+                  "fitted": 15.75881800490136
+                }
+              ],
+              "fit": {
+                "status": "reported_descriptive",
+                "intercept": 6.315962766572723,
+                "slope_per_100k_rows": 0.9442855238328637,
+                "r_squared": 0.9992633356215509,
+                "reason": null,
+                "pointer": "/sessions/1/summary/time_fits_descriptive_only/worker_cpu_s"
+              }
+            },
+            {
+              "id": "cgroup_lifetime_peak_bytes",
+              "label": "Peak memory",
+              "unit": "MiB",
+              "raw_unit": "bytes",
+              "scope": "container_cgroup_lifetime_including_page_cache",
+              "definition": "Container lifetime high-water mark, not additive memory consumption.",
+              "source": "cgroup v2 memory.peak",
+              "points": [
+                {
+                  "rows": 10000,
+                  "median": 231.5859375,
+                  "raw_median": 242835456,
+                  "mad": 0.109375,
+                  "coverage": 1.0,
+                  "attempted": 3,
+                  "verified": 3,
+                  "planned": 3,
+                  "fingerprints_match": true,
+                  "missing_reason": null,
+                  "pointer": "/sessions/1/summary/loads/10000/metrics/cgroup_lifetime_peak_bytes/median",
+                  "fitted": null
+                },
+                {
+                  "rows": 100000,
+                  "median": 237.328125,
+                  "raw_median": 248856576,
+                  "mad": 0.171875,
+                  "coverage": 1.0,
+                  "attempted": 3,
+                  "verified": 3,
+                  "planned": 3,
+                  "fingerprints_match": true,
+                  "missing_reason": null,
+                  "pointer": "/sessions/1/summary/loads/100000/metrics/cgroup_lifetime_peak_bytes/median",
+                  "fitted": null
+                },
+                {
+                  "rows": 500000,
+                  "median": 255.71484375,
+                  "raw_median": 268136448,
+                  "mad": 0.30859375,
+                  "coverage": 1.0,
+                  "attempted": 3,
+                  "verified": 3,
+                  "planned": 3,
+                  "fingerprints_match": true,
+                  "missing_reason": null,
+                  "pointer": "/sessions/1/summary/loads/500000/metrics/cgroup_lifetime_peak_bytes/median",
+                  "fitted": null
+                },
+                {
+                  "rows": 1000000,
+                  "median": 278.85546875,
+                  "raw_median": 292401152,
+                  "mad": 0.10546875,
+                  "coverage": 1.0,
+                  "attempted": 3,
+                  "verified": 3,
+                  "planned": 3,
+                  "fingerprints_match": true,
+                  "missing_reason": null,
+                  "pointer": "/sessions/1/summary/loads/1000000/metrics/cgroup_lifetime_peak_bytes/median",
+                  "fitted": null
+                }
+              ],
+              "fit": {
+                "status": "not_available",
+                "intercept": null,
+                "slope_per_100k_rows": null,
+                "r_squared": null,
+                "reason": "memory_high_water_not_fitted",
+                "pointer": null
+              }
+            }
+          ]
+        }
+      ],
+      "inventory": [],
+      "warnings": [
+        "Saved summary claims; attempts are not re-executed or requalified by this viewer.",
+        "Descriptive trends do not establish a complexity law, measurement accuracy or resource-comparison eligibility.",
+        "Sessions and scopes are never pooled. MAD is dispersion, not a confidence interval."
+      ]
+    }
+  },
+  {
+    "filename": "saved-suite-summary.json",
+    "report": {
+      "claim": "Semantic discrimination on deterministic fixtures, not general performance or carbon efficiency",
+      "pipelines": {
+        "climate_fusion": {
+          "cases": {
+            "equivalent": {
+              "attempt_telemetry": {
+                "cpu_s": {
+                  "available": 1,
+                  "coverage": 1.0,
+                  "mad": 0.0,
+                  "median": 0.99151
+                },
+                "memory_peak_bytes": {
+                  "available": 1,
+                  "coverage": 1.0,
+                  "mad": 0,
+                  "median": 120733696
+                },
+                "wall_clock_s": {
+                  "available": 1,
+                  "coverage": 1.0,
+                  "mad": 0.0,
+                  "median": 0.995430375
+                }
+              },
+              "attempted": 1,
+              "expected_behavior_matched": 1,
+              "planned": 1,
+              "verified_outputs": 1
+            },
+            "partial": {
+              "attempt_telemetry": {
+                "cpu_s": {
+                  "available": 1,
+                  "coverage": 1.0,
+                  "mad": 0.0,
+                  "median": 1.069827
+                },
+                "memory_peak_bytes": {
+                  "available": 1,
+                  "coverage": 1.0,
+                  "mad": 0,
+                  "median": 122912768
+                },
+                "wall_clock_s": {
+                  "available": 1,
+                  "coverage": 1.0,
+                  "mad": 0.0,
+                  "median": 1.0742755
+                }
+              },
+              "attempted": 1,
+              "expected_behavior_matched": 1,
+              "planned": 1,
+              "verified_outputs": 0
+            },
+            "same_shape_wrong": {
+              "attempt_telemetry": {
+                "cpu_s": {
+                  "available": 1,
+                  "coverage": 1.0,
+                  "mad": 0.0,
+                  "median": 0.969563
+                },
+                "memory_peak_bytes": {
+                  "available": 1,
+                  "coverage": 1.0,
+                  "mad": 0,
+                  "median": 120668160
+                },
+                "wall_clock_s": {
+                  "available": 1,
+                  "coverage": 1.0,
+                  "mad": 0.0,
+                  "median": 0.973911126
+                }
+              },
+              "attempted": 1,
+              "expected_behavior_matched": 1,
+              "planned": 1,
+              "verified_outputs": 0
+            },
+            "valid": {
+              "attempt_telemetry": {
+                "cpu_s": {
+                  "available": 1,
+                  "coverage": 1.0,
+                  "mad": 0.0,
+                  "median": 0.943274
+                },
+                "memory_peak_bytes": {
+                  "available": 1,
+                  "coverage": 1.0,
+                  "mad": 0,
+                  "median": 120774656
+                },
+                "wall_clock_s": {
+                  "available": 1,
+                  "coverage": 1.0,
+                  "mad": 0.0,
+                  "median": 0.947709876
+                }
+              },
+              "attempted": 1,
+              "expected_behavior_matched": 1,
+              "planned": 1,
+              "verified_outputs": 1
+            }
+          },
+          "positive_exact_equivalence": "passed"
+        },
+        "event_aggregation": {
+          "cases": {
+            "equivalent": {
+              "attempt_telemetry": {
+                "cpu_s": {
+                  "available": 1,
+                  "coverage": 1.0,
+                  "mad": 0.0,
+                  "median": 0.952915
+                },
+                "memory_peak_bytes": {
+                  "available": 1,
+                  "coverage": 1.0,
+                  "mad": 0,
+                  "median": 120954880
+                },
+                "wall_clock_s": {
+                  "available": 1,
+                  "coverage": 1.0,
+                  "mad": 0.0,
+                  "median": 0.954989626
+                }
+              },
+              "attempted": 1,
+              "expected_behavior_matched": 1,
+              "planned": 1,
+              "verified_outputs": 1
+            },
+            "partial": {
+              "attempt_telemetry": {
+                "cpu_s": {
+                  "available": 1,
+                  "coverage": 1.0,
+                  "mad": 0.0,
+                  "median": 1.101151
+                },
+                "memory_peak_bytes": {
+                  "available": 1,
+                  "coverage": 1.0,
+                  "mad": 0,
+                  "median": 122781696
+                },
+                "wall_clock_s": {
+                  "available": 1,
+                  "coverage": 1.0,
+                  "mad": 0.0,
+                  "median": 1.102623958
+                }
+              },
+              "attempted": 1,
+              "expected_behavior_matched": 1,
+              "planned": 1,
+              "verified_outputs": 0
+            },
+            "same_shape_wrong": {
+              "attempt_telemetry": {
+                "cpu_s": {
+                  "available": 1,
+                  "coverage": 1.0,
+                  "mad": 0.0,
+                  "median": 0.990373
+                },
+                "memory_peak_bytes": {
+                  "available": 1,
+                  "coverage": 1.0,
+                  "mad": 0,
+                  "median": 120901632
+                },
+                "wall_clock_s": {
+                  "available": 1,
+                  "coverage": 1.0,
+                  "mad": 0.0,
+                  "median": 0.995657334
+                }
+              },
+              "attempted": 1,
+              "expected_behavior_matched": 1,
+              "planned": 1,
+              "verified_outputs": 0
+            },
+            "valid": {
+              "attempt_telemetry": {
+                "cpu_s": {
+                  "available": 1,
+                  "coverage": 1.0,
+                  "mad": 0.0,
+                  "median": 0.915485
+                },
+                "memory_peak_bytes": {
+                  "available": 1,
+                  "coverage": 1.0,
+                  "mad": 0,
+                  "median": 120954880
+                },
+                "wall_clock_s": {
+                  "available": 1,
+                  "coverage": 1.0,
+                  "mad": 0.0,
+                  "median": 0.917666917
+                }
+              },
+              "attempted": 1,
+              "expected_behavior_matched": 1,
+              "planned": 1,
+              "verified_outputs": 1
+            }
+          },
+          "positive_exact_equivalence": "passed"
+        },
+        "inventory_latest": {
+          "cases": {
+            "equivalent": {
+              "attempt_telemetry": {
+                "cpu_s": {
+                  "available": 1,
+                  "coverage": 1.0,
+                  "mad": 0.0,
+                  "median": 0.929944
+                },
+                "memory_peak_bytes": {
+                  "available": 1,
+                  "coverage": 1.0,
+                  "mad": 0,
+                  "median": 122597376
+                },
+                "wall_clock_s": {
+                  "available": 1,
+                  "coverage": 1.0,
+                  "mad": 0.0,
+                  "median": 0.937275417
+                }
+              },
+              "attempted": 1,
+              "expected_behavior_matched": 1,
+              "planned": 1,
+              "verified_outputs": 1
+            },
+            "partial": {
+              "attempt_telemetry": {
+                "cpu_s": {
+                  "available": 1,
+                  "coverage": 1.0,
+                  "mad": 0.0,
+                  "median": 0.928577
+                },
+                "memory_peak_bytes": {
+                  "available": 1,
+                  "coverage": 1.0,
+                  "mad": 0,
+                  "median": 120954880
+                },
+                "wall_clock_s": {
+                  "available": 1,
+                  "coverage": 1.0,
+                  "mad": 0.0,
+                  "median": 0.930812375
+                }
+              },
+              "attempted": 1,
+              "expected_behavior_matched": 1,
+              "planned": 1,
+              "verified_outputs": 0
+            },
+            "same_shape_wrong": {
+              "attempt_telemetry": {
+                "cpu_s": {
+                  "available": 1,
+                  "coverage": 1.0,
+                  "mad": 0.0,
+                  "median": 0.933138
+                },
+                "memory_peak_bytes": {
+                  "available": 1,
+                  "coverage": 1.0,
+                  "mad": 0,
+                  "median": 120745984
+                },
+                "wall_clock_s": {
+                  "available": 1,
+                  "coverage": 1.0,
+                  "mad": 0.0,
+                  "median": 0.935391459
+                }
+              },
+              "attempted": 1,
+              "expected_behavior_matched": 1,
+              "planned": 1,
+              "verified_outputs": 0
+            },
+            "valid": {
+              "attempt_telemetry": {
+                "cpu_s": {
+                  "available": 1,
+                  "coverage": 1.0,
+                  "mad": 0.0,
+                  "median": 0.928985
+                },
+                "memory_peak_bytes": {
+                  "available": 1,
+                  "coverage": 1.0,
+                  "mad": 0,
+                  "median": 121085952
+                },
+                "wall_clock_s": {
+                  "available": 1,
+                  "coverage": 1.0,
+                  "mad": 0.0,
+                  "median": 0.931475833
+                }
+              },
+              "attempted": 1,
+              "expected_behavior_matched": 1,
+              "planned": 1,
+              "verified_outputs": 1
+            }
+          },
+          "positive_exact_equivalence": "passed"
+        },
+        "order_enrichment": {
+          "cases": {
+            "equivalent": {
+              "attempt_telemetry": {
+                "cpu_s": {
+                  "available": 1,
+                  "coverage": 1.0,
+                  "mad": 0.0,
+                  "median": 1.002152
+                },
+                "memory_peak_bytes": {
+                  "available": 1,
+                  "coverage": 1.0,
+                  "mad": 0,
+                  "median": 121057280
+                },
+                "wall_clock_s": {
+                  "available": 1,
+                  "coverage": 1.0,
+                  "mad": 0.0,
+                  "median": 1.005061084
+                }
+              },
+              "attempted": 1,
+              "expected_behavior_matched": 1,
+              "planned": 1,
+              "verified_outputs": 1
+            },
+            "partial": {
+              "attempt_telemetry": {
+                "cpu_s": {
+                  "available": 1,
+                  "coverage": 1.0,
+                  "mad": 0.0,
+                  "median": 0.936849
+                },
+                "memory_peak_bytes": {
+                  "available": 1,
+                  "coverage": 1.0,
+                  "mad": 0,
+                  "median": 120909824
+                },
+                "wall_clock_s": {
+                  "available": 1,
+                  "coverage": 1.0,
+                  "mad": 0.0,
+                  "median": 0.939610125
+                }
+              },
+              "attempted": 1,
+              "expected_behavior_matched": 1,
+              "planned": 1,
+              "verified_outputs": 0
+            },
+            "same_shape_wrong": {
+              "attempt_telemetry": {
+                "cpu_s": {
+                  "available": 1,
+                  "coverage": 1.0,
+                  "mad": 0.0,
+                  "median": 0.8866
+                },
+                "memory_peak_bytes": {
+                  "available": 1,
+                  "coverage": 1.0,
+                  "mad": 0,
+                  "median": 120815616
+                },
+                "wall_clock_s": {
+                  "available": 1,
+                  "coverage": 1.0,
+                  "mad": 0.0,
+                  "median": 0.889222334
+                }
+              },
+              "attempted": 1,
+              "expected_behavior_matched": 1,
+              "planned": 1,
+              "verified_outputs": 0
+            },
+            "valid": {
+              "attempt_telemetry": {
+                "cpu_s": {
+                  "available": 1,
+                  "coverage": 1.0,
+                  "mad": 0.0,
+                  "median": 0.920543
+                },
+                "memory_peak_bytes": {
+                  "available": 1,
+                  "coverage": 1.0,
+                  "mad": 0,
+                  "median": 120553472
+                },
+                "wall_clock_s": {
+                  "available": 1,
+                  "coverage": 1.0,
+                  "mad": 0.0,
+                  "median": 0.923043667
+                }
+              },
+              "attempted": 1,
+              "expected_behavior_matched": 1,
+              "planned": 1,
+              "verified_outputs": 1
+            }
+          },
+          "positive_exact_equivalence": "passed"
+        },
+        "sensor_windows": {
+          "cases": {
+            "equivalent": {
+              "attempt_telemetry": {
+                "cpu_s": {
+                  "available": 1,
+                  "coverage": 1.0,
+                  "mad": 0.0,
+                  "median": 0.937471
+                },
+                "memory_peak_bytes": {
+                  "available": 1,
+                  "coverage": 1.0,
+                  "mad": 0,
+                  "median": 121155584
+                },
+                "wall_clock_s": {
+                  "available": 1,
+                  "coverage": 1.0,
+                  "mad": 0.0,
+                  "median": 0.939880792
+                }
+              },
+              "attempted": 1,
+              "expected_behavior_matched": 1,
+              "planned": 1,
+              "verified_outputs": 1
+            },
+            "partial": {
+              "attempt_telemetry": {
+                "cpu_s": {
+                  "available": 1,
+                  "coverage": 1.0,
+                  "mad": 0.0,
+                  "median": 0.989317
+                },
+                "memory_peak_bytes": {
+                  "available": 1,
+                  "coverage": 1.0,
+                  "mad": 0,
+                  "median": 121102336
+                },
+                "wall_clock_s": {
+                  "available": 1,
+                  "coverage": 1.0,
+                  "mad": 0.0,
+                  "median": 0.99164425
+                }
+              },
+              "attempted": 1,
+              "expected_behavior_matched": 1,
+              "planned": 1,
+              "verified_outputs": 0
+            },
+            "same_shape_wrong": {
+              "attempt_telemetry": {
+                "cpu_s": {
+                  "available": 1,
+                  "coverage": 1.0,
+                  "mad": 0.0,
+                  "median": 1.037043
+                },
+                "memory_peak_bytes": {
+                  "available": 1,
+                  "coverage": 1.0,
+                  "mad": 0,
+                  "median": 121065472
+                },
+                "wall_clock_s": {
+                  "available": 1,
+                  "coverage": 1.0,
+                  "mad": 0.0,
+                  "median": 1.040175167
+                }
+              },
+              "attempted": 1,
+              "expected_behavior_matched": 1,
+              "planned": 1,
+              "verified_outputs": 0
+            },
+            "valid": {
+              "attempt_telemetry": {
+                "cpu_s": {
+                  "available": 1,
+                  "coverage": 1.0,
+                  "mad": 0.0,
+                  "median": 1.118098
+                },
+                "memory_peak_bytes": {
+                  "available": 1,
+                  "coverage": 1.0,
+                  "mad": 0,
+                  "median": 120967168
+                },
+                "wall_clock_s": {
+                  "available": 1,
+                  "coverage": 1.0,
+                  "mad": 0.0,
+                  "median": 1.120405834
+                }
+              },
+              "attempted": 1,
+              "expected_behavior_matched": 1,
+              "planned": 1,
+              "verified_outputs": 1
+            }
+          },
+          "positive_exact_equivalence": "passed"
+        }
+      },
+      "status": "passed",
+      "telemetry_role": "attempt diagnostics, including intentionally invalid and incomplete work"
+    },
+    "view": {
+      "view_type": "campaign",
+      "view_schema_version": "1.0.0",
+      "report_id": "7aafc75c12798d8df5d350a8f7473e5c664a7ac8551525825f7f344bd95ead12",
+      "report_kind": "suite_summary",
+      "identity": {
+        "name": "Benchmark suite",
+        "engine": "unknown",
+        "case": null,
+        "evidence_kind": "reported_campaign_summary"
+      },
+      "admission": {
+        "status": "summary_inventory",
+        "reason": null
+      },
+      "status": "passed",
+      "sessions": [],
+      "inventory": [
+        {
+          "pipeline": "climate_fusion",
+          "case": "equivalent",
+          "planned": 1,
+          "attempted": 1,
+          "expected_behavior_matched": 1,
+          "verified_outputs": 1,
+          "pointer": "/pipelines/climate_fusion/cases/equivalent"
+        },
+        {
+          "pipeline": "climate_fusion",
+          "case": "partial",
+          "planned": 1,
+          "attempted": 1,
+          "expected_behavior_matched": 1,
+          "verified_outputs": 0,
+          "pointer": "/pipelines/climate_fusion/cases/partial"
+        },
+        {
+          "pipeline": "climate_fusion",
+          "case": "same_shape_wrong",
+          "planned": 1,
+          "attempted": 1,
+          "expected_behavior_matched": 1,
+          "verified_outputs": 0,
+          "pointer": "/pipelines/climate_fusion/cases/same_shape_wrong"
+        },
+        {
+          "pipeline": "climate_fusion",
+          "case": "valid",
+          "planned": 1,
+          "attempted": 1,
+          "expected_behavior_matched": 1,
+          "verified_outputs": 1,
+          "pointer": "/pipelines/climate_fusion/cases/valid"
+        },
+        {
+          "pipeline": "event_aggregation",
+          "case": "equivalent",
+          "planned": 1,
+          "attempted": 1,
+          "expected_behavior_matched": 1,
+          "verified_outputs": 1,
+          "pointer": "/pipelines/event_aggregation/cases/equivalent"
+        },
+        {
+          "pipeline": "event_aggregation",
+          "case": "partial",
+          "planned": 1,
+          "attempted": 1,
+          "expected_behavior_matched": 1,
+          "verified_outputs": 0,
+          "pointer": "/pipelines/event_aggregation/cases/partial"
+        },
+        {
+          "pipeline": "event_aggregation",
+          "case": "same_shape_wrong",
+          "planned": 1,
+          "attempted": 1,
+          "expected_behavior_matched": 1,
+          "verified_outputs": 0,
+          "pointer": "/pipelines/event_aggregation/cases/same_shape_wrong"
+        },
+        {
+          "pipeline": "event_aggregation",
+          "case": "valid",
+          "planned": 1,
+          "attempted": 1,
+          "expected_behavior_matched": 1,
+          "verified_outputs": 1,
+          "pointer": "/pipelines/event_aggregation/cases/valid"
+        },
+        {
+          "pipeline": "inventory_latest",
+          "case": "equivalent",
+          "planned": 1,
+          "attempted": 1,
+          "expected_behavior_matched": 1,
+          "verified_outputs": 1,
+          "pointer": "/pipelines/inventory_latest/cases/equivalent"
+        },
+        {
+          "pipeline": "inventory_latest",
+          "case": "partial",
+          "planned": 1,
+          "attempted": 1,
+          "expected_behavior_matched": 1,
+          "verified_outputs": 0,
+          "pointer": "/pipelines/inventory_latest/cases/partial"
+        },
+        {
+          "pipeline": "inventory_latest",
+          "case": "same_shape_wrong",
+          "planned": 1,
+          "attempted": 1,
+          "expected_behavior_matched": 1,
+          "verified_outputs": 0,
+          "pointer": "/pipelines/inventory_latest/cases/same_shape_wrong"
+        },
+        {
+          "pipeline": "inventory_latest",
+          "case": "valid",
+          "planned": 1,
+          "attempted": 1,
+          "expected_behavior_matched": 1,
+          "verified_outputs": 1,
+          "pointer": "/pipelines/inventory_latest/cases/valid"
+        },
+        {
+          "pipeline": "order_enrichment",
+          "case": "equivalent",
+          "planned": 1,
+          "attempted": 1,
+          "expected_behavior_matched": 1,
+          "verified_outputs": 1,
+          "pointer": "/pipelines/order_enrichment/cases/equivalent"
+        },
+        {
+          "pipeline": "order_enrichment",
+          "case": "partial",
+          "planned": 1,
+          "attempted": 1,
+          "expected_behavior_matched": 1,
+          "verified_outputs": 0,
+          "pointer": "/pipelines/order_enrichment/cases/partial"
+        },
+        {
+          "pipeline": "order_enrichment",
+          "case": "same_shape_wrong",
+          "planned": 1,
+          "attempted": 1,
+          "expected_behavior_matched": 1,
+          "verified_outputs": 0,
+          "pointer": "/pipelines/order_enrichment/cases/same_shape_wrong"
+        },
+        {
+          "pipeline": "order_enrichment",
+          "case": "valid",
+          "planned": 1,
+          "attempted": 1,
+          "expected_behavior_matched": 1,
+          "verified_outputs": 1,
+          "pointer": "/pipelines/order_enrichment/cases/valid"
+        },
+        {
+          "pipeline": "sensor_windows",
+          "case": "equivalent",
+          "planned": 1,
+          "attempted": 1,
+          "expected_behavior_matched": 1,
+          "verified_outputs": 1,
+          "pointer": "/pipelines/sensor_windows/cases/equivalent"
+        },
+        {
+          "pipeline": "sensor_windows",
+          "case": "partial",
+          "planned": 1,
+          "attempted": 1,
+          "expected_behavior_matched": 1,
+          "verified_outputs": 0,
+          "pointer": "/pipelines/sensor_windows/cases/partial"
+        },
+        {
+          "pipeline": "sensor_windows",
+          "case": "same_shape_wrong",
+          "planned": 1,
+          "attempted": 1,
+          "expected_behavior_matched": 1,
+          "verified_outputs": 0,
+          "pointer": "/pipelines/sensor_windows/cases/same_shape_wrong"
+        },
+        {
+          "pipeline": "sensor_windows",
+          "case": "valid",
+          "planned": 1,
+          "attempted": 1,
+          "expected_behavior_matched": 1,
+          "verified_outputs": 1,
+          "pointer": "/pipelines/sensor_windows/cases/valid"
+        }
+      ],
+      "warnings": [
+        "Saved summary claims; attempts are not re-executed or requalified by this viewer.",
+        "Descriptive trends do not establish a complexity law, measurement accuracy or resource-comparison eligibility.",
+        "Sessions and scopes are never pooled. MAD is dispersion, not a confidence interval.",
+        "Expected negative-case rejection is not valid useful work. Attempt telemetry is not ranked."
+      ]
+    }
+  }
+]

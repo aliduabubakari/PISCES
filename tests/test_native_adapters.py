@@ -3,6 +3,7 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+from pisces.energy import runtime_evaluation as evaluator
 from pisces.energy.adapters import NativeSafetyPolicy, execute_native_workload
 from pisces.energy.runtime_evaluation import EnergyEvaluationRequest, evaluate_energy
 
@@ -162,7 +163,7 @@ job = Job()
     assert dagster["native_tasks_executed"] == 1
 
 
-def test_evaluate_energy_native_airflow_report_shape(tmp_path: Path) -> None:
+def test_evaluate_energy_native_airflow_report_shape(tmp_path: Path, monkeypatch) -> None:
     workflow = tmp_path / "fake_airflow.py"
     workflow.write_text(
         """
@@ -212,6 +213,17 @@ dag = Dag([Task("task_a", task_a)])
         timeout_s=30,
     )
 
+    monkeypatch.setattr(evaluator, "detect_orchestrator_version", lambda *a, **kw: "2.8.1")
+    monkeypatch.setattr(evaluator, "_run_runtime_measurement", lambda **kw: {
+        "ok": True,
+        "runtime_measurement": {
+            **execute_native_workload(workflow, orchestrator="airflow", max_tasks=5),
+            "status": "ok", "execution_outcome": "completed", "execution_adapter_used": "native",
+            "operational_metrics": {"wall_clock_s": 1, "process_cpu_s": 1, "peak_rss_mb": 1},
+            "modeled_energy": {"status": "not_started", "measurement_scope": "native_local_runtime"},
+            "runner_environment": {"python_executable": sys.executable},
+        },
+    })
     report = evaluate_energy(req).to_dict()
     measurement = report["runtime_measurement"]
     assert report["mode_used"] == "zero_fill"
@@ -221,14 +233,20 @@ dag = Dag([Task("task_a", task_a)])
     assert measurement["native_tasks_executed"] == 1
     assert measurement["native_tasks_skipped"] == 0
     assert measurement["execution_outcome"] == "completed"
-    assert measurement["eligible_for_resource_comparison"] is True
+    assert measurement["eligible_for_resource_comparison"] is False
     assert measurement["eligible_for_paired_equivalence_comparison"] is False
-    assert measurement["operational_metrics"]["evidence_role"] == "primary"
-    assert measurement["energy_profile"]["measurement_scope"] == "native_local_runtime"
+    assert measurement["contract_validation"]["status"] == "not_requested"
+    assert measurement["pairwise_equivalence"]["status"] == "not_evaluated"
+    assert measurement["telemetry"]["use"] == "attempt_diagnostics"
+    assert measurement["operational_metrics"] is None
+    assert measurement["energy_profile"] is None
+    assert measurement["attempt_diagnostics"]["operational_metrics"]["evidence_role"] == "diagnostic"
+    assert measurement["attempt_diagnostics"]["modeled_energy"]["measurement_scope"] == "native_local_runtime"
+    assert measurement["runner_environment"]["python_executable"] == sys.executable
 
 
-def test_experiment_mode_keeps_failed_execution_out_of_resource_metrics(
-    tmp_path: Path,
+def test_explicit_native_keeps_failed_execution_out_of_resource_metrics(
+    tmp_path: Path, monkeypatch,
 ) -> None:
     workflow = tmp_path / "zero_work_airflow.py"
     workflow.write_text(
@@ -274,12 +292,22 @@ dag = Dag([Task("blocked", requires_unavailable_argument)])
         runtime_python=Path(sys.executable),
         mode_selected="zero_fill",
         execution_adapter="native",
-        experiment_mode=True,
         max_rows=10,
         max_tasks=5,
         timeout_s=30,
     )
 
+    monkeypatch.setattr(evaluator, "detect_orchestrator_version", lambda *a, **kw: "2.8.1")
+    monkeypatch.setattr(evaluator, "_run_runtime_measurement", lambda **kw: {
+        "ok": False,
+        "runtime_measurement": {
+            "status": "failed", "execution_outcome": "zero_work", "execution_adapter_used": "native",
+            "attempt_diagnostics": {
+                "operational_metrics": {"wall_clock_s": 1, "process_cpu_s": 1, "peak_rss_mb": 1},
+                "modeled_energy": {"status": "not_started", "evidence_role": "secondary"},
+            },
+        },
+    })
     report = evaluate_energy(req).to_dict()
     measurement = report["runtime_measurement"]
 
@@ -291,6 +319,8 @@ dag = Dag([Task("blocked", requires_unavailable_argument)])
     assert measurement["modeled_energy"] is None
     assert measurement["energy_profile"] is None
     assert measurement["eligible_for_resource_comparison"] is False
+    assert measurement["normalized"]["energy_kwh_per_1k_rows"] is None
+    assert measurement["pairwise_equivalence"]["status"] == "not_evaluated"
     diagnostics = measurement["attempt_diagnostics"]
     assert diagnostics["operational_metrics"]["wall_clock_s"] >= 0
     assert diagnostics["modeled_energy"]["evidence_role"] == "secondary"

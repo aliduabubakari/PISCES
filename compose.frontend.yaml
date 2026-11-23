@@ -1,0 +1,11 @@
+name: pisces-frontend
+services:
+  frontend:
+    extends: {file: compose.yaml, service: frontend}
+    depends_on: !reset {}
+    environment:
+      PISCES_API_UPSTREAM: ${PISCES_API_UPSTREAM:?Set the backend host and port}
+    extra_hosts: ["host.docker.internal:host-gateway"]
+networks:
+  application:
+  ingress:

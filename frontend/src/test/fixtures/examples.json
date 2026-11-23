@@ -1,0 +1,1415 @@
+[
+  {
+    "filename": "event_aggregation-valid-01.json",
+    "report": {
+      "pipeline": "event_aggregation",
+      "case": "valid",
+      "repetition": 1,
+      "output_verified": true,
+      "expected_behavior_matched": true,
+      "provenance": {
+        "artifact_sha256": "e0d89eaa29da5a7463f9246fb3e2ba6e567de22d28aa1f9fe3c0be2b3d8669d4",
+        "target": "dagster"
+      },
+      "result": {
+        "execution_outcome": "completed",
+        "output_assertions": {
+          "passed": true,
+          "status": "passed",
+          "results": [
+            {
+              "logical_name": "result",
+              "passed": true,
+              "status": "passed",
+              "reason": null,
+              "row_count": 8
+            },
+            {
+              "logical_name": "quality",
+              "passed": true,
+              "status": "passed",
+              "reason": null,
+              "row_count": 2
+            }
+          ]
+        },
+        "payload": {
+          "runtime_measurement": {
+            "status": "ok",
+            "execution_outcome": "completed",
+            "execution_adapter_requested": "native",
+            "execution_adapter_used": "oci",
+            "contract_validation": {
+              "scope": "single_execution_checks",
+              "status": "checks_passed"
+            },
+            "pairwise_equivalence": {
+              "screening_eligible": true,
+              "status": "not_evaluated"
+            },
+            "telemetry": {
+              "modeled_energy": "not_collected",
+              "operational": "available",
+              "use": "workload_screening"
+            },
+            "normalized": {
+              "emissions_kgco2eq_per_1k_rows": null,
+              "energy_kwh_per_1k_rows": null,
+              "reason": "verified_workload_units_unavailable",
+              "status": "not_available"
+            },
+            "eligible_for_resource_comparison": false,
+            "ineligibility_reasons": [
+              "verified_workload_units_unavailable"
+            ],
+            "container_telemetry": {
+              "block_read_bytes": null,
+              "block_write_bytes": null,
+              "counter_window": {
+                "clock": "perf_counter_ns",
+                "cpu_after": {
+                  "read_finished_ns": 268523625102262,
+                  "read_started_ns": 268523622544262,
+                  "usage_usec": 7874005
+                },
+                "cpu_before": {
+                  "read_finished_ns": 268516163532383,
+                  "read_started_ns": 268516163481050,
+                  "usage_usec": 587773
+                },
+                "cpu_source": "cgroup_v2:cpu.stat:usage_usec",
+                "wall_finished_ns": 268523622485470,
+                "wall_started_ns": 268516163817841
+              },
+              "cpu_s": 7.286232,
+              "cpu_throttled_usec": 0,
+              "memory_peak_bytes": 122859520,
+              "memory_peak_scope": "container_cgroup_lifetime_including_page_cache",
+              "metric_quality": {
+                "block_read_bytes": {
+                  "reasons": {
+                    "after": "counter_file_empty",
+                    "before": "counter_file_empty"
+                  },
+                  "status": "unavailable"
+                },
+                "block_write_bytes": {
+                  "reasons": {
+                    "after": "counter_file_empty",
+                    "before": "counter_file_empty"
+                  },
+                  "status": "unavailable"
+                },
+                "cpu_s": {
+                  "reasons": {},
+                  "status": "available"
+                },
+                "cpu_throttled_usec": {
+                  "reasons": {},
+                  "status": "available"
+                },
+                "memory_peak_bytes": {
+                  "reasons": {},
+                  "status": "available"
+                },
+                "oom_kill_delta": {
+                  "reasons": {},
+                  "status": "available"
+                },
+                "wall_clock_s": {
+                  "reasons": {},
+                  "status": "available"
+                }
+              },
+              "oom_kill_delta": 0,
+              "scope": "container_worker_window_including_descendants_setup_and_validation",
+              "wall_clock_s": 7.458667629
+            },
+            "container_telemetry_missing_reason": null,
+            "engine_evidence": {
+              "control_plane": "ephemeral_instance",
+              "interface": "JobDefinition.execute_in_process",
+              "run_state": "success",
+              "setup_in_execution_window": true,
+              "source": "dagster_step_events",
+              "target": "dagster",
+              "task_states": [
+                {
+                  "state": "STEP_SUCCESS",
+                  "status": "executed",
+                  "task_id": "normalize"
+                },
+                {
+                  "state": "STEP_SUCCESS",
+                  "status": "executed",
+                  "task_id": "transform"
+                },
+                {
+                  "state": "STEP_SUCCESS",
+                  "status": "executed",
+                  "task_id": "write_outputs"
+                }
+              ],
+              "version": "1.12.8"
+            },
+            "operational_metrics": {
+              "clock_sources": {
+                "peak_memory": "resource.getrusage(RUSAGE_SELF).ru_maxrss",
+                "process_cpu": "time.process_time",
+                "wall_clock": "time.perf_counter"
+              },
+              "completed_repetitions": 1,
+              "evidence_role": "primary",
+              "measurement_scope": "bounded_execution_block",
+              "peak_rss_delta_mb": 75.238281,
+              "peak_rss_mb": 109.589844,
+              "peak_rss_scope": "dedicated_runner_process_lifetime",
+              "platform": "Linux-7.0.14-linuxkit-aarch64-with-glibc2.36",
+              "process_cpu_s": 5.820867515,
+              "process_cpu_s_per_repetition": 5.820867515,
+              "process_cpu_to_wall_ratio": 0.973699,
+              "status": "ok",
+              "wall_clock_s": 5.978099295,
+              "wall_clock_s_per_repetition": 5.978099295
+            },
+            "attempt_diagnostics": null,
+            "output_assertions": {
+              "passed": true,
+              "status": "passed",
+              "results": [
+                {
+                  "logical_name": "result",
+                  "passed": true,
+                  "status": "passed",
+                  "reason": null,
+                  "row_count": 8
+                },
+                {
+                  "logical_name": "quality",
+                  "passed": true,
+                  "status": "passed",
+                  "reason": null,
+                  "row_count": 2
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "view": {
+      "view_schema_version": "1.0.0",
+      "metric_registry_version": "1.0.0",
+      "report_id": "3f37b83acea755eeb969f080701559c2af2d27afa21be8ac3d86bebfbdddc53a",
+      "report_kind": "suite_attempt",
+      "source_schema_version": null,
+      "admission": {
+        "status": "suite_inventory",
+        "reason": null
+      },
+      "identity": {
+        "name": "event_aggregation",
+        "engine": "dagster",
+        "case": "valid",
+        "artifact_sha256": "e0d89eaa29da5a7463f9246fb3e2ba6e567de22d28aa1f9fe3c0be2b3d8669d4",
+        "evidence_kind": "benchmark_attempt"
+      },
+      "execution": {
+        "status": "completed",
+        "pointer": "/result/payload/runtime_measurement/execution_outcome"
+      },
+      "outputs": {
+        "status": "passed",
+        "checks": [
+          {
+            "name": "result",
+            "status": "passed",
+            "passed": true,
+            "row_count": 8,
+            "reason": null,
+            "pointer": "/result/payload/runtime_measurement/output_assertions/results/0"
+          },
+          {
+            "name": "quality",
+            "status": "passed",
+            "passed": true,
+            "row_count": 2,
+            "reason": null,
+            "pointer": "/result/payload/runtime_measurement/output_assertions/results/1"
+          }
+        ],
+        "expected_behavior_matched": true
+      },
+      "tasks": [
+        {
+          "task_id": "normalize",
+          "state": "STEP_SUCCESS",
+          "status": "executed",
+          "pointer": "/result/payload/runtime_measurement/engine_evidence/task_states/0"
+        },
+        {
+          "task_id": "transform",
+          "state": "STEP_SUCCESS",
+          "status": "executed",
+          "pointer": "/result/payload/runtime_measurement/engine_evidence/task_states/1"
+        },
+        {
+          "task_id": "write_outputs",
+          "state": "STEP_SUCCESS",
+          "status": "executed",
+          "pointer": "/result/payload/runtime_measurement/engine_evidence/task_states/2"
+        }
+      ],
+      "metrics": [
+        {
+          "id": "worker.wall",
+          "label": "Wall time",
+          "value": 7.458667629,
+          "raw_value": 7.458667629,
+          "unit": "s",
+          "raw_unit": "s",
+          "scope": "container_worker",
+          "definition": "Elapsed monotonic time across the container worker window.",
+          "source": "time.perf_counter_ns",
+          "includes": "Runner startup, setup, execution, verification and descendants; not controller staging or cleanup.",
+          "availability": "available",
+          "reason_codes": [],
+          "pointer": "/result/payload/runtime_measurement/container_telemetry/wall_clock_s",
+          "evidence_role": "reported"
+        },
+        {
+          "id": "worker.cpu",
+          "label": "Cgroup CPU",
+          "value": 7.286232,
+          "raw_value": 7.286232,
+          "unit": "CPU-s",
+          "raw_unit": "s",
+          "scope": "container_worker",
+          "definition": "Accumulated CPU time, not elapsed time or electricity.",
+          "source": "cgroup v2 cpu.stat:usage_usec",
+          "includes": "All processes and descendants in the container worker window.",
+          "availability": "available",
+          "reason_codes": [],
+          "pointer": "/result/payload/runtime_measurement/container_telemetry/cpu_s",
+          "evidence_role": "reported"
+        },
+        {
+          "id": "worker.memory",
+          "label": "Peak memory",
+          "value": 117.16796875,
+          "raw_value": 122859520,
+          "unit": "MiB",
+          "raw_unit": "bytes",
+          "scope": "container_worker",
+          "definition": "Container lifetime high-water mark, not additive memory consumption.",
+          "source": "cgroup v2 memory.peak",
+          "includes": "Container cgroup lifetime, including descendants and charged page cache; not process RSS.",
+          "availability": "available",
+          "reason_codes": [],
+          "pointer": "/result/payload/runtime_measurement/container_telemetry/memory_peak_bytes",
+          "evidence_role": "reported"
+        },
+        {
+          "id": "worker.read",
+          "label": "Block read bytes",
+          "value": null,
+          "raw_value": null,
+          "unit": "bytes",
+          "raw_unit": "bytes",
+          "scope": "container_worker",
+          "definition": "Block-device reads between valid counter endpoints; not logical input-file bytes.",
+          "source": "cgroup v2 io.stat",
+          "includes": "Block I/O charged to this cgroup during the worker window.",
+          "availability": "unavailable",
+          "reason_codes": [
+            "counter_file_empty"
+          ],
+          "pointer": "/result/payload/runtime_measurement/container_telemetry/block_read_bytes",
+          "evidence_role": "reported"
+        },
+        {
+          "id": "worker.write",
+          "label": "Block write bytes",
+          "value": null,
+          "raw_value": null,
+          "unit": "bytes",
+          "raw_unit": "bytes",
+          "scope": "container_worker",
+          "definition": "Block-device writes between valid counter endpoints; not logical output-file bytes.",
+          "source": "cgroup v2 io.stat",
+          "includes": "Block I/O charged to this cgroup during the worker window.",
+          "availability": "unavailable",
+          "reason_codes": [
+            "counter_file_empty"
+          ],
+          "pointer": "/result/payload/runtime_measurement/container_telemetry/block_write_bytes",
+          "evidence_role": "reported"
+        },
+        {
+          "id": "worker.throttling",
+          "label": "CPU throttling",
+          "value": 0.0,
+          "raw_value": 0,
+          "unit": "ms",
+          "raw_unit": "microseconds",
+          "scope": "container_worker",
+          "definition": "Observed CPU throttling-time delta; zero is a valid reading.",
+          "source": "cgroup v2 cpu.stat:throttled_usec",
+          "includes": "Throttling recorded by the cgroup during the worker window.",
+          "availability": "available",
+          "reason_codes": [],
+          "pointer": "/result/payload/runtime_measurement/container_telemetry/cpu_throttled_usec",
+          "evidence_role": "reported"
+        },
+        {
+          "id": "execution.wall",
+          "label": "Wall time",
+          "value": 5.978099295,
+          "raw_value": 5.978099295,
+          "unit": "s",
+          "raw_unit": "s",
+          "scope": "execution_block",
+          "definition": "Elapsed monotonic time across the bounded execution block.",
+          "source": "time.perf_counter",
+          "includes": "Selected adapter execution block; engine setup may be included. Not a task-body measurement.",
+          "availability": "available",
+          "reason_codes": [],
+          "pointer": "/result/payload/runtime_measurement/operational_metrics/wall_clock_s",
+          "evidence_role": "reported"
+        },
+        {
+          "id": "execution.cpu",
+          "label": "Process CPU",
+          "value": 5.820867515,
+          "raw_value": 5.820867515,
+          "unit": "CPU-s",
+          "raw_unit": "s",
+          "scope": "execution_block",
+          "definition": "Runner process CPU time, excluding descendant process CPU.",
+          "source": "time.process_time",
+          "includes": "Runner process threads within the execution block, not the whole container.",
+          "availability": "available",
+          "reason_codes": [],
+          "pointer": "/result/payload/runtime_measurement/operational_metrics/process_cpu_s",
+          "evidence_role": "reported"
+        },
+        {
+          "id": "execution.memory",
+          "label": "Peak process RSS",
+          "value": 109.589844,
+          "raw_value": 109.589844,
+          "unit": "MiB",
+          "raw_unit": "MiB",
+          "scope": "execution_block",
+          "definition": "Process lifetime high-water mark; not a peak restricted to the execution interval.",
+          "source": "resource.getrusage(RUSAGE_SELF).ru_maxrss",
+          "includes": "Dedicated runner process lifetime. The legacy _mb field stores MiB; not additive with cgroup memory.",
+          "availability": "available",
+          "reason_codes": [],
+          "pointer": "/result/payload/runtime_measurement/operational_metrics/peak_rss_mb",
+          "evidence_role": "reported"
+        },
+        {
+          "id": "modeled.energy",
+          "label": "Modeled energy",
+          "value": null,
+          "raw_value": null,
+          "unit": "kWh",
+          "raw_unit": "kWh",
+          "scope": "modeled",
+          "definition": "Software-model energy estimate, not a direct electrical measurement.",
+          "source": "Report-provided energy model",
+          "includes": "Model scope as reported; not inferred from CPU time or elapsed time.",
+          "availability": "not_collected",
+          "reason_codes": [
+            "not_collected"
+          ],
+          "pointer": null,
+          "evidence_role": "modeled"
+        },
+        {
+          "id": "modeled.carbon",
+          "label": "Modeled carbon",
+          "value": null,
+          "raw_value": null,
+          "unit": "kg CO2e",
+          "raw_unit": "kg CO2e",
+          "scope": "modeled",
+          "definition": "Model-estimated emissions, not measured electricity or a carbon saving.",
+          "source": "Report-provided carbon model",
+          "includes": "Depends on the attached model and carbon-intensity assumptions.",
+          "availability": "not_collected",
+          "reason_codes": [
+            "not_collected"
+          ],
+          "pointer": null,
+          "evidence_role": "modeled"
+        }
+      ],
+      "comparison": {
+        "resource_eligible": false,
+        "pairwise_status": "not_evaluated",
+        "screening_eligible": true,
+        "reasons": [
+          "verified_workload_units_unavailable"
+        ],
+        "pointer": "/result/payload/runtime_measurement/eligible_for_resource_comparison"
+      },
+      "warnings": [
+        "Imported report claims are not attested execution.",
+        "No conformance association is established by this view.",
+        "Suite attempts are versionless; admission covers the supported inventory shape only.",
+        "Task-body resource allocation and dependency edges are not inferred from aggregate counters or task order."
+      ]
+    },
+    "source": {
+      "name": "valid.py",
+      "text": "import csv\nfrom datetime import datetime, timezone\nfrom decimal import Decimal\nfrom itertools import groupby\nimport json\nfrom pathlib import Path\n\nPIPELINE = 'event_aggregation'\nVARIANT = 'valid'\nCONFIG = {'description': 'Reject invalid events; group counts and integer amounts', 'header': ['group_id', 'count', 'total'], 'types': ['integer', 'integer', 'integer'], 'key_indices': [0], 'value_index': 2}\n\n\ndef read_csv(name):\n    with (Path(\"inputs\") / (name + \".csv\")).open(encoding=\"utf-8\", newline=\"\") as stream:\n        return list(csv.DictReader(stream))\n\n\ndef normalize():\n    Path(\"work\").mkdir(exist_ok=True)\n    rows = []\n    rejected = 0\n    if PIPELINE == \"climate_fusion\":\n        for source in CONFIG[\"sources\"]:\n            if VARIANT != \"equivalent\":\n                read_csv(source)\n            for row in read_csv(source):\n                value = Decimal(row[\"temperature\"])\n                if row[\"unit\"] == \"F\":\n                    value = (value - 32) * 5 / 9\n                rows.append([source, int(row[\"station_id\"]), format(value, \".2f\")])\n    elif PIPELINE == \"event_aggregation\":\n        for row in read_csv(\"events\"):\n            if row[\"status\"] != \"valid\":\n                rejected += 1\n            else:\n                rows.append([int(row[\"group_id\"]), int(row[\"amount\"])])\n    elif PIPELINE == \"order_enrichment\":\n        customers = read_csv(\"customers\")\n        if VARIANT == \"equivalent\":\n            from bisect import bisect_left\n            customers.sort(key=lambda row: int(row[\"customer_id\"]))\n            keys = [int(row[\"customer_id\"]) for row in customers]\n\n            def lookup(key):\n                index = bisect_left(keys, key)\n                return customers[index] if index < len(keys) and keys[index] == key else None\n        else:\n            mapping = {int(row[\"customer_id\"]): row for row in customers}\n            lookup = mapping.get\n        for row in read_csv(\"orders\"):\n            customer = lookup(int(row[\"customer_id\"]))\n            if customer is None:\n                rejected += 1\n            else:\n                net = int(row[\"quantity\"]) * int(row[\"unit_cents\"]) * (10000 - int(customer[\"discount_bps\"])) // 10000\n                rows.append([int(row[\"order_id\"]), customer[\"region\"], net])\n    elif PIPELINE == \"sensor_windows\":\n        for row in read_csv(\"readings\"):\n            if row[\"quality\"] != \"good\":\n                rejected += 1\n            else:\n                rows.append([int(row[\"sensor_id\"]), int(row[\"timestamp_s\"]) // 60 * 60, int(row[\"temperature_tenths\"])])\n    elif PIPELINE == \"inventory_latest\":\n        rows = [[int(row[\"item_id\"]), int(row[\"version\"]), int(row[\"quantity\"]), row[\"deleted\"] == \"true\"]\n                for row in read_csv(\"updates\")]\n    Path(\"work/normalized.json\").write_text(json.dumps({\"rows\": rows, \"rejected\": rejected}), encoding=\"utf-8\")\n\n\ndef transform():\n    data = json.loads(Path(\"work/normalized.json\").read_text(encoding=\"utf-8\"))\n    rows = data[\"rows\"]\n    accepted = len(rows)\n    if PIPELINE in {\"event_aggregation\", \"sensor_windows\"}:\n        width = 1 if PIPELINE == \"event_aggregation\" else 2\n        if VARIANT == \"equivalent\":\n            rows.sort(key=lambda row: row[:width])\n            result = []\n            for key, group in groupby(rows, key=lambda row: tuple(row[:width])):\n                members = list(group)\n                result.append([*key, len(members), sum(row[-1] for row in members)])\n        else:\n            groups = {}\n            for row in rows:\n                value = groups.setdefault(tuple(row[:width]), [0, 0])\n                value[0] += 1\n                value[1] += row[-1]\n            result = [[*key, *value] for key, value in groups.items()]\n    elif PIPELINE == \"inventory_latest\":\n        if VARIANT == \"equivalent\":\n            rows.sort(key=lambda row: (row[0], -row[1]))\n            latest = [next(group) for _, group in groupby(rows, key=lambda row: row[0])]\n        else:\n            groups = {}\n            for row in rows:\n                if row[0] not in groups or row[1] > groups[row[0]][1]:\n                    groups[row[0]] = row\n            latest = list(groups.values())\n        result = [[item, version, quantity, not deleted] for item, version, quantity, deleted in latest]\n    else:\n        result = rows\n        if VARIANT == \"equivalent\":\n            result.reverse()\n    result.sort(key=lambda row: tuple(row[index] for index in CONFIG[\"key_indices\"]))\n    if VARIANT == \"same_shape_wrong\":\n        index = CONFIG[\"value_index\"]\n        value = result[0][index]\n        result[0][index] = str(Decimal(value) + 1) if isinstance(value, str) else value + 1\n    Path(\"work/result.json\").write_text(json.dumps({\n        \"rows\": result, \"quality\": [[\"accepted_count\", accepted], [\"rejected_count\", data[\"rejected\"]]],\n    }), encoding=\"utf-8\")\n\n\ndef write_outputs():\n    data = json.loads(Path(\"work/result.json\").read_text(encoding=\"utf-8\"))\n    Path(\"outputs\").mkdir(exist_ok=True)\n    for name, header, rows in ((\"result\", CONFIG[\"header\"], data[\"rows\"]), (\"quality\", [\"metric\", \"value\"], data[\"quality\"])):\n        if VARIANT == \"partial\" and name == \"quality\":\n            continue\n        with (Path(\"outputs\") / (name + \".csv\")).open(\"w\", encoding=\"utf-8\", newline=\"\") as stream:\n            writer = csv.writer(stream)\n            writer.writerow(header)\n            writer.writerows([[str(value).lower() if isinstance(value, bool) else value for value in row] for row in rows])\n\n\nif __name__ == \"__main__\":\n    normalize()\n    transform()\n    write_outputs()\nelse:\n    from dagster import job, op\n\n    @op(name=\"normalize\")\n    def normalize_op():\n        normalize()\n        return True\n\n    @op(name=\"transform\")\n    def transform_op(upstream):\n        transform()\n        return True\n\n    @op(name=\"write_outputs\")\n    def write_op(upstream):\n        write_outputs()\n\n    @job(name=\"pisces_\" + PIPELINE + \"_\" + VARIANT)\n    def pipeline():\n        write_op(transform_op(normalize_op()))\n\n    pisces_entrypoint = pipeline\n",
+      "digest": "e0d89eaa29da5a7463f9246fb3e2ba6e567de22d28aa1f9fe3c0be2b3d8669d4"
+    }
+  },
+  {
+    "filename": "event_aggregation-same_shape_wrong-01.json",
+    "report": {
+      "pipeline": "event_aggregation",
+      "case": "same_shape_wrong",
+      "repetition": 1,
+      "output_verified": false,
+      "expected_behavior_matched": true,
+      "provenance": {
+        "artifact_sha256": "8592a282ef51d0459c8ba3d84960d6b8b9f58c4e26d32bc308e747c45e7428af",
+        "target": "dagster"
+      },
+      "result": {
+        "execution_outcome": "completed",
+        "output_assertions": {
+          "passed": false,
+          "status": "failed",
+          "results": [
+            {
+              "logical_name": "result",
+              "passed": false,
+              "status": "failed",
+              "reason": "output_content_mismatch",
+              "row_count": 8
+            },
+            {
+              "logical_name": "quality",
+              "passed": true,
+              "status": "passed",
+              "reason": null,
+              "row_count": 2
+            }
+          ]
+        },
+        "payload": {
+          "runtime_measurement": {
+            "status": "failed",
+            "execution_outcome": "completed",
+            "execution_adapter_requested": "native",
+            "execution_adapter_used": "oci",
+            "contract_validation": {
+              "scope": "single_execution_checks",
+              "status": "failed"
+            },
+            "pairwise_equivalence": {
+              "screening_eligible": false,
+              "status": "not_evaluated"
+            },
+            "telemetry": {
+              "modeled_energy": "not_collected",
+              "operational": "available",
+              "use": "attempt_diagnostics"
+            },
+            "normalized": {
+              "emissions_kgco2eq_per_1k_rows": null,
+              "energy_kwh_per_1k_rows": null,
+              "reason": "verified_workload_units_unavailable",
+              "status": "not_available"
+            },
+            "eligible_for_resource_comparison": false,
+            "ineligibility_reasons": [
+              "output_assertions_failed",
+              "verified_workload_units_unavailable"
+            ],
+            "container_telemetry": {
+              "block_read_bytes": null,
+              "block_write_bytes": null,
+              "counter_window": {
+                "clock": "perf_counter_ns",
+                "cpu_after": {
+                  "read_finished_ns": 268470056495945,
+                  "read_started_ns": 268470030687529,
+                  "usage_usec": 7014033
+                },
+                "cpu_before": {
+                  "read_finished_ns": 268463507945651,
+                  "read_started_ns": 268463507879942,
+                  "usage_usec": 590335
+                },
+                "cpu_source": "cgroup_v2:cpu.stat:usage_usec",
+                "wall_finished_ns": 268470030647695,
+                "wall_started_ns": 268463507966776
+              },
+              "cpu_s": 6.423698,
+              "cpu_throttled_usec": 0,
+              "memory_peak_bytes": 120692736,
+              "memory_peak_scope": "container_cgroup_lifetime_including_page_cache",
+              "metric_quality": {
+                "block_read_bytes": {
+                  "reasons": {
+                    "after": "counter_file_empty",
+                    "before": "counter_file_empty"
+                  },
+                  "status": "unavailable"
+                },
+                "block_write_bytes": {
+                  "reasons": {
+                    "after": "counter_file_empty",
+                    "before": "counter_file_empty"
+                  },
+                  "status": "unavailable"
+                },
+                "cpu_s": {
+                  "reasons": {},
+                  "status": "available"
+                },
+                "cpu_throttled_usec": {
+                  "reasons": {},
+                  "status": "available"
+                },
+                "memory_peak_bytes": {
+                  "reasons": {},
+                  "status": "available"
+                },
+                "oom_kill_delta": {
+                  "reasons": {},
+                  "status": "available"
+                },
+                "wall_clock_s": {
+                  "reasons": {},
+                  "status": "available"
+                }
+              },
+              "oom_kill_delta": 0,
+              "scope": "container_worker_window_including_descendants_setup_and_validation",
+              "wall_clock_s": 6.522680919
+            },
+            "container_telemetry_missing_reason": null,
+            "engine_evidence": {
+              "control_plane": "ephemeral_instance",
+              "interface": "JobDefinition.execute_in_process",
+              "run_state": "success",
+              "setup_in_execution_window": true,
+              "source": "dagster_step_events",
+              "target": "dagster",
+              "task_states": [
+                {
+                  "state": "STEP_SUCCESS",
+                  "status": "executed",
+                  "task_id": "normalize"
+                },
+                {
+                  "state": "STEP_SUCCESS",
+                  "status": "executed",
+                  "task_id": "transform"
+                },
+                {
+                  "state": "STEP_SUCCESS",
+                  "status": "executed",
+                  "task_id": "write_outputs"
+                }
+              ],
+              "version": "1.12.8"
+            },
+            "operational_metrics": null,
+            "attempt_diagnostics": {
+              "operational_metrics": {
+                "clock_sources": {
+                  "peak_memory": "resource.getrusage(RUSAGE_SELF).ru_maxrss",
+                  "process_cpu": "time.process_time",
+                  "wall_clock": "time.perf_counter"
+                },
+                "completed_repetitions": 1,
+                "evidence_role": "diagnostic",
+                "measurement_scope": "bounded_execution_block",
+                "peak_rss_delta_mb": 73.410156,
+                "peak_rss_mb": 107.824219,
+                "peak_rss_scope": "dedicated_runner_process_lifetime",
+                "platform": "Linux-7.0.14-linuxkit-aarch64-with-glibc2.36",
+                "process_cpu_s": 4.067505031,
+                "process_cpu_s_per_repetition": 4.067505031,
+                "process_cpu_to_wall_ratio": 0.973101,
+                "status": "ok",
+                "wall_clock_s": 4.179939294,
+                "wall_clock_s_per_repetition": 4.179939294
+              }
+            },
+            "output_assertions": {
+              "passed": false,
+              "status": "failed",
+              "results": [
+                {
+                  "logical_name": "result",
+                  "passed": false,
+                  "status": "failed",
+                  "reason": "output_content_mismatch",
+                  "row_count": 8
+                },
+                {
+                  "logical_name": "quality",
+                  "passed": true,
+                  "status": "passed",
+                  "reason": null,
+                  "row_count": 2
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "view": {
+      "view_schema_version": "1.0.0",
+      "metric_registry_version": "1.0.0",
+      "report_id": "5b12658e781447dd449e53c064a894d7abcd271f6a174c6935210f90fd91970f",
+      "report_kind": "suite_attempt",
+      "source_schema_version": null,
+      "admission": {
+        "status": "suite_inventory",
+        "reason": null
+      },
+      "identity": {
+        "name": "event_aggregation",
+        "engine": "dagster",
+        "case": "same_shape_wrong",
+        "artifact_sha256": "8592a282ef51d0459c8ba3d84960d6b8b9f58c4e26d32bc308e747c45e7428af",
+        "evidence_kind": "benchmark_attempt"
+      },
+      "execution": {
+        "status": "completed",
+        "pointer": "/result/payload/runtime_measurement/execution_outcome"
+      },
+      "outputs": {
+        "status": "failed",
+        "checks": [
+          {
+            "name": "result",
+            "status": "failed",
+            "passed": false,
+            "row_count": 8,
+            "reason": "output_content_mismatch",
+            "pointer": "/result/payload/runtime_measurement/output_assertions/results/0"
+          },
+          {
+            "name": "quality",
+            "status": "passed",
+            "passed": true,
+            "row_count": 2,
+            "reason": null,
+            "pointer": "/result/payload/runtime_measurement/output_assertions/results/1"
+          }
+        ],
+        "expected_behavior_matched": true
+      },
+      "tasks": [
+        {
+          "task_id": "normalize",
+          "state": "STEP_SUCCESS",
+          "status": "executed",
+          "pointer": "/result/payload/runtime_measurement/engine_evidence/task_states/0"
+        },
+        {
+          "task_id": "transform",
+          "state": "STEP_SUCCESS",
+          "status": "executed",
+          "pointer": "/result/payload/runtime_measurement/engine_evidence/task_states/1"
+        },
+        {
+          "task_id": "write_outputs",
+          "state": "STEP_SUCCESS",
+          "status": "executed",
+          "pointer": "/result/payload/runtime_measurement/engine_evidence/task_states/2"
+        }
+      ],
+      "metrics": [
+        {
+          "id": "worker.wall",
+          "label": "Wall time",
+          "value": 6.522680919,
+          "raw_value": 6.522680919,
+          "unit": "s",
+          "raw_unit": "s",
+          "scope": "container_worker",
+          "definition": "Elapsed monotonic time across the container worker window.",
+          "source": "time.perf_counter_ns",
+          "includes": "Runner startup, setup, execution, verification and descendants; not controller staging or cleanup.",
+          "availability": "available",
+          "reason_codes": [],
+          "pointer": "/result/payload/runtime_measurement/container_telemetry/wall_clock_s",
+          "evidence_role": "diagnostic"
+        },
+        {
+          "id": "worker.cpu",
+          "label": "Cgroup CPU",
+          "value": 6.423698,
+          "raw_value": 6.423698,
+          "unit": "CPU-s",
+          "raw_unit": "s",
+          "scope": "container_worker",
+          "definition": "Accumulated CPU time, not elapsed time or electricity.",
+          "source": "cgroup v2 cpu.stat:usage_usec",
+          "includes": "All processes and descendants in the container worker window.",
+          "availability": "available",
+          "reason_codes": [],
+          "pointer": "/result/payload/runtime_measurement/container_telemetry/cpu_s",
+          "evidence_role": "diagnostic"
+        },
+        {
+          "id": "worker.memory",
+          "label": "Peak memory",
+          "value": 115.1015625,
+          "raw_value": 120692736,
+          "unit": "MiB",
+          "raw_unit": "bytes",
+          "scope": "container_worker",
+          "definition": "Container lifetime high-water mark, not additive memory consumption.",
+          "source": "cgroup v2 memory.peak",
+          "includes": "Container cgroup lifetime, including descendants and charged page cache; not process RSS.",
+          "availability": "available",
+          "reason_codes": [],
+          "pointer": "/result/payload/runtime_measurement/container_telemetry/memory_peak_bytes",
+          "evidence_role": "diagnostic"
+        },
+        {
+          "id": "worker.read",
+          "label": "Block read bytes",
+          "value": null,
+          "raw_value": null,
+          "unit": "bytes",
+          "raw_unit": "bytes",
+          "scope": "container_worker",
+          "definition": "Block-device reads between valid counter endpoints; not logical input-file bytes.",
+          "source": "cgroup v2 io.stat",
+          "includes": "Block I/O charged to this cgroup during the worker window.",
+          "availability": "unavailable",
+          "reason_codes": [
+            "counter_file_empty"
+          ],
+          "pointer": "/result/payload/runtime_measurement/container_telemetry/block_read_bytes",
+          "evidence_role": "diagnostic"
+        },
+        {
+          "id": "worker.write",
+          "label": "Block write bytes",
+          "value": null,
+          "raw_value": null,
+          "unit": "bytes",
+          "raw_unit": "bytes",
+          "scope": "container_worker",
+          "definition": "Block-device writes between valid counter endpoints; not logical output-file bytes.",
+          "source": "cgroup v2 io.stat",
+          "includes": "Block I/O charged to this cgroup during the worker window.",
+          "availability": "unavailable",
+          "reason_codes": [
+            "counter_file_empty"
+          ],
+          "pointer": "/result/payload/runtime_measurement/container_telemetry/block_write_bytes",
+          "evidence_role": "diagnostic"
+        },
+        {
+          "id": "worker.throttling",
+          "label": "CPU throttling",
+          "value": 0.0,
+          "raw_value": 0,
+          "unit": "ms",
+          "raw_unit": "microseconds",
+          "scope": "container_worker",
+          "definition": "Observed CPU throttling-time delta; zero is a valid reading.",
+          "source": "cgroup v2 cpu.stat:throttled_usec",
+          "includes": "Throttling recorded by the cgroup during the worker window.",
+          "availability": "available",
+          "reason_codes": [],
+          "pointer": "/result/payload/runtime_measurement/container_telemetry/cpu_throttled_usec",
+          "evidence_role": "diagnostic"
+        },
+        {
+          "id": "execution.wall",
+          "label": "Wall time",
+          "value": 4.179939294,
+          "raw_value": 4.179939294,
+          "unit": "s",
+          "raw_unit": "s",
+          "scope": "execution_block",
+          "definition": "Elapsed monotonic time across the bounded execution block.",
+          "source": "time.perf_counter",
+          "includes": "Selected adapter execution block; engine setup may be included. Not a task-body measurement.",
+          "availability": "available",
+          "reason_codes": [],
+          "pointer": "/result/payload/runtime_measurement/attempt_diagnostics/operational_metrics/wall_clock_s",
+          "evidence_role": "diagnostic"
+        },
+        {
+          "id": "execution.cpu",
+          "label": "Process CPU",
+          "value": 4.067505031,
+          "raw_value": 4.067505031,
+          "unit": "CPU-s",
+          "raw_unit": "s",
+          "scope": "execution_block",
+          "definition": "Runner process CPU time, excluding descendant process CPU.",
+          "source": "time.process_time",
+          "includes": "Runner process threads within the execution block, not the whole container.",
+          "availability": "available",
+          "reason_codes": [],
+          "pointer": "/result/payload/runtime_measurement/attempt_diagnostics/operational_metrics/process_cpu_s",
+          "evidence_role": "diagnostic"
+        },
+        {
+          "id": "execution.memory",
+          "label": "Peak process RSS",
+          "value": 107.824219,
+          "raw_value": 107.824219,
+          "unit": "MiB",
+          "raw_unit": "MiB",
+          "scope": "execution_block",
+          "definition": "Process lifetime high-water mark; not a peak restricted to the execution interval.",
+          "source": "resource.getrusage(RUSAGE_SELF).ru_maxrss",
+          "includes": "Dedicated runner process lifetime. The legacy _mb field stores MiB; not additive with cgroup memory.",
+          "availability": "available",
+          "reason_codes": [],
+          "pointer": "/result/payload/runtime_measurement/attempt_diagnostics/operational_metrics/peak_rss_mb",
+          "evidence_role": "diagnostic"
+        },
+        {
+          "id": "modeled.energy",
+          "label": "Modeled energy",
+          "value": null,
+          "raw_value": null,
+          "unit": "kWh",
+          "raw_unit": "kWh",
+          "scope": "modeled",
+          "definition": "Software-model energy estimate, not a direct electrical measurement.",
+          "source": "Report-provided energy model",
+          "includes": "Model scope as reported; not inferred from CPU time or elapsed time.",
+          "availability": "not_collected",
+          "reason_codes": [
+            "not_collected"
+          ],
+          "pointer": null,
+          "evidence_role": "modeled"
+        },
+        {
+          "id": "modeled.carbon",
+          "label": "Modeled carbon",
+          "value": null,
+          "raw_value": null,
+          "unit": "kg CO2e",
+          "raw_unit": "kg CO2e",
+          "scope": "modeled",
+          "definition": "Model-estimated emissions, not measured electricity or a carbon saving.",
+          "source": "Report-provided carbon model",
+          "includes": "Depends on the attached model and carbon-intensity assumptions.",
+          "availability": "not_collected",
+          "reason_codes": [
+            "not_collected"
+          ],
+          "pointer": null,
+          "evidence_role": "modeled"
+        }
+      ],
+      "comparison": {
+        "resource_eligible": false,
+        "pairwise_status": "not_evaluated",
+        "screening_eligible": false,
+        "reasons": [
+          "output_assertions_failed",
+          "verified_workload_units_unavailable"
+        ],
+        "pointer": "/result/payload/runtime_measurement/eligible_for_resource_comparison"
+      },
+      "warnings": [
+        "Imported report claims are not attested execution.",
+        "No conformance association is established by this view.",
+        "Suite attempts are versionless; admission covers the supported inventory shape only.",
+        "Task-body resource allocation and dependency edges are not inferred from aggregate counters or task order."
+      ]
+    },
+    "source": {
+      "name": "same_shape_wrong.py",
+      "text": "import csv\nfrom datetime import datetime, timezone\nfrom decimal import Decimal\nfrom itertools import groupby\nimport json\nfrom pathlib import Path\n\nPIPELINE = 'event_aggregation'\nVARIANT = 'same_shape_wrong'\nCONFIG = {'description': 'Reject invalid events; group counts and integer amounts', 'header': ['group_id', 'count', 'total'], 'types': ['integer', 'integer', 'integer'], 'key_indices': [0], 'value_index': 2}\n\n\ndef read_csv(name):\n    with (Path(\"inputs\") / (name + \".csv\")).open(encoding=\"utf-8\", newline=\"\") as stream:\n        return list(csv.DictReader(stream))\n\n\ndef normalize():\n    Path(\"work\").mkdir(exist_ok=True)\n    rows = []\n    rejected = 0\n    if PIPELINE == \"climate_fusion\":\n        for source in CONFIG[\"sources\"]:\n            if VARIANT != \"equivalent\":\n                read_csv(source)\n            for row in read_csv(source):\n                value = Decimal(row[\"temperature\"])\n                if row[\"unit\"] == \"F\":\n                    value = (value - 32) * 5 / 9\n                rows.append([source, int(row[\"station_id\"]), format(value, \".2f\")])\n    elif PIPELINE == \"event_aggregation\":\n        for row in read_csv(\"events\"):\n            if row[\"status\"] != \"valid\":\n                rejected += 1\n            else:\n                rows.append([int(row[\"group_id\"]), int(row[\"amount\"])])\n    elif PIPELINE == \"order_enrichment\":\n        customers = read_csv(\"customers\")\n        if VARIANT == \"equivalent\":\n            from bisect import bisect_left\n            customers.sort(key=lambda row: int(row[\"customer_id\"]))\n            keys = [int(row[\"customer_id\"]) for row in customers]\n\n            def lookup(key):\n                index = bisect_left(keys, key)\n                return customers[index] if index < len(keys) and keys[index] == key else None\n        else:\n            mapping = {int(row[\"customer_id\"]): row for row in customers}\n            lookup = mapping.get\n        for row in read_csv(\"orders\"):\n            customer = lookup(int(row[\"customer_id\"]))\n            if customer is None:\n                rejected += 1\n            else:\n                net = int(row[\"quantity\"]) * int(row[\"unit_cents\"]) * (10000 - int(customer[\"discount_bps\"])) // 10000\n                rows.append([int(row[\"order_id\"]), customer[\"region\"], net])\n    elif PIPELINE == \"sensor_windows\":\n        for row in read_csv(\"readings\"):\n            if row[\"quality\"] != \"good\":\n                rejected += 1\n            else:\n                rows.append([int(row[\"sensor_id\"]), int(row[\"timestamp_s\"]) // 60 * 60, int(row[\"temperature_tenths\"])])\n    elif PIPELINE == \"inventory_latest\":\n        rows = [[int(row[\"item_id\"]), int(row[\"version\"]), int(row[\"quantity\"]), row[\"deleted\"] == \"true\"]\n                for row in read_csv(\"updates\")]\n    Path(\"work/normalized.json\").write_text(json.dumps({\"rows\": rows, \"rejected\": rejected}), encoding=\"utf-8\")\n\n\ndef transform():\n    data = json.loads(Path(\"work/normalized.json\").read_text(encoding=\"utf-8\"))\n    rows = data[\"rows\"]\n    accepted = len(rows)\n    if PIPELINE in {\"event_aggregation\", \"sensor_windows\"}:\n        width = 1 if PIPELINE == \"event_aggregation\" else 2\n        if VARIANT == \"equivalent\":\n            rows.sort(key=lambda row: row[:width])\n            result = []\n            for key, group in groupby(rows, key=lambda row: tuple(row[:width])):\n                members = list(group)\n                result.append([*key, len(members), sum(row[-1] for row in members)])\n        else:\n            groups = {}\n            for row in rows:\n                value = groups.setdefault(tuple(row[:width]), [0, 0])\n                value[0] += 1\n                value[1] += row[-1]\n            result = [[*key, *value] for key, value in groups.items()]\n    elif PIPELINE == \"inventory_latest\":\n        if VARIANT == \"equivalent\":\n            rows.sort(key=lambda row: (row[0], -row[1]))\n            latest = [next(group) for _, group in groupby(rows, key=lambda row: row[0])]\n        else:\n            groups = {}\n            for row in rows:\n                if row[0] not in groups or row[1] > groups[row[0]][1]:\n                    groups[row[0]] = row\n            latest = list(groups.values())\n        result = [[item, version, quantity, not deleted] for item, version, quantity, deleted in latest]\n    else:\n        result = rows\n        if VARIANT == \"equivalent\":\n            result.reverse()\n    result.sort(key=lambda row: tuple(row[index] for index in CONFIG[\"key_indices\"]))\n    if VARIANT == \"same_shape_wrong\":\n        index = CONFIG[\"value_index\"]\n        value = result[0][index]\n        result[0][index] = str(Decimal(value) + 1) if isinstance(value, str) else value + 1\n    Path(\"work/result.json\").write_text(json.dumps({\n        \"rows\": result, \"quality\": [[\"accepted_count\", accepted], [\"rejected_count\", data[\"rejected\"]]],\n    }), encoding=\"utf-8\")\n\n\ndef write_outputs():\n    data = json.loads(Path(\"work/result.json\").read_text(encoding=\"utf-8\"))\n    Path(\"outputs\").mkdir(exist_ok=True)\n    for name, header, rows in ((\"result\", CONFIG[\"header\"], data[\"rows\"]), (\"quality\", [\"metric\", \"value\"], data[\"quality\"])):\n        if VARIANT == \"partial\" and name == \"quality\":\n            continue\n        with (Path(\"outputs\") / (name + \".csv\")).open(\"w\", encoding=\"utf-8\", newline=\"\") as stream:\n            writer = csv.writer(stream)\n            writer.writerow(header)\n            writer.writerows([[str(value).lower() if isinstance(value, bool) else value for value in row] for row in rows])\n\n\nif __name__ == \"__main__\":\n    normalize()\n    transform()\n    write_outputs()\nelse:\n    from dagster import job, op\n\n    @op(name=\"normalize\")\n    def normalize_op():\n        normalize()\n        return True\n\n    @op(name=\"transform\")\n    def transform_op(upstream):\n        transform()\n        return True\n\n    @op(name=\"write_outputs\")\n    def write_op(upstream):\n        write_outputs()\n\n    @job(name=\"pisces_\" + PIPELINE + \"_\" + VARIANT)\n    def pipeline():\n        write_op(transform_op(normalize_op()))\n\n    pisces_entrypoint = pipeline\n",
+      "digest": "8592a282ef51d0459c8ba3d84960d6b8b9f58c4e26d32bc308e747c45e7428af"
+    }
+  },
+  {
+    "filename": "event_aggregation-partial-01.json",
+    "report": {
+      "pipeline": "event_aggregation",
+      "case": "partial",
+      "repetition": 1,
+      "output_verified": false,
+      "expected_behavior_matched": true,
+      "provenance": {
+        "artifact_sha256": "3a8b274b2e27b8c2336b95f7464e897b967cbe8bd4af71cb7b90df7a441b6df8",
+        "target": "dagster"
+      },
+      "result": {
+        "execution_outcome": "completed",
+        "output_assertions": {
+          "passed": false,
+          "status": "failed",
+          "results": [
+            {
+              "logical_name": "result",
+              "passed": true,
+              "status": "passed",
+              "reason": null,
+              "row_count": 8
+            },
+            {
+              "logical_name": "quality",
+              "passed": false,
+              "status": "failed",
+              "reason": "output_file_missing"
+            }
+          ]
+        },
+        "payload": {
+          "runtime_measurement": {
+            "status": "failed",
+            "execution_outcome": "completed",
+            "execution_adapter_requested": "native",
+            "execution_adapter_used": "oci",
+            "contract_validation": {
+              "scope": "single_execution_checks",
+              "status": "failed"
+            },
+            "pairwise_equivalence": {
+              "screening_eligible": false,
+              "status": "not_evaluated"
+            },
+            "telemetry": {
+              "modeled_energy": "not_collected",
+              "operational": "available",
+              "use": "attempt_diagnostics"
+            },
+            "normalized": {
+              "emissions_kgco2eq_per_1k_rows": null,
+              "energy_kwh_per_1k_rows": null,
+              "reason": "verified_workload_units_unavailable",
+              "status": "not_available"
+            },
+            "eligible_for_resource_comparison": false,
+            "ineligibility_reasons": [
+              "output_assertions_failed",
+              "verified_workload_units_unavailable"
+            ],
+            "container_telemetry": {
+              "block_read_bytes": null,
+              "block_write_bytes": null,
+              "counter_window": {
+                "clock": "perf_counter_ns",
+                "cpu_after": {
+                  "read_finished_ns": 268443403189808,
+                  "read_started_ns": 268443401555141,
+                  "usage_usec": 9393794
+                },
+                "cpu_before": {
+                  "read_finished_ns": 268434383936679,
+                  "read_started_ns": 268434383890887,
+                  "usage_usec": 741543
+                },
+                "cpu_source": "cgroup_v2:cpu.stat:usage_usec",
+                "wall_finished_ns": 268443401448516,
+                "wall_started_ns": 268434383956971
+              },
+              "cpu_s": 8.652251,
+              "cpu_throttled_usec": 55723,
+              "memory_peak_bytes": 120672256,
+              "memory_peak_scope": "container_cgroup_lifetime_including_page_cache",
+              "metric_quality": {
+                "block_read_bytes": {
+                  "reasons": {
+                    "after": "counter_file_empty",
+                    "before": "counter_file_empty"
+                  },
+                  "status": "unavailable"
+                },
+                "block_write_bytes": {
+                  "reasons": {
+                    "after": "counter_file_empty",
+                    "before": "counter_file_empty"
+                  },
+                  "status": "unavailable"
+                },
+                "cpu_s": {
+                  "reasons": {},
+                  "status": "available"
+                },
+                "cpu_throttled_usec": {
+                  "reasons": {},
+                  "status": "available"
+                },
+                "memory_peak_bytes": {
+                  "reasons": {},
+                  "status": "available"
+                },
+                "oom_kill_delta": {
+                  "reasons": {},
+                  "status": "available"
+                },
+                "wall_clock_s": {
+                  "reasons": {},
+                  "status": "available"
+                }
+              },
+              "oom_kill_delta": 0,
+              "scope": "container_worker_window_including_descendants_setup_and_validation",
+              "wall_clock_s": 9.017491545
+            },
+            "container_telemetry_missing_reason": null,
+            "engine_evidence": {
+              "control_plane": "ephemeral_instance",
+              "interface": "JobDefinition.execute_in_process",
+              "run_state": "success",
+              "setup_in_execution_window": true,
+              "source": "dagster_step_events",
+              "target": "dagster",
+              "task_states": [
+                {
+                  "state": "STEP_SUCCESS",
+                  "status": "executed",
+                  "task_id": "normalize"
+                },
+                {
+                  "state": "STEP_SUCCESS",
+                  "status": "executed",
+                  "task_id": "transform"
+                },
+                {
+                  "state": "STEP_SUCCESS",
+                  "status": "executed",
+                  "task_id": "write_outputs"
+                }
+              ],
+              "version": "1.12.8"
+            },
+            "operational_metrics": null,
+            "attempt_diagnostics": {
+              "operational_metrics": {
+                "clock_sources": {
+                  "peak_memory": "resource.getrusage(RUSAGE_SELF).ru_maxrss",
+                  "process_cpu": "time.process_time",
+                  "wall_clock": "time.perf_counter"
+                },
+                "completed_repetitions": 1,
+                "evidence_role": "diagnostic",
+                "measurement_scope": "bounded_execution_block",
+                "peak_rss_delta_mb": 73.484375,
+                "peak_rss_mb": 107.890625,
+                "peak_rss_scope": "dedicated_runner_process_lifetime",
+                "platform": "Linux-7.0.14-linuxkit-aarch64-with-glibc2.36",
+                "process_cpu_s": 5.85945344,
+                "process_cpu_s_per_repetition": 5.85945344,
+                "process_cpu_to_wall_ratio": 0.952795,
+                "status": "ok",
+                "wall_clock_s": 6.149754586,
+                "wall_clock_s_per_repetition": 6.149754586
+              }
+            },
+            "output_assertions": {
+              "passed": false,
+              "status": "failed",
+              "results": [
+                {
+                  "logical_name": "result",
+                  "passed": true,
+                  "status": "passed",
+                  "reason": null,
+                  "row_count": 8
+                },
+                {
+                  "logical_name": "quality",
+                  "passed": false,
+                  "status": "failed",
+                  "reason": "output_file_missing"
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "view": {
+      "view_schema_version": "1.0.0",
+      "metric_registry_version": "1.0.0",
+      "report_id": "8e05ba082b802a662fc55a6f1cca7a63bb2d71e04d43a48ae15b26bc896d3e52",
+      "report_kind": "suite_attempt",
+      "source_schema_version": null,
+      "admission": {
+        "status": "suite_inventory",
+        "reason": null
+      },
+      "identity": {
+        "name": "event_aggregation",
+        "engine": "dagster",
+        "case": "partial",
+        "artifact_sha256": "3a8b274b2e27b8c2336b95f7464e897b967cbe8bd4af71cb7b90df7a441b6df8",
+        "evidence_kind": "benchmark_attempt"
+      },
+      "execution": {
+        "status": "completed",
+        "pointer": "/result/payload/runtime_measurement/execution_outcome"
+      },
+      "outputs": {
+        "status": "failed",
+        "checks": [
+          {
+            "name": "result",
+            "status": "passed",
+            "passed": true,
+            "row_count": 8,
+            "reason": null,
+            "pointer": "/result/payload/runtime_measurement/output_assertions/results/0"
+          },
+          {
+            "name": "quality",
+            "status": "failed",
+            "passed": false,
+            "row_count": null,
+            "reason": "output_file_missing",
+            "pointer": "/result/payload/runtime_measurement/output_assertions/results/1"
+          }
+        ],
+        "expected_behavior_matched": true
+      },
+      "tasks": [
+        {
+          "task_id": "normalize",
+          "state": "STEP_SUCCESS",
+          "status": "executed",
+          "pointer": "/result/payload/runtime_measurement/engine_evidence/task_states/0"
+        },
+        {
+          "task_id": "transform",
+          "state": "STEP_SUCCESS",
+          "status": "executed",
+          "pointer": "/result/payload/runtime_measurement/engine_evidence/task_states/1"
+        },
+        {
+          "task_id": "write_outputs",
+          "state": "STEP_SUCCESS",
+          "status": "executed",
+          "pointer": "/result/payload/runtime_measurement/engine_evidence/task_states/2"
+        }
+      ],
+      "metrics": [
+        {
+          "id": "worker.wall",
+          "label": "Wall time",
+          "value": 9.017491545,
+          "raw_value": 9.017491545,
+          "unit": "s",
+          "raw_unit": "s",
+          "scope": "container_worker",
+          "definition": "Elapsed monotonic time across the container worker window.",
+          "source": "time.perf_counter_ns",
+          "includes": "Runner startup, setup, execution, verification and descendants; not controller staging or cleanup.",
+          "availability": "available",
+          "reason_codes": [],
+          "pointer": "/result/payload/runtime_measurement/container_telemetry/wall_clock_s",
+          "evidence_role": "diagnostic"
+        },
+        {
+          "id": "worker.cpu",
+          "label": "Cgroup CPU",
+          "value": 8.652251,
+          "raw_value": 8.652251,
+          "unit": "CPU-s",
+          "raw_unit": "s",
+          "scope": "container_worker",
+          "definition": "Accumulated CPU time, not elapsed time or electricity.",
+          "source": "cgroup v2 cpu.stat:usage_usec",
+          "includes": "All processes and descendants in the container worker window.",
+          "availability": "available",
+          "reason_codes": [],
+          "pointer": "/result/payload/runtime_measurement/container_telemetry/cpu_s",
+          "evidence_role": "diagnostic"
+        },
+        {
+          "id": "worker.memory",
+          "label": "Peak memory",
+          "value": 115.08203125,
+          "raw_value": 120672256,
+          "unit": "MiB",
+          "raw_unit": "bytes",
+          "scope": "container_worker",
+          "definition": "Container lifetime high-water mark, not additive memory consumption.",
+          "source": "cgroup v2 memory.peak",
+          "includes": "Container cgroup lifetime, including descendants and charged page cache; not process RSS.",
+          "availability": "available",
+          "reason_codes": [],
+          "pointer": "/result/payload/runtime_measurement/container_telemetry/memory_peak_bytes",
+          "evidence_role": "diagnostic"
+        },
+        {
+          "id": "worker.read",
+          "label": "Block read bytes",
+          "value": null,
+          "raw_value": null,
+          "unit": "bytes",
+          "raw_unit": "bytes",
+          "scope": "container_worker",
+          "definition": "Block-device reads between valid counter endpoints; not logical input-file bytes.",
+          "source": "cgroup v2 io.stat",
+          "includes": "Block I/O charged to this cgroup during the worker window.",
+          "availability": "unavailable",
+          "reason_codes": [
+            "counter_file_empty"
+          ],
+          "pointer": "/result/payload/runtime_measurement/container_telemetry/block_read_bytes",
+          "evidence_role": "diagnostic"
+        },
+        {
+          "id": "worker.write",
+          "label": "Block write bytes",
+          "value": null,
+          "raw_value": null,
+          "unit": "bytes",
+          "raw_unit": "bytes",
+          "scope": "container_worker",
+          "definition": "Block-device writes between valid counter endpoints; not logical output-file bytes.",
+          "source": "cgroup v2 io.stat",
+          "includes": "Block I/O charged to this cgroup during the worker window.",
+          "availability": "unavailable",
+          "reason_codes": [
+            "counter_file_empty"
+          ],
+          "pointer": "/result/payload/runtime_measurement/container_telemetry/block_write_bytes",
+          "evidence_role": "diagnostic"
+        },
+        {
+          "id": "worker.throttling",
+          "label": "CPU throttling",
+          "value": 55.723,
+          "raw_value": 55723,
+          "unit": "ms",
+          "raw_unit": "microseconds",
+          "scope": "container_worker",
+          "definition": "Observed CPU throttling-time delta; zero is a valid reading.",
+          "source": "cgroup v2 cpu.stat:throttled_usec",
+          "includes": "Throttling recorded by the cgroup during the worker window.",
+          "availability": "available",
+          "reason_codes": [],
+          "pointer": "/result/payload/runtime_measurement/container_telemetry/cpu_throttled_usec",
+          "evidence_role": "diagnostic"
+        },
+        {
+          "id": "execution.wall",
+          "label": "Wall time",
+          "value": 6.149754586,
+          "raw_value": 6.149754586,
+          "unit": "s",
+          "raw_unit": "s",
+          "scope": "execution_block",
+          "definition": "Elapsed monotonic time across the bounded execution block.",
+          "source": "time.perf_counter",
+          "includes": "Selected adapter execution block; engine setup may be included. Not a task-body measurement.",
+          "availability": "available",
+          "reason_codes": [],
+          "pointer": "/result/payload/runtime_measurement/attempt_diagnostics/operational_metrics/wall_clock_s",
+          "evidence_role": "diagnostic"
+        },
+        {
+          "id": "execution.cpu",
+          "label": "Process CPU",
+          "value": 5.85945344,
+          "raw_value": 5.85945344,
+          "unit": "CPU-s",
+          "raw_unit": "s",
+          "scope": "execution_block",
+          "definition": "Runner process CPU time, excluding descendant process CPU.",
+          "source": "time.process_time",
+          "includes": "Runner process threads within the execution block, not the whole container.",
+          "availability": "available",
+          "reason_codes": [],
+          "pointer": "/result/payload/runtime_measurement/attempt_diagnostics/operational_metrics/process_cpu_s",
+          "evidence_role": "diagnostic"
+        },
+        {
+          "id": "execution.memory",
+          "label": "Peak process RSS",
+          "value": 107.890625,
+          "raw_value": 107.890625,
+          "unit": "MiB",
+          "raw_unit": "MiB",
+          "scope": "execution_block",
+          "definition": "Process lifetime high-water mark; not a peak restricted to the execution interval.",
+          "source": "resource.getrusage(RUSAGE_SELF).ru_maxrss",
+          "includes": "Dedicated runner process lifetime. The legacy _mb field stores MiB; not additive with cgroup memory.",
+          "availability": "available",
+          "reason_codes": [],
+          "pointer": "/result/payload/runtime_measurement/attempt_diagnostics/operational_metrics/peak_rss_mb",
+          "evidence_role": "diagnostic"
+        },
+        {
+          "id": "modeled.energy",
+          "label": "Modeled energy",
+          "value": null,
+          "raw_value": null,
+          "unit": "kWh",
+          "raw_unit": "kWh",
+          "scope": "modeled",
+          "definition": "Software-model energy estimate, not a direct electrical measurement.",
+          "source": "Report-provided energy model",
+          "includes": "Model scope as reported; not inferred from CPU time or elapsed time.",
+          "availability": "not_collected",
+          "reason_codes": [
+            "not_collected"
+          ],
+          "pointer": null,
+          "evidence_role": "modeled"
+        },
+        {
+          "id": "modeled.carbon",
+          "label": "Modeled carbon",
+          "value": null,
+          "raw_value": null,
+          "unit": "kg CO2e",
+          "raw_unit": "kg CO2e",
+          "scope": "modeled",
+          "definition": "Model-estimated emissions, not measured electricity or a carbon saving.",
+          "source": "Report-provided carbon model",
+          "includes": "Depends on the attached model and carbon-intensity assumptions.",
+          "availability": "not_collected",
+          "reason_codes": [
+            "not_collected"
+          ],
+          "pointer": null,
+          "evidence_role": "modeled"
+        }
+      ],
+      "comparison": {
+        "resource_eligible": false,
+        "pairwise_status": "not_evaluated",
+        "screening_eligible": false,
+        "reasons": [
+          "output_assertions_failed",
+          "verified_workload_units_unavailable"
+        ],
+        "pointer": "/result/payload/runtime_measurement/eligible_for_resource_comparison"
+      },
+      "warnings": [
+        "Imported report claims are not attested execution.",
+        "No conformance association is established by this view.",
+        "Suite attempts are versionless; admission covers the supported inventory shape only.",
+        "Task-body resource allocation and dependency edges are not inferred from aggregate counters or task order."
+      ]
+    },
+    "source": {
+      "name": "partial.py",
+      "text": "import csv\nfrom datetime import datetime, timezone\nfrom decimal import Decimal\nfrom itertools import groupby\nimport json\nfrom pathlib import Path\n\nPIPELINE = 'event_aggregation'\nVARIANT = 'partial'\nCONFIG = {'description': 'Reject invalid events; group counts and integer amounts', 'header': ['group_id', 'count', 'total'], 'types': ['integer', 'integer', 'integer'], 'key_indices': [0], 'value_index': 2}\n\n\ndef read_csv(name):\n    with (Path(\"inputs\") / (name + \".csv\")).open(encoding=\"utf-8\", newline=\"\") as stream:\n        return list(csv.DictReader(stream))\n\n\ndef normalize():\n    Path(\"work\").mkdir(exist_ok=True)\n    rows = []\n    rejected = 0\n    if PIPELINE == \"climate_fusion\":\n        for source in CONFIG[\"sources\"]:\n            if VARIANT != \"equivalent\":\n                read_csv(source)\n            for row in read_csv(source):\n                value = Decimal(row[\"temperature\"])\n                if row[\"unit\"] == \"F\":\n                    value = (value - 32) * 5 / 9\n                rows.append([source, int(row[\"station_id\"]), format(value, \".2f\")])\n    elif PIPELINE == \"event_aggregation\":\n        for row in read_csv(\"events\"):\n            if row[\"status\"] != \"valid\":\n                rejected += 1\n            else:\n                rows.append([int(row[\"group_id\"]), int(row[\"amount\"])])\n    elif PIPELINE == \"order_enrichment\":\n        customers = read_csv(\"customers\")\n        if VARIANT == \"equivalent\":\n            from bisect import bisect_left\n            customers.sort(key=lambda row: int(row[\"customer_id\"]))\n            keys = [int(row[\"customer_id\"]) for row in customers]\n\n            def lookup(key):\n                index = bisect_left(keys, key)\n                return customers[index] if index < len(keys) and keys[index] == key else None\n        else:\n            mapping = {int(row[\"customer_id\"]): row for row in customers}\n            lookup = mapping.get\n        for row in read_csv(\"orders\"):\n            customer = lookup(int(row[\"customer_id\"]))\n            if customer is None:\n                rejected += 1\n            else:\n                net = int(row[\"quantity\"]) * int(row[\"unit_cents\"]) * (10000 - int(customer[\"discount_bps\"])) // 10000\n                rows.append([int(row[\"order_id\"]), customer[\"region\"], net])\n    elif PIPELINE == \"sensor_windows\":\n        for row in read_csv(\"readings\"):\n            if row[\"quality\"] != \"good\":\n                rejected += 1\n            else:\n                rows.append([int(row[\"sensor_id\"]), int(row[\"timestamp_s\"]) // 60 * 60, int(row[\"temperature_tenths\"])])\n    elif PIPELINE == \"inventory_latest\":\n        rows = [[int(row[\"item_id\"]), int(row[\"version\"]), int(row[\"quantity\"]), row[\"deleted\"] == \"true\"]\n                for row in read_csv(\"updates\")]\n    Path(\"work/normalized.json\").write_text(json.dumps({\"rows\": rows, \"rejected\": rejected}), encoding=\"utf-8\")\n\n\ndef transform():\n    data = json.loads(Path(\"work/normalized.json\").read_text(encoding=\"utf-8\"))\n    rows = data[\"rows\"]\n    accepted = len(rows)\n    if PIPELINE in {\"event_aggregation\", \"sensor_windows\"}:\n        width = 1 if PIPELINE == \"event_aggregation\" else 2\n        if VARIANT == \"equivalent\":\n            rows.sort(key=lambda row: row[:width])\n            result = []\n            for key, group in groupby(rows, key=lambda row: tuple(row[:width])):\n                members = list(group)\n                result.append([*key, len(members), sum(row[-1] for row in members)])\n        else:\n            groups = {}\n            for row in rows:\n                value = groups.setdefault(tuple(row[:width]), [0, 0])\n                value[0] += 1\n                value[1] += row[-1]\n            result = [[*key, *value] for key, value in groups.items()]\n    elif PIPELINE == \"inventory_latest\":\n        if VARIANT == \"equivalent\":\n            rows.sort(key=lambda row: (row[0], -row[1]))\n            latest = [next(group) for _, group in groupby(rows, key=lambda row: row[0])]\n        else:\n            groups = {}\n            for row in rows:\n                if row[0] not in groups or row[1] > groups[row[0]][1]:\n                    groups[row[0]] = row\n            latest = list(groups.values())\n        result = [[item, version, quantity, not deleted] for item, version, quantity, deleted in latest]\n    else:\n        result = rows\n        if VARIANT == \"equivalent\":\n            result.reverse()\n    result.sort(key=lambda row: tuple(row[index] for index in CONFIG[\"key_indices\"]))\n    if VARIANT == \"same_shape_wrong\":\n        index = CONFIG[\"value_index\"]\n        value = result[0][index]\n        result[0][index] = str(Decimal(value) + 1) if isinstance(value, str) else value + 1\n    Path(\"work/result.json\").write_text(json.dumps({\n        \"rows\": result, \"quality\": [[\"accepted_count\", accepted], [\"rejected_count\", data[\"rejected\"]]],\n    }), encoding=\"utf-8\")\n\n\ndef write_outputs():\n    data = json.loads(Path(\"work/result.json\").read_text(encoding=\"utf-8\"))\n    Path(\"outputs\").mkdir(exist_ok=True)\n    for name, header, rows in ((\"result\", CONFIG[\"header\"], data[\"rows\"]), (\"quality\", [\"metric\", \"value\"], data[\"quality\"])):\n        if VARIANT == \"partial\" and name == \"quality\":\n            continue\n        with (Path(\"outputs\") / (name + \".csv\")).open(\"w\", encoding=\"utf-8\", newline=\"\") as stream:\n            writer = csv.writer(stream)\n            writer.writerow(header)\n            writer.writerows([[str(value).lower() if isinstance(value, bool) else value for value in row] for row in rows])\n\n\nif __name__ == \"__main__\":\n    normalize()\n    transform()\n    write_outputs()\nelse:\n    from dagster import job, op\n\n    @op(name=\"normalize\")\n    def normalize_op():\n        normalize()\n        return True\n\n    @op(name=\"transform\")\n    def transform_op(upstream):\n        transform()\n        return True\n\n    @op(name=\"write_outputs\")\n    def write_op(upstream):\n        write_outputs()\n\n    @job(name=\"pisces_\" + PIPELINE + \"_\" + VARIANT)\n    def pipeline():\n        write_op(transform_op(normalize_op()))\n\n    pisces_entrypoint = pipeline\n",
+      "digest": "3a8b274b2e27b8c2336b95f7464e897b967cbe8bd4af71cb7b90df7a441b6df8"
+    }
+  }
+]

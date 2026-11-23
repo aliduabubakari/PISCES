@@ -1,5 +1,10 @@
 # PISCES Engineering Roadmap
 
+> Historical roadmap for the initial implementation. For new engineering work,
+> follow the [PISCES Robustness Plan](docs/PISCES_ROBUSTNESS_PLAN.md). Its rules
+> for comparison eligibility, surrogate workloads, and carbon claims supersede
+> the corresponding guidance below. This file is retained for traceability.
+
 ## Purpose
 
 This plan defines the engineering path for turning PISCES from a promising prototype into a reliable carbon and runtime evaluation suite for workflow code. The central design principle is evidence honesty: PISCES should always explain what it measured, what it inferred, what it skipped, and how much confidence a user should place in the result.
@@ -1061,6 +1066,10 @@ PISCES can be called a reliable carbon/runtime evaluation suite when:
 - Its report schema is stable enough for comparison and research use.
 
 ## Near-Term Implementation Checklist
+
+For current work on workload generalizability, Prefect and Dagster parity,
+and the report dashboard, follow the
+[platform extension roadmap](docs/PLATFORM_EXTENSION_ROADMAP.md).
 
 - [x] Make heuristic evaluation the default.
 - [x] Add import/build carbon measurement.

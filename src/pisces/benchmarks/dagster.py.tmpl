@@ -1,0 +1,21 @@
+    from dagster import job, op
+
+    @op(name="normalize")
+    def normalize_op():
+        normalize()
+        return True
+
+    @op(name="transform")
+    def transform_op(upstream):
+        transform()
+        return True
+
+    @op(name="write_outputs")
+    def write_op(upstream):
+        write_outputs()
+
+    @job(name="pisces_" + PIPELINE + "_" + VARIANT)
+    def pipeline():
+        write_op(transform_op(normalize_op()))
+
+    pisces_entrypoint = pipeline

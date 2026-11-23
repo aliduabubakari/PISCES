@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any, Dict
 
 import pisces.energy.runtime_evaluation as reval
+from pisces.report_validation import validate_report
 from pisces.unified_evaluator import UnifiedEnergyConfig, run_unified_energy_evaluation
 
 
@@ -49,6 +50,7 @@ def _fixed_runtime_measurement(*args: Any, **kwargs: Any) -> Dict[str, Any]:
         "ok": True,
         "runtime_measurement": {
             "status": "ok",
+            "execution_outcome": "surrogate",
             "execution_adapter_requested": "representative",
             "execution_adapter_used": "representative",
             "adapter_attempts": [{"adapter": "representative", "status": "success"}],
@@ -77,11 +79,7 @@ def _static_snapshot(report: Dict[str, Any]) -> Dict[str, Any]:
     return {
         "report_schema_version": report["report_schema_version"],
         "tool": report["tool"],
-        "workflow": {
-            "name": report["workflow"]["name"],
-            "orchestrator": report["workflow"]["orchestrator"],
-            "runtime_supported": report["workflow"]["runtime_supported"],
-        },
+        "workflow": {key: value for key, value in report["workflow"].items() if key != "path"},
         "energy_evaluation": report["energy_evaluation"],
         "energy": {
             "mode_used": energy["mode_used"],
@@ -115,6 +113,7 @@ def _sample_snapshot(report: Dict[str, Any]) -> Dict[str, Any]:
     energy = report["energy"]
     summary = energy["attempted_modes"][0]["sample_summary"]
     estimate = energy["measurements"]["estimate"]
+    runtime = energy["measurements"]["runtime"]
     return {
         "report_schema_version": report["report_schema_version"],
         "tool": report["tool"],
@@ -146,7 +145,12 @@ def _sample_snapshot(report: Dict[str, Any]) -> Dict[str, Any]:
             "estimate": {
                 "status": estimate["status"],
                 "measurement_kind": estimate["measurement_kind"],
+                "reason": estimate["reason"],
                 "assumptions": estimate["assumptions"],
+            },
+            "runtime": {
+                key: runtime[key]
+                for key in ("execution_outcome", "contract_validation", "telemetry", "pairwise_equivalence", "normalized")
             },
         },
     }
@@ -158,6 +162,7 @@ def test_static_heuristic_golden_snapshot(tmp_path: Path) -> None:
 
     expected = json.loads((GOLDEN_DIR / "static_heuristic.json").read_text(encoding="utf-8"))
     assert _static_snapshot(report) == expected
+    assert validate_report(report).status == "current_inventory"
 
 
 def test_sample_estimate_golden_snapshot(tmp_path: Path, monkeypatch) -> None:
@@ -187,3 +192,4 @@ def test_sample_estimate_golden_snapshot(tmp_path: Path, monkeypatch) -> None:
 
     expected = json.loads((GOLDEN_DIR / "sample_estimate.json").read_text(encoding="utf-8"))
     assert _sample_snapshot(report) == expected
+    assert validate_report(report).status == "current_inventory"

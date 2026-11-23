@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.10"
 license = { file = "LICENSE" }
 authors = [{ name = "Alidu Abubakari" }]
-dependencies = []
+dependencies = ["jsonschema>=4.18,<5"]
 
 [project.optional-dependencies]
 yaml = ["PyYAML>=6.0.1"]
@@ -18,13 +18,15 @@ energy = ["codecarbon>=2.3.5"]
 llm = ["openai>=1.0.0"]
 dotenv = ["python-dotenv>=1.0.0"]
 cli = ["typer>=0.12.0", "rich>=13.7.1"]
-dev = ["pytest>=8.0.0", "ruff>=0.6.0"]
+dev = ["pytest>=8.0.0", "ruff>=0.6.0", "httpx>=0.27,<1"]
+web = ["fastapi>=0.115,<1", "uvicorn>=0.30,<1"]
 
 [project.scripts]
 pisces-unified = "pisces.unified_evaluator:main"
 pisces-energy = "pisces.energy.runtime_runner_cli:main"
 pisces-compare = "pisces.dag_comparator:main"
 pisces-diagnostics = "pisces.diagnostics:main"
+pisces-benchmarks = "pisces.benchmarks.__main__:main"
 pisces = "pisces.cli:main"
 
 [tool.setuptools]
@@ -34,4 +36,4 @@ package-dir = {"" = "src"}
 where = ["src"]
 
 [tool.setuptools.package-data]
-"pisces" = ["knowledge_packs/*.json"]
+"pisces" = ["knowledge_packs/*.json", "schemas/*.json", "benchmarks/*.tmpl"]

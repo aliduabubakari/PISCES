@@ -5,7 +5,10 @@ import contextlib
 import hashlib
 import inspect
 import json
+import subprocess
+import sys
 from datetime import datetime, timezone
+from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
 from typing import Any, Dict, List
 
@@ -30,8 +33,34 @@ def _is_dag_like(value: Any) -> bool:
     return isinstance(tasks, (list, tuple))
 
 
+def airflow_runtime_major() -> int:
+    try:
+        return int(version("apache-airflow").split(".", 1)[0])
+    except PackageNotFoundError:
+        return 0
+
+
 def prepare_airflow_test_environment() -> Dict[str, Any]:
     """Initialize the Airflow metadata database before measurement begins."""
+    major = airflow_runtime_major()
+    if major == 3:
+        try:
+            standard_provider = version("apache-airflow-providers-standard")
+            task_sdk = version("apache-airflow-task-sdk")
+        except PackageNotFoundError as exc:
+            raise NativeAdapterError("airflow_3_standard_provider_or_sdk_missing") from exc
+        subprocess.run([sys.executable, "-m", "airflow", "db", "migrate"], check=True)
+        return {
+            "airflow_version": version("apache-airflow"),
+            "standard_provider_version": standard_provider,
+            "task_sdk_version": task_sdk,
+            "execution_interface": "DAG.test",
+            "database_initialization": "airflow db migrate",
+            "date_parameter": "logical_date",
+            "executor": "not_used",
+        }
+    if major not in {0, 2}:
+        raise NativeAdapterError("airflow_major_version_not_supported")
     try:
         import airflow
         from airflow.utils import db
@@ -45,6 +74,9 @@ def prepare_airflow_test_environment() -> Dict[str, Any]:
     return {
         "airflow_version": str(airflow.__version__),
         "execution_interface": "DAG.test",
+        "database_initialization": "airflow.utils.db.initdb",
+        "date_parameter": "execution_date",
+        "executor": "SequentialExecutor",
     }
 
 
@@ -111,7 +143,8 @@ class AirflowNativeAdapter:
             if fixture_registry is not None
             else contextlib.nullcontext()
         )
-        with native_safety_guard(import_safety_policy(safety_policy)) as import_safety:
+        import_policy = safety_policy if airflow_runtime_major() == 3 else import_safety_policy(safety_policy)
+        with native_safety_guard(import_policy) as import_safety:
             with fixture_context:
                 module = load_module_from_file(
                     workflow_file,
@@ -122,6 +155,13 @@ class AirflowNativeAdapter:
             raise NativeAdapterError("no_dag_object_found")
 
         dag = dags[0]
+        test_parameters = inspect.signature(dag.test).parameters
+        if "logical_date" in test_parameters:
+            date_parameter = "logical_date"
+        elif "execution_date" in test_parameters:
+            date_parameter = "execution_date"
+        else:
+            raise NativeAdapterError("unsupported_airflow_dag_test_signature")
         tasks = list(getattr(dag, "tasks", []) or [])
         if not tasks:
             raise NativeAdapterError("airflow_dag_has_no_tasks")
@@ -135,8 +175,12 @@ class AirflowNativeAdapter:
             )
             for task in tasks
         }
-        for task in tasks:
-            task.retries = 0
+        if date_parameter == "logical_date":
+            if any(retry_configuration.values()):
+                raise NativeAdapterError("airflow_3_dag_test_requires_zero_declared_retries")
+        else:
+            for task in tasks:
+                task.retries = 0
         execution_date = logical_date or datetime(2024, 1, 1, tzinfo=timezone.utc)
         if execution_date.tzinfo is None:
             execution_date = execution_date.replace(tzinfo=timezone.utc)
@@ -152,7 +196,10 @@ class AirflowNativeAdapter:
         )
         with native_safety_guard(safety_policy) as execution_safety:
             with fixture_context:
-                dag_run = dag.test(execution_date=execution_date)
+                test_kwargs = {date_parameter: execution_date}
+                if "use_executor" in test_parameters:
+                    test_kwargs["use_executor"] = False
+                dag_run = dag.test(**test_kwargs)
 
         task_instances = list(dag_run.get_task_instances())
         results: List[NativeTaskResult] = []
@@ -191,6 +238,7 @@ class AirflowNativeAdapter:
                 "dag_state": str(getattr(dag_run, "state", "unknown")),
                 "airflow_version": airflow_version,
                 "execution_interface": "DAG.test",
+                "date_parameter": date_parameter,
                 "logical_date": execution_date.isoformat(),
                 "declared_task_count": len(tasks),
                 "observed_task_instance_count": len(task_instances),

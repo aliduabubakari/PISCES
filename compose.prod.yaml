@@ -1,0 +1,8 @@
+services:
+  api:
+    environment: {PISCES_ENV: production}
+    restart: unless-stopped
+  worker:
+    restart: unless-stopped
+  frontend:
+    restart: unless-stopped
